@@ -20,7 +20,7 @@
             <form action="<?= base_url('data/prosesrole'); ?>" method="POST">
               <div class="form-group">
                 <label>Nama Role</label>
-                <input type="text" class="form-control" name="nama_role" placeholder="Contoh: Administrator, Petugas, Siswa" required>
+                <input type="text" class="form-control" name="nama_role" placeholder="Contoh: Pranata, Kepala Kantor" required>
               </div>
 
               <div class="pull-right">

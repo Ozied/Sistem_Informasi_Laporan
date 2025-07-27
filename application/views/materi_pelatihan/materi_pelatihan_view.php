@@ -20,8 +20,8 @@
         <div class="box box-primary">
           <div class="box-header with-border">
             <?php if ($this->session->userdata('level') == 'Petugas') { ?>
-              <a href="<?= base_url('data/detailpelatihantambah'); ?>">
-                <button class="btn btn-primary"><i class="fa fa-plus"></i> Tambah Detail</button>
+              <a href="<?= base_url('data/materipelatihantambah'); ?>">
+                <button class="btn btn-primary"><i class="fa fa-plus"></i> Tambah Materi Pelatihan</button>
               </a>
             <?php } ?>
           </div>
@@ -34,31 +34,31 @@
                   <tr>
                     <th>No</th>
                     <th>Nama Kegiatan</th>
-                    <th>Penanggung Jawab</th>
-                    <th>Ketua Panitia</th>
-                    <th>Jabatan Peserta</th>
-                    <th>Jumlah Peserta</th>
+                    <th>Jumlah JP</th>
+                    <th>Jumlah JP Dasar</th>
+                    <th>Jumlah JP Inti</th>
+                    <th>Jumlah JP Penunjang</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <?php if (!empty($detail_pelatihan)) : ?>
-                    <?php $no = 1; foreach ($detail_pelatihan as $row) : ?>
+                  <?php if (!empty($materi_pelatihan)) : ?>
+                    <?php $no = 1; foreach ($materi_pelatihan as $row) : ?>
                       <tr>
                         <td><?= $no++; ?></td>
                         <td><?= htmlentities($row->nama_kegiatan ?? '-') ?></td>
-                        <td><?= htmlentities($row->nama_penanggung_jawab ?? '-') ?></td>
-                        <td><?= htmlentities($row->nama_ketua_panitia ?? '-') ?></td>
-                        <td><?= nl2br(htmlentities($row->jabatan_peserta ?? '-')) ?></td>
-                        <td><?= (int)$row->jumlah_peserta ?> Orang</td>
+                        <td><?= (int)$row->jumlah_jp ?> JP</td>
+                        <td><?= (int)$row->jp_kel_dasar ?> JP</td>
+                        <td><?= (int)$row->jp_kel_inti ?> JP</td>
+                        <td><?= (int)$row->jp_kel_penunjang ?> JP</td>
                         <td>
                           <?php if($this->session->userdata('level') == 'Petugas'){ ?>
-                            <a href="<?= base_url('data/detailpelatihanedit/'.$row->id_detail_pelatihan); ?>">
+                            <a href="<?= base_url('data/materipelatihanedit/'.$row->id_materi_pelatihan); ?>">
                               <button class="btn btn-success btn-sm"><i class="fa fa-edit"></i></button>
                             </a>
-                            <a href="<?= base_url('data/detailpelatihandetail/' . $row->id_detail_pelatihan); ?>" class="btn btn-info btn-sm">
+                            <a href="<?= base_url('data/materipelatihandetail/' . $row->id_materi_pelatihan); ?>" class="btn btn-info btn-sm">
                             <i class="fa fa-search"></i> Check Detail
-                            <a href="<?= base_url('data/prosesdetailpelatihan?id_detail_pelatihan='.$row->id_detail_pelatihan); ?>" onclick="return confirm('Anda yakin ingin menghapus data ini?');">
+                            <a href="<?= base_url('data/prosesmateripelatihan?id_materi_pelatihan='.$row->id_materi_pelatihan); ?>" onclick="return confirm('Anda yakin ingin menghapus data ini?');">
                               <button class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
                             </a>
                           <?php } ?>
@@ -67,7 +67,7 @@
                     <?php endforeach; ?>
                   <?php else : ?>
                     <tr>
-                      <td colspan="7" class="text-center">Data detail pelatihan tidak ditemukan.</td>
+                      <td colspan="7" class="text-center">Data materi pelatihan tidak ditemukan.</td>
                     </tr>
                   <?php endif; ?>
                 </tbody>

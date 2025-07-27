@@ -455,20 +455,529 @@ class Data extends CI_Controller {
     }
 }
 
-	// Code LDK Pekanbaru Detail Pelatihan
+// Code LDK Pekanbaru Detail Pelatihan
 
-			public function detailpelatihan()
+public function detailpelatihan()
+{
+    // Ambil ID user yang login
+    $this->data['idbo'] = $this->session->userdata('ses_id');
+
+    // Ambil semua data detail pelatihan + join dengan nama pelatihan dan pegawai
+    $this->data['detail_pelatihan'] = $this->db->query("
+        SELECT 
+            dp.*, 
+            p.nama_kegiatan,
+            pj.nama AS nama_penanggung_jawab,
+            kp.nama AS nama_ketua_panitia
+        FROM tbl_detail_pelatihan dp
+        LEFT JOIN tbl_pelatihan p ON dp.id_pelatihan = p.id_pelatihan
+        LEFT JOIN tbl_pegawai pj ON dp.id_penanggung_jawab = pj.id_pegawai
+        LEFT JOIN tbl_pegawai kp ON dp.id_ketua_panitia = kp.id_pegawai
+        WHERE dp.deleted_at IS NULL
+        ORDER BY dp.id_detail_pelatihan DESC
+    ")->result();
+
+    // Jika ada parameter ID, ambil data spesifik untuk diedit
+    if (!empty($this->input->get('id'))) {
+        $id = $this->input->get('id');
+        $count = $this->M_Admin->CountTableId('tbl_detail_pelatihan', 'id_detail_pelatihan', $id);
+
+        if ($count > 0) {
+            $this->data['detail_pelatihans'] = $this->db->query("
+                SELECT 
+                    dp.*, 
+                    p.nama_kegiatan,
+                    pj.nama AS nama_penanggung_jawab,
+                    kp.nama AS nama_ketua_panitia
+                FROM tbl_detail_pelatihan dp
+                LEFT JOIN tbl_pelatihan p ON dp.id_pelatihan = p.id_pelatihan
+                LEFT JOIN tbl_pegawai pj ON dp.id_penanggung_jawab = pj.id_pegawai
+                LEFT JOIN tbl_pegawai kp ON dp.id_ketua_panitia = kp.id_pegawai
+                WHERE dp.id_detail_pelatihan = '$id'
+            ")->row();
+        } else {
+            echo '<script>alert("KATEGORI TIDAK DITEMUKAN");window.location="' . base_url('data/detailpelatihan') . '"</script>';
+        }
+    }
+
+    // Set judul dan tampilkan view
+    $this->data['title_web'] = 'Data Detail Pelatihan';
+    $this->load->view('header_view', $this->data);
+    $this->load->view('sidebar_view', $this->data);
+    $this->load->view('detail_pelatihan/detail_pelatihan_view', $this->data);
+    $this->load->view('footer_view', $this->data);
+}
+
+	public function prosesdetailpelatihan()
+{
+    // Pastikan user sudah login
+    if ($this->session->userdata('masuk_perpus') != TRUE) {
+        redirect(base_url('login'));
+    }
+
+    // === SOFT DELETE DETAIL PELATIHAN ===
+    if (!empty($this->input->get('id_detail_pelatihan'))) {
+        $id_detail_pelatihan = htmlentities($this->input->get('id_detail_pelatihan'));
+
+        $detail_pelatihan = $this->M_Admin->get_tableid_edit(
+            'tbl_detail_pelatihan',
+            'id_detail_pelatihan',
+            $id_detail_pelatihan
+        );
+
+        if ($detail_pelatihan) {
+            $this->db->set('deleted_at', date('Y-m-d H:i:s'));
+            $this->db->where('id_detail_pelatihan', $id_detail_pelatihan);
+            $this->db->update('tbl_detail_pelatihan');
+
+            $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-warning">
+                <p>Berhasil Hapus (Soft Delete) Data Detail Pelatihan!</p>
+            </div></div>');
+        } else {
+            $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-danger">
+                <p>Data Detail Pelatihan tidak ditemukan!</p>
+            </div></div>');
+        }
+
+        redirect(base_url('data/detailpelatihan'));
+    }
+
+    // === TAMBAH DETAIL PELATIHAN ===
+    if (!empty($this->input->post('tambah'))) {
+        $post = $this->input->post();
+
+        $data = array(
+			'id_pelatihan' => htmlentities($post['id_pelatihan']),
+			'id_penanggung_jawab' => !empty($post['id_penanggung_jawab']) ? htmlentities($post['id_penanggung_jawab']) : NULL,
+			'id_ketua_panitia' => !empty($post['id_ketua_panitia']) ? htmlentities($post['id_ketua_panitia']) : NULL,
+			'id_akademis' => !empty($post['id_akademis']) ? htmlentities($post['id_akademis']) : NULL,
+			'id_keuangan' => !empty($post['id_keuangan']) ? htmlentities($post['id_keuangan']) : NULL,
+			'id_administrasi' => !empty($post['id_administrasi']) ? htmlentities($post['id_administrasi']) : NULL,
+
+			'id_wi_1' => !empty($post['id_wi_1']) ? htmlentities($post['id_wi_1']) : NULL,
+			'id_wi_2' => !empty($post['id_wi_2']) ? htmlentities($post['id_wi_2']) : NULL,
+			'id_wi_3' => !empty($post['id_wi_3']) ? htmlentities($post['id_wi_3']) : NULL,
+			'id_wi_4' => !empty($post['id_wi_4']) ? htmlentities($post['id_wi_4']) : NULL,
+			'id_wi_rapat_kelulusan' => !empty($post['id_wi_rapat_kelulusan']) ? htmlentities($post['id_wi_rapat_kelulusan']) : NULL,
+
+			'id_pengajar_1' => !empty($post['id_pengajar_1']) ? htmlentities($post['id_pengajar_1']) : NULL,
+			'id_pengajar_2' => !empty($post['id_pengajar_2']) ? htmlentities($post['id_pengajar_2']) : NULL,
+			'id_pengajar_3' => !empty($post['id_pengajar_3']) ? htmlentities($post['id_pengajar_3']) : NULL,
+
+			'jumlah_wi_pengajar' => htmlentities($post['jumlah_wi_pengajar']),
+			'jumlah_pendidikan_wi_s1' => htmlentities($post['jumlah_pendidikan_wi_s1']),
+			'jumlah_pendidikan_wi_s2' => htmlentities($post['jumlah_pendidikan_wi_s2']),
+			'jumlah_pendidikan_wi_s3' => htmlentities($post['jumlah_pendidikan_wi_s3']),
+
+			'jumlah_peserta' => htmlentities($post['jumlah_peserta']),
+			'jumlah_lulus' => htmlentities($post['jumlah_lulus']),
+			'jumlah_tidak_lulus' => htmlentities($post['jumlah_tidak_lulus']),
+			'jabatan_peserta' => htmlentities($post['jabatan_peserta']),
+
+			'jumlah_peserta_asn' => htmlentities($post['jumlah_peserta_asn']),
+			'jumlah_peserta_non_asn' => htmlentities($post['jumlah_peserta_non_asn']),
+
+			'jumlah_peserta_laki' => htmlentities($post['jumlah_peserta_laki']),
+			'jumlah_peserta_wanita' => htmlentities($post['jumlah_peserta_wanita']),
+
+			'jumlah_pendidikan_peserta_sma' => htmlentities($post['jumlah_pendidikan_peserta_sma']),
+			'jumlah_pendidikan_peserta_s1' => htmlentities($post['jumlah_pendidikan_peserta_s1']),
+			'jumlah_pendidikan_peserta_s2' => htmlentities($post['jumlah_pendidikan_peserta_s2']),
+			'jumlah_pendidikan_peserta_s3' => htmlentities($post['jumlah_pendidikan_peserta_s3']),
+
+			'rab' => htmlentities($post['rab']),
+			'realisasi' => htmlentities($post['realisasi']),
+
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'deleted_at' => NULL
+        );
+
+        $this->db->insert('tbl_detail_pelatihan', $data);
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+            <p>Tambah Detail Pelatihan Sukses!</p>
+        </div></div>');
+        redirect(base_url('data/detailpelatihan'));
+    }
+
+    // === EDIT DETAIL PELATIHAN ===
+    if (!empty($this->input->post('edit'))) {
+        $post = $this->input->post();
+
+        $data = array(
+			'id_pelatihan' => htmlentities($post['id_pelatihan']),
+			'id_penanggung_jawab' => !empty($post['id_penanggung_jawab']) ? htmlentities($post['id_penanggung_jawab']) : NULL,
+			'id_ketua_panitia' => !empty($post['id_ketua_panitia']) ? htmlentities($post['id_ketua_panitia']) : NULL,
+			'id_akademis' => !empty($post['id_akademis']) ? htmlentities($post['id_akademis']) : NULL,
+			'id_keuangan' => !empty($post['id_keuangan']) ? htmlentities($post['id_keuangan']) : NULL,
+			'id_administrasi' => !empty($post['id_administrasi']) ? htmlentities($post['id_administrasi']) : NULL,
+
+			'id_wi_1' => !empty($post['id_wi_1']) ? htmlentities($post['id_wi_1']) : NULL,
+			'id_wi_2' => !empty($post['id_wi_2']) ? htmlentities($post['id_wi_2']) : NULL,
+			'id_wi_3' => !empty($post['id_wi_3']) ? htmlentities($post['id_wi_3']) : NULL,
+			'id_wi_4' => !empty($post['id_wi_4']) ? htmlentities($post['id_wi_4']) : NULL,
+			'id_wi_rapat_kelulusan' => !empty($post['id_wi_rapat_kelulusan']) ? htmlentities($post['id_wi_rapat_kelulusan']) : NULL,
+
+			'id_pengajar_1' => !empty($post['id_pengajar_1']) ? htmlentities($post['id_pengajar_1']) : NULL,
+			'id_pengajar_2' => !empty($post['id_pengajar_2']) ? htmlentities($post['id_pengajar_2']) : NULL,
+			'id_pengajar_3' => !empty($post['id_pengajar_3']) ? htmlentities($post['id_pengajar_3']) : NULL,
+
+			'jumlah_wi_pengajar' => htmlentities($post['jumlah_wi_pengajar']),
+			'jumlah_pendidikan_wi_s1' => htmlentities($post['jumlah_pendidikan_wi_s1']),
+			'jumlah_pendidikan_wi_s2' => htmlentities($post['jumlah_pendidikan_wi_s2']),
+			'jumlah_pendidikan_wi_s3' => htmlentities($post['jumlah_pendidikan_wi_s3']),
+
+			'jumlah_peserta' => htmlentities($post['jumlah_peserta']),
+			'jumlah_lulus' => htmlentities($post['jumlah_lulus']),
+			'jumlah_tidak_lulus' => htmlentities($post['jumlah_tidak_lulus']),
+			'jabatan_peserta' => htmlentities($post['jabatan_peserta']),
+
+			'jumlah_peserta_asn' => htmlentities($post['jumlah_peserta_asn']),
+			'jumlah_peserta_non_asn' => htmlentities($post['jumlah_peserta_non_asn']),
+
+			'jumlah_peserta_laki' => htmlentities($post['jumlah_peserta_laki']),
+			'jumlah_peserta_wanita' => htmlentities($post['jumlah_peserta_wanita']),
+
+			'jumlah_pendidikan_peserta_sma' => htmlentities($post['jumlah_pendidikan_peserta_sma']),
+			'jumlah_pendidikan_peserta_s1' => htmlentities($post['jumlah_pendidikan_peserta_s1']),
+			'jumlah_pendidikan_peserta_s2' => htmlentities($post['jumlah_pendidikan_peserta_s2']),
+			'jumlah_pendidikan_peserta_s3' => htmlentities($post['jumlah_pendidikan_peserta_s3']),
+
+			'rab' => htmlentities($post['rab']),
+			'realisasi' => htmlentities($post['realisasi']),
+            'updated_at' => date('Y-m-d H:i:s')
+        );
+
+        $this->db->where('id_detail_pelatihan', htmlentities($post['edit']));
+        $this->db->update('tbl_detail_pelatihan', $data);
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+            <p>Edit Detail Pelatihan Sukses!</p>
+        </div></div>');
+        redirect(base_url('data/detailpelatihan'));
+    }
+}
+
+	public function detailpelatihantambah()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
-		// Ambil semua role yang belum dihapus (deleted_at IS NULL)
-    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_detail_pelatihan WHERE deleted_at IS NULL ORDER BY id_detail_pelatihan DESC");
-        $this->data['title_web'] = 'Data Detail Pelatihan';
+
+		// Ambil id_pelatihan yang sudah dipakai di tbl_detail_pelatihan
+		$existing_detail_ids = $this->db->select('id_pelatihan')
+										->from('tbl_detail_pelatihan')
+										->where('deleted_at', NULL) // Opsional jika menggunakan soft delete
+										->get()
+										->result_array();
+
+		// Konversi ke array satu dimensi
+		$used_ids = array_column($existing_detail_ids, 'id_pelatihan');
+
+		// Ambil hanya pelatihan yang belum dipakai
+		if (!empty($used_ids)) {
+			$this->data['pelatihans'] = $this->db
+				->where_not_in('id_pelatihan', $used_ids)
+				->where('deleted_at', NULL) // Opsional untuk soft delete
+				->order_by('id_pelatihan', 'DESC')
+				->get('tbl_pelatihan')
+				->result_array();
+		} else {
+			// Jika belum ada data di tbl_detail_pelatihan, ambil semua
+			$this->data['pelatihans'] = $this->db
+				->where('deleted_at', NULL)
+				->order_by('id_pelatihan', 'DESC')
+				->get('tbl_pelatihan')
+				->result_array();
+		}
+
+		// Ambil semua pegawai
+		$this->data['pegawais'] = $this->db
+			->where('deleted_at', NULL)
+			->order_by('id_pegawai', 'DESC')
+			->get('tbl_pegawai')
+			->result_array();
+
+		$this->data['title_web'] = 'Tambah Detail Pelatihan';
+
+		// Load views
+		$this->load->view('header_view', $this->data);
+		$this->load->view('sidebar_view', $this->data);
+		$this->load->view('detail_pelatihan/tambah_view', $this->data);
+		$this->load->view('footer_view', $this->data);
+	}
+
+
+		public function detailpelatihandetail()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+		$count = $this->M_Admin->CountTableId('tbl_detail_pelatihan','id_detail_pelatihan',$this->uri->segment('3'));
+		if($count > 0)
+		{
+			$this->data['detail_pelatihan'] = $this->M_Admin->get_tableid_edit('tbl_detail_pelatihan','id_detail_pelatihan',$this->uri->segment('3'));
+			$this->data['pelatihans'] =  $this->db->query("SELECT * FROM tbl_pelatihan ORDER BY id_pelatihan DESC")->result_array();
+			$this->data['pegawais'] =  $this->db->query("SELECT * FROM tbl_pegawai ORDER BY id_pegawai DESC")->result_array();
+
+		}else{
+			echo '<script>alert("PEGAWAI TIDAK DITEMUKAN");window.location="'.base_url('data/detailpelatihan').'"</script>';
+		}
+
+		$this->data['title_web'] = 'Data Detail Pelatihan';
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
-        $this->load->view('pelatihan/pelatihan_view',$this->data);
+        $this->load->view('detail_pelatihan/detail',$this->data);
         $this->load->view('footer_view',$this->data);
 	}
-	
+
+	public function detailpelatihanedit()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+		$count = $this->M_Admin->CountTableId('tbl_detail_pelatihan','id_detail_pelatihan',$this->uri->segment('3'));
+		if($count > 0)
+		{
+			
+			$this->data['detail_pelatihan'] = $this->M_Admin->get_tableid_edit('tbl_detail_pelatihan','id_detail_pelatihan',$this->uri->segment('3'));
+			$this->data['pelatihans'] =  $this->db->query("SELECT * FROM tbl_pelatihan ORDER BY id_pelatihan DESC")->result_array();
+			$this->data['pegawais'] =  $this->db->query("SELECT * FROM tbl_pegawai ORDER BY id_pegawai DESC")->result_array();
+
+		}else{
+			echo '<script>alert("PEGAWAI TIDAK DITEMUKAN");window.location="'.base_url('data/pegawai').'"</script>';
+		}
+
+		$this->data['title_web'] = 'Data Pegawai Edit';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('detail_pelatihan/edit_view',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	// Code LDK Pekanbaru Materi Pelatihan
+
+	public function materipelatihan()
+{
+    // Ambil ID user yang login
+    $this->data['idbo'] = $this->session->userdata('ses_id');
+
+    // Ambil semua data detail pelatihan + join dengan nama pelatihan dan pegawai
+	$this->data['materi_pelatihan'] = $this->db->query("
+		SELECT 
+			mp.*, 
+			p.nama_kegiatan
+		FROM tbl_materi_pelatihan mp
+		LEFT JOIN tbl_pelatihan p ON mp.id_pelatihan = p.id_pelatihan
+		WHERE mp.deleted_at IS NULL
+		ORDER BY mp.id_materi_pelatihan DESC
+	")->result();
+
+    // Jika ada parameter ID, ambil data spesifik untuk diedit
+    if (!empty($this->input->get('id'))) {
+        $id = $this->input->get('id');
+        $count = $this->M_Admin->CountTableId('tbl_materi_pelatihan', 'id_materi_pelatihan', $id);
+
+        if ($count > 0) {
+            $this->data['materi_pelatihans'] = $this->db->query("
+				SELECT 
+					mp.*, 
+					p.nama_kegiatan
+				FROM tbl_materi_pelatihan mp
+				LEFT JOIN tbl_pelatihan p ON mp.id_pelatihan = p.id_pelatihan
+				WHERE mp.id_materi_pelatihan = '$id'
+			")->row();
+        } else {
+            echo '<script>alert("MATERI PELATIHAN TIDAK DITEMUKAN");window.location="' . base_url('data/materipelatihan') . '"</script>';
+        }
+    }
+
+    // Set judul dan tampilkan view
+    $this->data['title_web'] = 'Data Materi Pelatihan';
+    $this->load->view('header_view', $this->data);
+    $this->load->view('sidebar_view', $this->data);
+    $this->load->view('materi_pelatihan/materi_pelatihan_view', $this->data);
+    $this->load->view('footer_view', $this->data);
+}
+
+	public function prosesmateripelatihan()
+{
+    // Cek apakah user sudah login
+    if ($this->session->userdata('masuk_perpus') != TRUE) {
+        redirect(base_url('login'));
+    }
+
+    // === SOFT DELETE MATERI PELATIHAN ===
+    if (!empty($this->input->get('id_materi_pelatihan'))) {
+        $id_materi_pelatihan = htmlentities($this->input->get('id_materi_pelatihan'));
+
+        $materi_pelatihan = $this->M_Admin->get_tableid_edit(
+            'tbl_materi_pelatihan',
+            'id_materi_pelatihan',
+            $id_materi_pelatihan
+        );
+
+        if ($materi_pelatihan) {
+            $this->db->set('deleted_at', date('Y-m-d H:i:s'));
+            $this->db->where('id_materi_pelatihan', $id_materi_pelatihan);
+            $this->db->update('tbl_materi_pelatihan');
+
+            $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-warning">
+                <p>Berhasil Hapus (Soft Delete) Materi Pelatihan!</p>
+            </div></div>');
+        } else {
+            $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-danger">
+                <p>Data Materi Pelatihan tidak ditemukan!</p>
+            </div></div>');
+        }
+
+        redirect(base_url('data/materipelatihan'));
+    }
+
+    // === TAMBAH MATERI PELATIHAN ===
+    if (!empty($this->input->post('tambah'))) {
+        $post = $this->input->post();
+
+        $data = array(
+            'id_pelatihan' => htmlentities($post['id_pelatihan']),
+            'jumlah_jp' => !empty($post['jumlah_jp']) ? htmlentities($post['jumlah_jp']) : 0,
+            'jp_kel_dasar' => !empty($post['jp_kel_dasar']) ? htmlentities($post['jp_kel_dasar']) : 0,
+            'jp_kel_inti' => !empty($post['jp_kel_inti']) ? htmlentities($post['jp_kel_inti']) : 0,
+            'jp_kel_penunjang' => !empty($post['jp_kel_penunjang']) ? htmlentities($post['jp_kel_penunjang']) : 0,
+            'nama_mata_pelatihan_kel_dasar' => htmlentities($post['nama_mata_pelatihan_kel_dasar']),
+            'nama_mata_pelatihan_kel_inti' => htmlentities($post['nama_mata_pelatihan_kel_inti']),
+            'nama_mata_pelatihan_kel_penunjang' => htmlentities($post['nama_mata_pelatihan_kel_penunjang']),
+            'latar_belakang' => htmlentities($post['latar_belakang']),
+            'tujuan_pelatihan' => htmlentities($post['tujuan_pelatihan']),
+            'tujuan_kursil' => htmlentities($post['tujuan_kursil']),
+            'asal_kursil' => htmlentities($post['asal_kursil']),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'deleted_at' => NULL
+        );
+
+        $this->db->insert('tbl_materi_pelatihan', $data);
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+            <p>Tambah Materi Pelatihan Sukses!</p>
+        </div></div>');
+        redirect(base_url('data/materipelatihan'));
+    }
+
+    // === EDIT MATERI PELATIHAN ===
+    if (!empty($this->input->post('edit'))) {
+        $post = $this->input->post();
+
+        $data = array(
+            'id_pelatihan' => htmlentities($post['id_pelatihan']),
+            'jumlah_jp' => !empty($post['jumlah_jp']) ? htmlentities($post['jumlah_jp']) : 0,
+            'jp_kel_dasar' => !empty($post['jp_kel_dasar']) ? htmlentities($post['jp_kel_dasar']) : 0,
+            'jp_kel_inti' => !empty($post['jp_kel_inti']) ? htmlentities($post['jp_kel_inti']) : 0,
+            'jp_kel_penunjang' => !empty($post['jp_kel_penunjang']) ? htmlentities($post['jp_kel_penunjang']) : 0,
+            'nama_mata_pelatihan_kel_dasar' => htmlentities($post['nama_mata_pelatihan_kel_dasar']),
+            'nama_mata_pelatihan_kel_inti' => htmlentities($post['nama_mata_pelatihan_kel_inti']),
+            'nama_mata_pelatihan_kel_penunjang' => htmlentities($post['nama_mata_pelatihan_kel_penunjang']),
+            'latar_belakang' => htmlentities($post['latar_belakang']),
+            'tujuan_pelatihan' => htmlentities($post['tujuan_pelatihan']),
+            'tujuan_kursil' => htmlentities($post['tujuan_kursil']),
+            'asal_kursil' => htmlentities($post['asal_kursil']),
+            'updated_at' => date('Y-m-d H:i:s')
+        );
+
+        $this->db->where('id_materi_pelatihan', htmlentities($post['edit']));
+        $this->db->update('tbl_materi_pelatihan', $data);
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+            <p>Edit Materi Pelatihan Sukses!</p>
+        </div></div>');
+        redirect(base_url('data/materipelatihan'));
+    }
+}
+
+
+	public function materipelatihantambah()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+
+		// Ambil id_pelatihan yang sudah dipakai di tbl_detail_pelatihan
+		$existing_detail_ids = $this->db->select('id_pelatihan')
+										->from('tbl_materi_pelatihan')
+										->where('deleted_at', NULL) // Opsional jika menggunakan soft delete
+										->get()
+										->result_array();
+
+		// Konversi ke array satu dimensi
+		$used_ids = array_column($existing_detail_ids, 'id_pelatihan');
+
+		// Ambil hanya pelatihan yang belum dipakai
+		if (!empty($used_ids)) {
+			$this->data['pelatihans'] = $this->db
+				->where_not_in('id_pelatihan', $used_ids)
+				->where('deleted_at', NULL) // Opsional untuk soft delete
+				->order_by('id_pelatihan', 'DESC')
+				->get('tbl_pelatihan')
+				->result_array();
+		} else {
+			// Jika belum ada data di tbl_detail_pelatihan, ambil semua
+			$this->data['pelatihans'] = $this->db
+				->where('deleted_at', NULL)
+				->order_by('id_pelatihan', 'DESC')
+				->get('tbl_pelatihan')
+				->result_array();
+		}
+
+		// // Ambil semua pegawai
+		// $this->data['pegawais'] = $this->db
+		// 	->where('deleted_at', NULL)
+		// 	->order_by('id_pegawai', 'DESC')
+		// 	->get('tbl_pegawai')
+		// 	->result_array();
+
+		$this->data['title_web'] = 'Tambah Materi Pelatihan';
+
+		// Load views
+		$this->load->view('header_view', $this->data);
+		$this->load->view('sidebar_view', $this->data);
+		$this->load->view('materi_pelatihan/tambah_view', $this->data);
+		$this->load->view('footer_view', $this->data);
+	}
+
+		public function materipelatihandetail()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+		$count = $this->M_Admin->CountTableId('tbl_materi_pelatihan','id_materi_pelatihan',$this->uri->segment('3'));
+		if($count > 0)
+		{
+			$this->data['materi_pelatihan'] = $this->M_Admin->get_tableid_edit('tbl_materi_pelatihan','id_materi_pelatihan',$this->uri->segment('3'));
+			$this->data['pelatihans'] =  $this->db->query("SELECT * FROM tbl_pelatihan ORDER BY id_pelatihan DESC")->result_array();
+
+		}else{
+			echo '<script>alert("PEGAWAI TIDAK DITEMUKAN");window.location="'.base_url('data/materipelatihan').'"</script>';
+		}
+
+		$this->data['title_web'] = 'Data Materi Pelatihan Detail';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('materi_pelatihan/detail',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	public function materipelatihanedit()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+		$count = $this->M_Admin->CountTableId('tbl_materi_pelatihan','id_materi_pelatihan',$this->uri->segment('3'));
+		if($count > 0)
+		{
+			
+			$this->data['materi_pelatihan'] = $this->M_Admin->get_tableid_edit('tbl_materi_pelatihan','id_materi_pelatihan',$this->uri->segment('3'));
+			$this->data['pelatihans'] =  $this->db->query("SELECT * FROM tbl_pelatihan ORDER BY id_pelatihan DESC")->result_array();
+
+		}else{
+			echo '<script>alert("PEGAWAI TIDAK DITEMUKAN");window.location="'.base_url('data/materipelatihan').'"</script>';
+		}
+
+		$this->data['title_web'] = 'Data Materi Pelatihan Edit';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('materi_pelatihan/edit_view',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
 
 	public function kategori()
 	{
