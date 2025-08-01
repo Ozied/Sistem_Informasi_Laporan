@@ -90,6 +90,63 @@
                 </ul>
             </li>
 
+            <!-- Code LDK Pekanbaru Menu Dokumen -->
+             <li class="treeview <?php if($this->uri->uri_string() == 'data/dokumenpelatihan'){ echo 'active';}?>
+				<?php if($this->uri->uri_string() == 'data/dokumen'){ echo 'active';}?>
+				<?php if($this->uri->uri_string() == 'data/dokumendetail/'.$this->uri->segment('3')){ echo 'active';}?>
+				<?php if($this->uri->uri_string() == 'data/dokumenedit/'.$this->uri->segment('3')){ echo 'active';}?>">
+                <a href="#">
+                    <i class="fa fa-folder-open"></i>
+                    <span>Lampiran Dokumen</span>
+                    <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="<?php if($this->uri->uri_string() == 'data/dokumen'){ echo 'active';}?>
+                        <?php if($this->uri->uri_string() == 'data/dokumentambah'){ echo 'active';}?>
+                        <?php if($this->uri->uri_string() == 'data/dokumendetail/'.$this->uri->segment('3')){ echo 'active';}?>
+                        <?php if($this->uri->uri_string() == 'data/dokumenedit/'.$this->uri->segment('3')){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data/dokumen");?>" class="cursor">
+                            <span class="fa fa-file"></span> Data Dokumen
+                            
+                        </a>
+                    </li>
+                    <li class=" <?php if($this->uri->uri_string() == 'data/dokumenpelatihan'){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data/dokumenpelatihan");?>" class="cursor">
+                            <span class="fa fa-list"></span> Dokumen Pelatihan
+                            
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Code LDK Pekanbaru Menu Dokumentasi Pelatihan-->
+              <li class="treeview 
+                <?php if($this->uri->uri_string() == 'data/dokumentasipelatihan'){ echo 'active';}?>
+                <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
+				<?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
+				<?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
+                <a href="#">
+                    <i class="fa fa-picture-o"></i>
+                    <span>Dokumentasi Pelatihan</span>
+                    <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="<?php if($this->uri->uri_string() == 'data/dokumentasipelatihan'){ echo 'active';}?>
+                    <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
+                    <?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
+                    <?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
+                            <a href="<?php echo base_url("data/dokumentasipelatihan");?>" class="cursor">
+                            <span class="fa fa-tasks"></span> Kegiatan Pelatihan
+                            
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
             <!-- Code LDK Pekanbaru Menu Pegawai-->
               <li class="treeview 
                 <?php if($this->uri->uri_string() == 'data/pegawai'){ echo 'active';}?>

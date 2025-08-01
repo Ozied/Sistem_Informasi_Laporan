@@ -978,6 +978,665 @@ public function detailpelatihan()
         $this->load->view('footer_view',$this->data);
 	}
 
+	// Code LDK Pekanbaru Controller Menu Master Document
+	
+	public function dokumen()
+{
+    // Ambil ID user yang login
+    $this->data['idbo'] = $this->session->userdata('ses_id');
+
+    // Ambil semua dokumen yang belum dihapus (deleted_at IS NULL)
+    $this->data['dokumen'] = $this->db->query("SELECT * FROM tbl_dokumen WHERE deleted_at IS NULL ORDER BY id_dokumen DESC");
+
+    // Cek apakah ada parameter ?id= di URL
+    if (!empty($this->input->get('id'))) {
+        $id = $this->input->get('id');
+        $count = $this->M_Admin->CountTableId('tbl_dokumen', 'id_dokumen', $id);
+
+        if ($count > 0) {
+            // Tetap ambil datanya (tanpa filtering deleted_at karena ini konteks pengeditan spesifik)
+            $this->data['dokumen'] = $this->db->query("SELECT * FROM tbl_dokumen WHERE id_dokumen='$id'")->row();
+        } else {
+            echo '<script>alert("KATEGORI TIDAK DITEMUKAN");window.location="' . base_url('data/dokumen') . '"</script>';
+        }
+    }
+
+    // Set judul dan load view
+    $this->data['title_web'] = 'Data Dokumen';
+    $this->load->view('header_view', $this->data);
+    $this->load->view('sidebar_view', $this->data);
+    $this->load->view('dokumen/dokumen_view', $this->data);
+    $this->load->view('footer_view', $this->data);
+}
+
+
+	public function prosesdokumen()
+	{
+	if($this->session->userdata('masuk_perpus') != TRUE){
+		redirect(base_url('login'));
+	}
+
+	// hapus aksi form proses role (soft delete)
+	if(!empty($this->input->get('id_dokumen')))
+	{
+
+		     $dokumen = $this->M_Admin->get_tableid_edit(
+            'tbl_dokumen',
+            'id_dokumen',
+            htmlentities($this->input->get('id_dokumen'))
+        );
+		$id_dokumen = htmlentities($this->input->get('id_dokumen'));
+
+		// Soft delete: set deleted_at timestamp
+		$this->db->set('deleted_at', date('Y-m-d H:i:s'));
+		$this->db->where('id_dokumen', $id_dokumen);
+		$this->db->update('tbl_dokumen');
+
+		$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-warning">
+			<p>Berhasil Hapus Dokumen!</p>
+		</div></div>');
+		redirect(base_url('data/dokumen'));
+	}
+
+	// tambah aksi form proses role
+	if(!empty($this->input->post('tambah')))
+	{
+		$post = $this->input->post();
+		$data = array(
+			'nama_dokumen' => htmlentities($post['nama_dokumen']),
+			'deskripsi' => htmlentities($post['deskripsi']),
+			'created_at' => date('Y-m-d H:i:s'),
+			'updated_at' => date('Y-m-d H:i:s'),
+			'deleted_at' => NULL
+		);
+
+		$this->db->insert('tbl_dokumen', $data);
+
+		$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-success">
+			<p>Tambah Dokumen Sukses!</p>
+		</div></div>');
+		redirect(base_url('data/dokumen'));
+	}
+
+	// edit aksi form proses role
+	if(!empty($this->input->post('edit')))
+	{
+		$post = $this->input->post();
+		$data = array(
+			'nama_dokumen' => htmlentities($post['nama_dokumen']),
+			'deskripsi' => htmlentities($post['deskripsi']),
+			'updated_at' => date('Y-m-d H:i:s')
+		);
+
+		$this->db->where('id_dokumen', htmlentities($post['edit']));
+		$this->db->update('tbl_dokumen', $data);
+
+		$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-success">
+			<p>Edit Dokumen Sukses!</p>
+		</div></div>');
+		// redirect(base_url('data/roleedit/'.$post['edit']));
+
+		 // Ganti redirect ke halaman utama data role
+    	redirect(base_url('data/dokumen'));
+	}
+	}
+
+		public function dokumentambah()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+
+        $this->data['title_web'] = 'Tambah Dokumen';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('dokumen/tambah_view',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+		public function dokumendetail()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+		$count = $this->M_Admin->CountTableId('tbl_dokumen','id_dokumen',$this->uri->segment('3'));
+		if($count > 0)
+		{
+			$this->data['dokumen'] = $this->M_Admin->get_tableid_edit('tbl_dokumen','id_dokumen',$this->uri->segment('3'));
+
+		}else{
+			echo '<script>alert("DOKUMEN TIDAK DITEMUKAN");window.location="'.base_url('data/dokumen').'"</script>';
+		}
+
+		$this->data['title_web'] = 'Data Dokumen Detail';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('dokumen/detail',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	public function dokumenedit()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+		$count = $this->M_Admin->CountTableId('tbl_dokumen','id_dokumen',$this->uri->segment('3'));
+		if($count > 0)
+		{
+			
+			$this->data['dokumen'] = $this->M_Admin->get_tableid_edit('tbl_dokumen','id_dokumen',$this->uri->segment('3'));
+
+		}else{
+			echo '<script>alert("DOKUMEN TIDAK DITEMUKAN");window.location="'.base_url('data/dokumen').'"</script>';
+		}
+
+		$this->data['title_web'] = 'Data Role Edit';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('dokumen/edit_view',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	// Code LDK Pekanbaru Controller Menu Dokumen Pelatihan
+
+	public function dokumenpelatihan()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+        $this->data['title_web'] = 'Data Pelatihan Lampiran Dokumen';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('dokumen_pelatihan/list_pelatihan',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	public function listdokumenpelatihan($id_pelatihan)
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+
+		$cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+			'id_pelatihan' => $id_pelatihan,
+			'deleted_at' => NULL
+		])->row();
+
+		if (!$cek_pelatihan) {
+			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+			return;
+		}
+
+		$this->data['pelatihan'] = $cek_pelatihan;
+		$this->data['dokumen_pelatihan'] = $this->db->query("
+			SELECT pd.*, d.nama_dokumen, d.deskripsi 
+			FROM tbl_pelatihan_dokumen pd
+			JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
+			WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
+			ORDER BY pd.id_pelatihan_dokumen DESC
+		", [$id_pelatihan]);
+
+		// Ambil dokumen yang sudah dipakai di tbl_pelatihan_dokumen untuk pelatihan ini
+		$used_doc_ids = $this->db->select('id_dokumen')
+			->from('tbl_pelatihan_dokumen')
+			->where('id_pelatihan', $id_pelatihan)
+			->where('deleted_at', NULL)
+			->get()
+			->result_array();
+
+		$used_ids = array_column($used_doc_ids, 'id_dokumen');
+
+		// Ambil dokumen yang belum digunakan
+		if (!empty($used_ids)) {
+			$this->data['dokumen_all'] = $this->db
+				->where_not_in('id_dokumen', $used_ids)
+				->where('deleted_at', NULL)
+				->order_by('id_dokumen', 'DESC')
+				->get('tbl_dokumen')
+				->result();
+		} else {
+			$this->data['dokumen_all'] = $this->db
+				->where('deleted_at', NULL)
+				->order_by('id_dokumen', 'DESC')
+				->get('tbl_dokumen')
+				->result();
+		}
+
+		if (!empty($used_ids)) {
+		// INI AKAN DIPAKAI UNTUK EDIT, MAKA AMBIL SEMUA, TERMASUK YANG SUDAH DIPILIH
+		$this->data['dokumen_all_raw'] = $this->db
+			->where('deleted_at', NULL)
+			->order_by('id_dokumen', 'DESC')
+			->get('tbl_dokumen')
+			->result();
+	} else {
+		$this->data['dokumen_all_raw'] = $this->db
+			->where('deleted_at', NULL)
+			->order_by('id_dokumen', 'DESC')
+			->get('tbl_dokumen')
+			->result();
+}
+
+		$this->data['id_pelatihan'] = $id_pelatihan;
+		$this->data['title_web'] = 'Lampiran Dokumen - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+		$this->load->view('header_view', $this->data);
+		$this->load->view('sidebar_view', $this->data);
+		$this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
+		$this->load->view('footer_view', $this->data);
+	}
+
+	public function prosesdokumenpelatihan()
+	{
+		$config['upload_path'] = './assets_style/assets/dokumen/';
+		$config['allowed_types'] = 'pdf|doc|docx|ppt|pptx|xls|xlsx|txt';
+		$config['max_size'] = 2048; // 2 MB
+		$config['encrypt_name'] = TRUE;
+
+		$this->load->library('upload', $config);
+
+		if ($this->session->userdata('masuk_perpus') != TRUE) {
+			redirect(base_url('login'));
+		}
+
+		// Handle tambah dokumen pelatihan
+		if (!empty($this->input->post('tambah'))) {
+		$post = $this->input->post();
+		$id_pelatihan = htmlentities($post['id_pelatihan']);
+		$id_dokumen = htmlentities($post['id_dokumen']);
+		$file_path = '';
+
+		if (!empty($_FILES['file_upload']['name'])) {
+			if (!$this->upload->do_upload('file_upload')) {
+				$this->session->set_flashdata('pesan', '<div class="alert alert-danger">' . $this->upload->display_errors() . '</div>');
+				redirect(base_url('data/listdokumenpelatihan/' . $id_pelatihan));
+				return;
+			} else {
+				$upload_data = $this->upload->data();
+				$file_path = $upload_data['file_name'];
+			}
+		}
+
+		$cek = $this->db->get_where('tbl_pelatihan_dokumen', [
+			'id_pelatihan' => $id_pelatihan,
+			'id_dokumen' => $id_dokumen,
+			'deleted_at' => NULL
+		])->num_rows();
+
+		if ($cek > 0) {
+			$this->session->set_flashdata('pesan', '<div class="alert alert-danger"><p>Dokumen ini sudah ditambahkan pada pelatihan!</p></div>');
+			redirect(base_url('data/listdokumenpelatihan/' . $id_pelatihan));
+			return;
+		}
+
+		$data = [
+			'id_pelatihan' => $id_pelatihan,
+			'id_dokumen' => $id_dokumen,
+			'file_path' => $file_path,
+			'tanggal_upload' => date('Y-m-d'),
+			'created_at' => date('Y-m-d H:i:s'),
+			'updated_at' => date('Y-m-d H:i:s'),
+			'deleted_at' => NULL
+		];
+
+		$this->db->insert('tbl_pelatihan_dokumen', $data);
+		$this->session->set_flashdata('pesan', '<div class="alert alert-success"><p>Dokumen berhasil ditambahkan ke pelatihan!</p></div>');
+		redirect(base_url('data/listdokumenpelatihan/' . $id_pelatihan));
+	}
+
+
+		// Handle edit dokumen pelatihan
+		if (!empty($this->input->post('edit'))) {
+		$post = $this->input->post();
+		$id_pelatihan_dokumen = htmlentities($post['edit']);
+		$id_pelatihan = htmlentities($post['id_pelatihan']);
+		$id_dokumen = htmlentities($post['id_dokumen']);
+
+		$dokumen_old = $this->db->get_where('tbl_pelatihan_dokumen', ['id_pelatihan_dokumen' => $id_pelatihan_dokumen])->row();
+		$file_path = $dokumen_old->file_path;
+
+		if (!empty($_FILES['file_upload']['name'])) {
+			if (!$this->upload->do_upload('file_upload')) {
+				$this->session->set_flashdata('pesan', '<div class="alert alert-danger">' . $this->upload->display_errors() . '</div>');
+				redirect(base_url('data/listdokumenpelatihan/' . $id_pelatihan));
+				return;
+			} else {
+				// Optional: delete old file
+				if (file_exists('./assets_style/assets/dokumen/' . $file_path) && !empty($file_path)) {
+					unlink('./assets_style/assets/dokumen/' . $file_path);
+				}
+				$upload_data = $this->upload->data();
+				$file_path = $upload_data['file_name'];
+			}
+		}
+
+		$this->db->where('id_pelatihan_dokumen', $id_pelatihan_dokumen);
+		$this->db->update('tbl_pelatihan_dokumen', [
+			'id_dokumen' => $id_dokumen,
+			'file_path' => $file_path,
+			'updated_at' => date('Y-m-d H:i:s')
+		]);
+
+		$this->session->set_flashdata('pesan', '<div class="alert alert-success"><p>Dokumen pelatihan berhasil diperbarui!</p></div>');
+		redirect(base_url('data/listdokumenpelatihan/' . $id_pelatihan));
+	}
+
+		// Handle hapus dokumen pelatihan (soft delete)
+		if (!empty($this->input->get('id_pelatihan_dokumen'))) {
+			$id_pelatihan_dokumen = htmlentities($this->input->get('id_pelatihan_dokumen'));
+
+			$data = $this->db->get_where('tbl_pelatihan_dokumen', [
+				'id_pelatihan_dokumen' => $id_pelatihan_dokumen
+			])->row();
+
+			if ($data) {
+				$this->db->set('deleted_at', date('Y-m-d H:i:s'));
+				$this->db->where('id_pelatihan_dokumen', $id_pelatihan_dokumen);
+				$this->db->update('tbl_pelatihan_dokumen');
+
+				$this->session->set_flashdata('pesan', '<div class="alert alert-warning"><p>Dokumen pelatihan berhasil dihapus!</p></div>');
+				redirect(base_url('data/listdokumenpelatihan/' . $data->id_pelatihan));
+			} else {
+				echo '<script>alert("Data tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+			}
+		}
+	}
+
+	// Code LDK Pekanbaru Controller Menu Dokumentasi Pelatihan
+
+	public function dokumentasipelatihan()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+        $this->data['title_web'] = 'Data Kegiatan Pelatihan';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('dokumentasi_pelatihan/list_pelatihan',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	public function listkegiatanpelatihan($id_pelatihan)
+{
+    $this->data['idbo'] = $this->session->userdata('ses_id');
+
+    $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+        'id_pelatihan' => $id_pelatihan,
+        'deleted_at' => NULL
+    ])->row();
+
+    if (!$cek_pelatihan) {
+        echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/kegiatanpelatihan') . '"</script>';
+        return;
+    }
+
+    $this->data['pelatihan'] = $cek_pelatihan;
+
+    // Ambil semua kegiatan pelatihan terkait
+    $this->data['dokumentasi_pelatihan'] = $this->db->query("
+        SELECT a.*, p.nama as nama_narasumber
+        FROM tbl_pelatihan_activity a
+        LEFT JOIN tbl_pegawai p ON a.id_narasumber = p.id_pegawai
+        WHERE a.id_pelatihan = ? AND a.deleted_at IS NULL
+        ORDER BY a.tanggal_activity ASC, a.jam_mulai ASC
+    ", [$id_pelatihan]);
+
+    $this->data['pegawai'] = $this->db
+        ->where('deleted_at', NULL)
+        ->order_by('nama', 'ASC')
+        ->get('tbl_pegawai')
+        ->result();
+
+    $this->data['id_pelatihan'] = $id_pelatihan;
+    $this->data['title_web'] = 'Kegiatan Pelatihan - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+    $this->load->view('header_view', $this->data);
+    $this->load->view('sidebar_view', $this->data);
+    $this->load->view('dokumentasi_pelatihan/list_kegiatan_pelatihan', $this->data);
+    $this->load->view('footer_view', $this->data);
+}
+
+public function proseskegiatanpelatihan()
+{
+    if ($this->session->userdata('masuk_perpus') != TRUE) {
+        redirect(base_url('login'));
+    }
+
+	// Handle Upload Foto
+	if (!empty($this->input->post('upload_foto'))) {
+		$id_activity = htmlentities($this->input->post('id_activity'));
+		$id_pelatihan = htmlentities($this->input->post('id_pelatihan'));
+		$tanggal_foto = htmlentities($this->input->post('tanggal_foto'));
+		$keterangan = htmlentities($this->input->post('keterangan'));
+
+		if (!empty($_FILES['foto_kegiatan']['name'][0])) {
+			$files = $_FILES['foto_kegiatan'];
+			$count = count($files['name']);
+
+			for ($i = 0; $i < $count; $i++) {
+				if ($files['error'][$i] == 0) {
+					$filename = time() . '_' . basename($files['name'][$i]);
+					$upload_path = './assets/foto_kegiatan/';
+					$save_path = 'assets/foto_kegiatan/' . $filename;
+
+					if (!file_exists($upload_path)) {
+						mkdir($upload_path, 0777, true);
+					}
+
+					move_uploaded_file($files['tmp_name'][$i], $upload_path . $filename);
+
+					// Simpan ke database
+					$this->db->insert('tbl_pelatihan_foto', [
+						'id_activity'   => $id_activity,
+						'foto_path'     => $save_path,
+						'keterangan'    => $keterangan,
+						'tanggal_foto'  => $tanggal_foto,
+						'created_at'    => date('Y-m-d H:i:s'),
+						'updated_at'    => date('Y-m-d H:i:s'),
+						'deleted_at'    => NULL,
+					]);
+				}
+			}
+
+			$this->session->set_flashdata('pesan', '<div class="alert alert-success">Foto berhasil diupload.</div>');
+		} else {
+			$this->session->set_flashdata('pesan', '<div class="alert alert-danger">Tidak ada file yang dipilih.</div>');
+		}
+
+		redirect(base_url('data/listkegiatanpelatihan/' . $id_pelatihan));
+	}
+
+    // Handle Tambah
+    if (!empty($this->input->post('tambah'))) {
+        $post = $this->input->post();
+
+        $data = [
+            'id_pelatihan'      => htmlentities($post['id_pelatihan']),
+            'sesi_ke'           => htmlentities($post['sesi_ke']),
+            'day_ke'            => htmlentities($post['day_ke']),
+            'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+            'id_narasumber'     => htmlentities($post['id_narasumber']),
+            'activity_desc'     => htmlentities($post['activity_desc']),
+            'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+            'jam_mulai'         => htmlentities($post['jam_mulai']),
+            'jam_selesai'       => htmlentities($post['jam_selesai']),
+            'created_at'        => date('Y-m-d H:i:s'),
+            'updated_at'        => date('Y-m-d H:i:s'),
+            'deleted_at'        => NULL
+        ];
+
+        $this->db->insert('tbl_pelatihan_activity', $data);
+        $this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil ditambahkan!</div>');
+        redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+    }
+
+    // Handle Edit
+    if (!empty($this->input->post('edit'))) {
+        $post = $this->input->post();
+
+        $data = [
+            'sesi_ke'           => htmlentities($post['sesi_ke']),
+            'day_ke'            => htmlentities($post['day_ke']),
+            'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+            'id_narasumber'     => htmlentities($post['id_narasumber']),
+            'activity_desc'     => htmlentities($post['activity_desc']),
+            'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+            'jam_mulai'         => htmlentities($post['jam_mulai']),
+            'jam_selesai'       => htmlentities($post['jam_selesai']),
+            'updated_at'        => date('Y-m-d H:i:s'),
+        ];
+
+        $this->db->where('id_activity', htmlentities($post['edit']));
+        $this->db->update('tbl_pelatihan_activity', $data);
+        $this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil diperbarui!</div>');
+        redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+    }
+
+	// Handle Delete Foto (soft delete)
+	if (!empty($this->input->get('delete_foto'))) {
+		$id_foto = htmlentities($this->input->get('delete_foto'));
+		$id_pelatihan = htmlentities($this->input->get('id_pelatihan'));
+
+		$data = $this->db->get_where('tbl_pelatihan_foto', [
+			'id_foto' => $id_foto
+		])->row();
+
+		if ($data) {
+			$this->db->set('deleted_at', date('Y-m-d H:i:s'));
+			$this->db->where('id_foto', $id_foto);
+			$this->db->update('tbl_pelatihan_foto');
+
+			$this->session->set_flashdata('pesan', '<div class="alert alert-warning">Foto berhasil dihapus!</div>');
+			redirect(base_url('data/listkegiatanpelatihan/' . $id_pelatihan));
+		} else {
+			echo '<script>alert("Data tidak ditemukan."); window.location="' . base_url('data/kegiatanpelatihan') . '"</script>';
+		}
+	}
+
+
+    // Handle Delete (soft delete)
+    if (!empty($this->input->get('id_activity'))) {
+        $id_activity = htmlentities($this->input->get('id_activity'));
+
+        $data = $this->db->get_where('tbl_pelatihan_activity', [
+            'id_activity' => $id_activity
+        ])->row();
+
+        if ($data) {
+            $this->db->set('deleted_at', date('Y-m-d H:i:s'));
+            $this->db->where('id_activity', $id_activity);
+            $this->db->update('tbl_pelatihan_activity');
+
+            $this->session->set_flashdata('pesan', '<div class="alert alert-warning">Kegiatan berhasil dihapus!</div>');
+            redirect(base_url('data/listkegiatanpelatihan/' . $data->id_pelatihan));
+        } else {
+            echo '<script>alert("Data tidak ditemukan."); window.location="' . base_url('data/kegiatanpelatihan') . '"</script>';
+        }
+    }
+}
+
+
+
+	// public function listkegiatanpelatihan($id_pelatihan)
+	// {
+	// 	$this->data['idbo'] = $this->session->userdata('ses_id');
+
+	// 	$cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+	// 		'id_pelatihan' => $id_pelatihan,
+	// 		'deleted_at' => NULL
+	// 	])->row();
+
+	// 	if (!$cek_pelatihan) {
+	// 		echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/kegiatanpelatihan') . '"</script>';
+	// 		return;
+	// 	}
+
+	// 	$this->data['pelatihan'] = $cek_pelatihan;
+
+	// 	// Ambil semua kegiatan pelatihan terkait
+	// 	$this->data['dokumentasi_pelatihan'] = $this->db->query("
+	// 		SELECT a.*, p.nama as nama_narasumber 
+	// 		FROM tbl_pelatihan_activity a 
+	// 		LEFT JOIN tbl_pegawai p ON a.id_narasumber = p.id_pegawai 
+	// 		WHERE a.id_pelatihan = ? AND a.deleted_at IS NULL
+	// 		ORDER BY a.tanggal_activity ASC, a.jam_mulai ASC
+	// 	", [$id_pelatihan]);
+
+	// 	$this->data['pegawai'] = $this->db
+	// 		->where('deleted_at', NULL)
+	// 		->order_by('nama', 'ASC')
+	// 		->get('tbl_pegawai')
+	// 		->result();
+
+	// 	$this->data['id_pelatihan'] = $id_pelatihan;
+	// 	$this->data['title_web'] = 'Kegiatan Pelatihan - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+	// 	$this->load->view('header_view', $this->data);
+	// 	$this->load->view('sidebar_view', $this->data);
+	// 	$this->load->view('dokumentasi_pelatihan/list_kegiatan_pelatihan', $this->data);
+	// 	$this->load->view('footer_view', $this->data);
+	// }
+
+	// public function proseskegiatanpelatihan()
+	// {
+	// 	if ($this->session->userdata('masuk_perpus') != TRUE) {
+	// 		redirect(base_url('login'));
+	// 	}
+
+	// 	// Handle Tambah
+	// 	if (!empty($this->input->post('tambah'))) {
+	// 		$post = $this->input->post();
+
+	// 		$data = [
+	// 			'id_pelatihan'      => htmlentities($post['id_pelatihan']),
+	// 			'sesi_ke'           => htmlentities($post['sesi_ke']),
+	// 			'day_ke'            => htmlentities($post['day_ke']),
+	// 			'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+	// 			'id_narasumber'     => htmlentities($post['id_narasumber']),
+	// 			'activity_desc'     => htmlentities($post['activity_desc']),
+	// 			'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+	// 			'jam_mulai'         => htmlentities($post['jam_mulai']),
+	// 			'jam_selesai'       => htmlentities($post['jam_selesai']),
+	// 			'created_at'        => date('Y-m-d H:i:s'),
+	// 			'updated_at'        => date('Y-m-d H:i:s'),
+	// 			'deleted_at'        => NULL
+	// 		];
+
+	// 		$this->db->insert('tbl_pelatihan_activity', $data);
+	// 		$this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil ditambahkan!</div>');
+	// 		redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+	// 	}
+
+	// 	// Handle Edit
+	// 	if (!empty($this->input->post('edit'))) {
+	// 		$post = $this->input->post();
+
+	// 		$data = [
+	// 			'sesi_ke'           => htmlentities($post['sesi_ke']),
+	// 			'day_ke'            => htmlentities($post['day_ke']),
+	// 			'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+	// 			'id_narasumber'     => htmlentities($post['id_narasumber']),
+	// 			'activity_desc'     => htmlentities($post['activity_desc']),
+	// 			'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+	// 			'jam_mulai'         => htmlentities($post['jam_mulai']),
+	// 			'jam_selesai'       => htmlentities($post['jam_selesai']),
+	// 			'updated_at'        => date('Y-m-d H:i:s'),
+	// 		];
+
+	// 		$this->db->where('id_activity', htmlentities($post['edit']));
+	// 		$this->db->update('tbl_pelatihan_activity', $data);
+	// 		$this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil diperbarui!</div>');
+	// 		redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+	// 	}
+
+	// 	// Handle Delete (soft delete)
+	// 	if (!empty($this->input->get('id_activity'))) {
+	// 		$id_activity = htmlentities($this->input->get('id_activity'));
+
+	// 		$data = $this->db->get_where('tbl_pelatihan_activity', [
+	// 			'id_activity' => $id_activity
+	// 		])->row();
+
+	// 		if ($data) {
+	// 			$this->db->set('deleted_at', date('Y-m-d H:i:s'));
+	// 			$this->db->where('id_activity', $id_activity);
+	// 			$this->db->update('tbl_pelatihan_activity');
+
+	// 			$this->session->set_flashdata('pesan', '<div class="alert alert-warning">Kegiatan berhasil dihapus!</div>');
+	// 			redirect(base_url('data/listkegiatanpelatihan/' . $data->id_pelatihan));
+	// 		} else {
+	// 			echo '<script>alert("Data tidak ditemukan."); window.location="' . base_url('data/kegiatanpelatihan') . '"</script>';
+	// 		}
+	// 	}
+	// }
+
 
 	public function kategori()
 	{
@@ -1241,7 +1900,7 @@ public function prosespegawai()
 
 // Code LDK Pekanbaru Controller Menu Role
 	
-		public function role()
+	public function role()
 {
     // Ambil ID user yang login
     $this->data['idbo'] = $this->session->userdata('ses_id');
