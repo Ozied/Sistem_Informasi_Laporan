@@ -1523,6 +1523,19 @@ public function proseskegiatanpelatihan()
     }
 }
 
+	// Code LDK Pekanbaru Controller Cetak Laporan
+
+	public function cetaklaporan()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+        $this->data['title_web'] = 'Data Cetak Laporan Pelatihan';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('cetak_laporan/list_pelatihan_pjj',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
 
 
 	// public function listkegiatanpelatihan($id_pelatihan)
