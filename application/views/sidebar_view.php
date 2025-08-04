@@ -170,6 +170,12 @@
                             
                         </a>
                     </li>
+                    <li class=" <?php if($this->uri->uri_string() == 'data/cetaklampiranlaporan'){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data/cetaklampiranlaporan");?>" class="cursor">
+                            <span class="fa fa-list"></span> Lampiran Dokumen PJJ
+                            
+                        </a>
+                    </li>
                 </ul>
             </li>
 

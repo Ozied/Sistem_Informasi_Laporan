@@ -1,6 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+
+    // Inisialisasi PHPWord
+    require_once FCPATH . 'vendor/autoload.php';
+    use PhpOffice\PhpWord\PhpWord;
+    use PhpOffice\PhpWord\IOFactory;
+    use PhpOffice\PhpWord\SimpleType\Jc;
+
+
 class Data extends CI_Controller {
 	function __construct(){
 	 parent::__construct();
@@ -1529,12 +1537,152 @@ public function proseskegiatanpelatihan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
     	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
-        $this->data['title_web'] = 'Data Cetak Laporan Pelatihan';
+        $this->data['title_web'] = 'Cetak Laporan Pelatihan';
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
         $this->load->view('cetak_laporan/list_pelatihan_pjj',$this->data);
         $this->load->view('footer_view',$this->data);
 	}
+
+		public function cetaklampiranlaporan()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+        $this->data['title_web'] = 'Cetak Lampiran Dokumen Pelatihan';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('cetak_laporan/list_lampiran_pelatihan_pjj',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	public function listlampiranpelatihan($id_pelatihan)
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+
+		$query = $this->db->get_where('tbl_pelatihan', [
+			'id_pelatihan' => $id_pelatihan,
+			'deleted_at' => NULL
+		]);
+
+		if ($query->num_rows() == 0) {
+			show_404(); // Or you can use redirect with flash message
+		}
+
+		$this->data['pelatihan'] = $query->row_array();
+		$this->data['title_web'] = 'Preview Cetak Lampiran Pelatihan';
+		$this->load->view('cetak_laporan/cetak_lampiran_preview', $this->data);
+
+	}
+
+	public function exportLampiranPelatihan($id_pelatihan)
+{
+    $pelatihan = $this->db->get_where('tbl_pelatihan', [
+        'id_pelatihan' => $id_pelatihan,
+        'deleted_at' => NULL
+    ])->row_array();
+
+    if (!$pelatihan) {
+        show_404();
+    }
+
+    // Ambil data kegiatan
+    $activities = $this->db->query("
+        SELECT a.*, p.nama AS nama_narasumber
+        FROM tbl_pelatihan_activity a
+        LEFT JOIN tbl_pegawai p ON a.id_narasumber = p.id_pegawai
+        WHERE a.id_pelatihan = ? AND a.deleted_at IS NULL
+        ORDER BY a.tanggal_activity ASC, a.jam_mulai ASC
+    ", [$id_pelatihan])->result_array();
+
+    // Ambil semua foto, dikelompokkan berdasarkan id_activity
+    $fotos = $this->db->query("
+        SELECT * FROM tbl_pelatihan_foto 
+        WHERE id_activity IN (
+            SELECT id_activity FROM tbl_pelatihan_activity 
+            WHERE id_pelatihan = ? AND deleted_at IS NULL
+        ) AND deleted_at IS NULL
+        ORDER BY tanggal_foto ASC
+    ", [$id_pelatihan])->result_array();
+
+    $fotoMap = [];
+    foreach ($fotos as $f) {
+        $fotoMap[$f['id_activity']][] = $f;
+    }
+
+    $phpWord = new PhpWord();
+    $section = $phpWord->addSection();
+
+    // Judul Dokumen
+    $section->addText('LAMPIRAN DOKUMENTASI PELATIHAN', ['bold' => true, 'size' => 14], ['align' => 'center']);
+    $section->addTextBreak(1);
+
+    // Tambahkan deskripsi pelatihan
+    $bulan = [
+        '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+        '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+        '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+    ];
+    $tgl1 = explode('-', $pelatihan['tanggal_mulai_pelatihan']);
+    $tgl2 = explode('-', $pelatihan['tanggal_selesai_pelatihan']);
+    $tglMulai = $tgl1[2] . ' ' . $bulan[$tgl1[1]] . ' ' . $tgl1[0];
+    $tglSelesai = $tgl2[2] . ' ' . $bulan[$tgl2[1]] . ' ' . $tgl2[0];
+
+    $section->addText("Nama Pelatihan: " . $pelatihan['nama_pelatihan'], ['bold' => true]);
+    $section->addText("Periode: $tglMulai - $tglSelesai", ['italic' => true]);
+    $section->addTextBreak(1);
+
+    // Loop kegiatan
+    foreach ($activities as $act) {
+        $section->addText("Hari ke-{$act['day_ke']} | Sesi ke-{$act['sesi_ke']}", ['bold' => true, 'size' => 11]);
+        $section->addText("Judul Kegiatan: {$act['nama_kegiatan']}");
+        $section->addText("Tanggal: {$act['tanggal_activity']}, Pukul: {$act['jam_mulai']} - {$act['jam_selesai']}");
+        $section->addText("Narasumber: " . ($act['nama_narasumber'] ?? '-'));
+        if (!empty($act['activity_desc'])) {
+            $section->addText("Deskripsi: {$act['activity_desc']}", [], ['alignment' => Jc::BOTH]);
+        }
+        $section->addTextBreak(1);
+
+        // Tambahkan foto
+        if (isset($fotoMap[$act['id_activity']])) {
+            foreach ($fotoMap[$act['id_activity']] as $foto) {
+                $fotoPath = FCPATH . $foto['foto_path'];
+                if (file_exists($fotoPath)) {
+                    $section->addImage($fotoPath, [
+                        'width' => 300,
+                        'height' => 200,
+                        'alignment' => Jc::CENTER
+                    ]);
+                    if (!empty($foto['keterangan'])) {
+                        $section->addText("Keterangan Foto: {$foto['keterangan']}", ['italic' => true], ['align' => 'center']);
+                    }
+                    $section->addText("Tanggal Foto: {$foto['tanggal_foto']}", ['size' => 10], ['align' => 'center']);
+                    $section->addTextBreak(1);
+                }
+            }
+        } else {
+            $section->addText("Tidak ada dokumentasi foto untuk sesi ini.", ['italic' => true]);
+        }
+
+        $section->addTextBreak(2);
+    }
+
+    // Penutup
+    $section->addTextBreak(2);
+    $section->addText("Mengetahui,", ['bold' => true], ['align' => 'right']);
+    $section->addTextBreak(2);
+    $section->addText("........................................", ['underline' => 'single'], ['align' => 'right']);
+    $section->addText("Penanggung Jawab", [], ['align' => 'right']);
+
+    // Ekspor dokumen
+    $filename = 'Lampiran_Dokumentasi_Pelatihan_' . date('Ymd_His') . '.docx';
+    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    header('Cache-Control: max-age=0');
+
+    $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+    $objWriter->save('php://output');
+    exit;
+}
 
 
 
