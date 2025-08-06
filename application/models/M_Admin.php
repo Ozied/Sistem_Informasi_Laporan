@@ -8,6 +8,21 @@ class M_Admin extends CI_Model
 	 //validasi jika user belum login
 	 }
 
+   function dataPelatihan($id_pelatihan){
+
+      $pelatihan = $this->db->get_where('tbl_pelatihan', ['id_pelatihan' => $id_pelatihan])->row();
+
+     $pelatihan->materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => $id_pelatihan])->result();
+
+      // foreach($materi as $m){
+      //   $m->nama_mata_pelatihan_kel_dasar = json_decode($m->nama_mata_pelatihan_kel_dasar, true);
+      // }
+
+      // $pelatihan->materi = $materi;
+
+      return $pelatihan;
+   }
+
    function get_table($table_name)
    {
      $get_user = $this->db->get($table_name);
