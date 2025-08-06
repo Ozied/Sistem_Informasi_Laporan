@@ -9,16 +9,25 @@ class M_Admin extends CI_Model
 	 }
 
    function dataPelatihan($id_pelatihan){
-
+    //Ambil data pelatihan
       $pelatihan = $this->db->get_where('tbl_pelatihan', ['id_pelatihan' => $id_pelatihan])->row();
+      if(!$pelatihan) return null;
 
-     $pelatihan->materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => $id_pelatihan])->result();
+      //Ambil materi pelatihan
+     $materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => $id_pelatihan])->result();
 
-      // foreach($materi as $m){
-      //   $m->nama_mata_pelatihan_kel_dasar = json_decode($m->nama_mata_pelatihan_kel_dasar, true);
-      // }
+     //Parsing materi
+     foreach ($materi as $m) {
+      if (!empty($m->nama_mata_pelatihan_kel_dasar)){
+        $m->materi_parsed = array_filter(
+          array_map('trim', preg_split("/\r\n|\n|\r/", $m->nama_mata_pelatihan_kel_dasar))
+        );
+      } else {
+        $m->materi_parsed = ["Materi tidak tersedia"];
+      }
+     }
 
-      // $pelatihan->materi = $materi;
+     $pelatihan->materi = $materi;
 
       return $pelatihan;
    }

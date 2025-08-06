@@ -1163,17 +1163,17 @@ public function detailpelatihan()
 			// 	'pelatihan' => $this->M_Admin->dataPelatihan($id_pelatihan)
 			// );
 			$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
-
-			if (!empty($pelatihan->nama_mata_pelatihan_kel_dasar)){
-				$pelatihan->materi_parsed = array_map(
-					'trim',
-					preg_split("/\r\n|\n|\r/", $pelatihan->nama_mata_pelatihan_kel_dasar)
-				);
-
-				$pelatihan->materi_parsed = array_filter($pelatihan->materi_parsed);
-			}
-
+			
+			$materi_pertama = $pelatihan->materi[0] ?? null;
 			$data['pelatihan'] = $pelatihan;
+					
+			if (!empty($pelatihan->nama_mata_pelatihan_kel_dasar)) {
+				$pelatihan->materi_parsed = array_filter(
+					array_map('trim', preg_split("/\r\n|\n|\r/", $pelatihan->nama_mata_pelatihan_kel_dasar))
+				);
+			} else {
+				$pelatihan->materi_parsed = ["Materi tidak tersedia"]; // Fallback
+			}
 
 			$filename = $this->wordgenerator->generate($data);
 			if (!$filename){

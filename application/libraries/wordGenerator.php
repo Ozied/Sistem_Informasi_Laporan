@@ -92,28 +92,21 @@ class wordGenerator{
             $section->addTitle("A. Kelompok Dasar", 2);
             $section->addText("Kelompok dasar yaitu kelompok mata pelatihan yang bertujuan untuk menanamkan, memperkuat dan meningkatkan kesetiaan dan ketaatan peserta sebagai dasar dalam melaksanakan tugas atau jabatannya sebagai abdi negara dan abdi masyarakat, yang terdiri dari:", $fontstyle, $paragraphstyle);
 
-            if (!empty($pelatihan->materi_parsed)) {
-                foreach ($pelatihan->materi_parsed as $materi) {
-                    if (!empty(trim($materi))) {  // Pastikan tidak ada item kosong
-                        $section->addListItem($materi, 0, $fontstyle, $style);
-                        $section->addTextBreak(1);
+            if (!empty($pelatihan->materi)) {
+                foreach ($pelatihan->materi as $materi) {
+                    if (!empty($materi->materi_parsed)) {
+                        foreach ($materi->materi_parsed as $item) {
+                            if (!empty(trim($item))) {
+                                $section->addListItem($item, 0, $fontstyle, $style);
+                            }
+                        }
+                    } else {
+                        $section->addText('Materi tidak tersedia', $fontstyle);
                     }
                 }
             } else {
-                // Fallback jika materi_parsed tidak ada
-                $section->addText('Materi pelatihan tidak tersedia');
+                $section->addText('Tidak ada materi pelatihan', $fontstyle);
             }
-            // echo '<pre>';
-            // print_r($pelatihan);
-            // echo '</pre>';
-            // exit;
-            // foreach ($pelatihan->parsed_materi as $materi) {
-            //     $text = $materi->nama_mata_pelatihan_kel_dasar;
-            //     $section->addListItem($materi, 0, $fontstyle, $style);
-
-            // }
-            // $section->addListItem("Nilai-Nilai Dasar Sumber Daya Manusia (SDM) Kementerian Agama", 0, $fontstyle, $style);
-            // $section->addListItem("Sistem Pelatihan dan Pengembangan SDM Kementerian Agama", 0, $fontstyle, $style);
         
             $section->addTitle("B. Kelompok Inti", 2);
             $section->addText("Kelompok inti yaitu kelompok mata pelatihan yang bertujuan untuk membekali peserta dengan berbagai pengetahuan dan keterampilan di bidang tugas pokok yang bersangkutan. Kelompok ini terdiri dari:", $fontstyle, $paragraphstyle);
