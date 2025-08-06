@@ -30,6 +30,7 @@ class wordGenerator{
 
             $phpword = new PhpWord();
             $pelatihan = is_array($data) ? (object)$data['pelatihan'] : $data->pelatihan;
+            $detail = is_array($data) ? (object)$data['detail'] : $data->detail;
             // $fontstyle = new Font();
             // $paragraphstyle = new Paragraph();
             // $paragraphstyle = new Paragraph();
@@ -93,12 +94,12 @@ class wordGenerator{
             $section->addText("Kelompok dasar yaitu kelompok mata pelatihan yang bertujuan untuk menanamkan, memperkuat dan meningkatkan kesetiaan dan ketaatan peserta sebagai dasar dalam melaksanakan tugas atau jabatannya sebagai abdi negara dan abdi masyarakat, yang terdiri dari:", $fontstyle, $paragraphstyle);
 
             if (!empty($pelatihan->materi)) {
+                
                 foreach ($pelatihan->materi as $materi) {
-                    if (!empty($materi->materi_parsed)) {
-                        foreach ($materi->materi_parsed as $item) {
-                            if (!empty(trim($item))) {
-                                $section->addListItem($item, 0, $fontstyle, $style);
-                            }
+                    //Akses property yang sudah diparsing
+                    if (!empty($materi->kel_dasar_parsed)) {
+                        foreach ($materi->kel_dasar_parsed as $item) {
+                            $section->addListItem($item, 0, $fontstyle, $style);
                         }
                     } else {
                         $section->addText('Materi tidak tersedia', $fontstyle);
@@ -113,24 +114,50 @@ class wordGenerator{
 
             $style = generate_list_style($phpword, 'decimal');
 
-            $section->addListItem("Peraturan Perundang Undangan Zakat", 0, $fontstyle, $style);
-            $section->addListItem("Fiqh Zakat", 0, $fontstyle, $style);
-            $section->addListItem("Perhitungan Zakat", 0, $fontstyle, $style);
-            $section->addListItem("Fundraising Zakat", 0, $fontstyle, $style);
-            $section->addListItem("Sistem Akuntansi dan Pelaporan Zakat", 0, $fontstyle, $style);
-            $section->addListItem("Zakat dan Pajak", 0, $fontstyle, $style);
-            $section->addListItem("Pengelolaan zakat  di BAZNAS", 0, $fontstyle, $style);
+            if (!empty($pelatihan->materi)) {
+                
+                foreach ($pelatihan->materi as $materi) {
+                    //Akses property yang sudah diparsing
+                    if (!empty($materi->kel_inti_parsed)) {
+                        foreach ($materi->kel_inti_parsed as $item) {
+                            $section->addListItem($item, 0, $fontstyle, $style);
+                        }
+                    } else {
+                        $section->addText('Materi tidak tersedia', $fontstyle);
+                    }
+                }
+            } else {
+                $section->addText('Tidak ada materi pelatihan', $fontstyle);
+            }
+
+            // $section->addListItem("Peraturan Perundang Undangan Zakat", 0, $fontstyle, $style);
 
             $section->addTitle("C. Kelompok Penunjang", 2);
             $section->addText("Kelompok penunjang adalah kelompok mata pelatihan yang bertujuan untuk memperluas pengetahuan dan wawasan, serta mempertajam pemahaman dan penghayatan peserta terhadap berbagai faktor lingkungan sebagai penunjang pelaksanaan tugas pokok. Kelompok penunjang terdiri dari:", $fontstyle, $paragraphstyle);
 
             $style = generate_list_style($phpword, 'decimal');
 
-            $section->addListItem("Overview", 0, $fontstyle, $style);
-            $section->addListItem("Building Learning Commitment", 0, $fontstyle, $style);
-            $section->addListItem("Evaluasi Program", 0, $fontstyle, $style);
-            $section->addListItem("Rencana Tindak Lanjut", 0, $fontstyle, $style);
-            $section->addListItem("Ujian", 0, $fontstyle, $style);
+            if (!empty($pelatihan->materi)) {
+                
+                foreach ($pelatihan->materi as $materi) {
+                    //Akses property yang sudah diparsing
+                    if (!empty($materi->kel_penunjang_parsed)) {
+                        foreach ($materi->kel_penunjang_parsed as $item) {
+                            $section->addListItem($item, 0, $fontstyle, $style);
+                        }
+                    } else {
+                        $section->addText('Materi tidak tersedia', $fontstyle);
+                    }
+                }
+            } else {
+                $section->addText('Tidak ada materi pelatihan', $fontstyle);
+            }
+
+            // $section->addListItem("Overview", 0, $fontstyle, $style);
+            // $section->addListItem("Building Learning Commitment", 0, $fontstyle, $style);
+            // $section->addListItem("Evaluasi Program", 0, $fontstyle, $style);
+            // $section->addListItem("Rencana Tindak Lanjut", 0, $fontstyle, $style);
+            // $section->addListItem("Ujian", 0, $fontstyle, $style);
     
             //PESERTA DAN FASILITATOR/WIDYAISWARA
             $section->addPageBreak();
@@ -156,15 +183,15 @@ class wordGenerator{
             $section->addListItem("Nomor handphone aktif dengan jenis layanan prabayar (kartu dengan pengisian ulang pulsa) untuk penggantian biaya komunikasi berupa pulsa.", 0, $fontstyle, $style);
         
             $section->addListItem("Jumlah dan alokasi peserta", 0, $fontstyle, $alphaStyle);
-            $section->addText("Jumlah peserta seluruhnya 30 orang;", $fontstyle, $paragraphstyle);
-            $section->addText("Alokasi peserta berada di lingkungan Pengurus Zakat pada Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru;", $fontstyle, $paragraphstyle);
+            $section->addText("Jumlah peserta seluruhnya " . $detail->jumlah_peserta . " orang;", $fontstyle, $paragraphstyle);
+            $section->addText("Alokasi peserta berada di lingkungan " . $detail->jabatan_peserta . " pada Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru;", $fontstyle, $paragraphstyle);
             
             $section->addListItem("Tenaga Fasilitator/Widyaiswara", 0, $fontstyle, $alphaStyle);
             $section->addText("Tenaga Fasilitator/Widyaiswara pengajar pelatihan ini berasal dari :", $fontstyle, $paragraphstyle);
 
             $style = generate_list_style($phpword, 'decimal');
 
-            $section->addListItem("Makmun Hidayat, S.Pd., M.Pd. berasal dari Balai Diklat Keagamaan Surabaya", 0, $fontstyle, $style);
+            $section->addListItem("{$detail->wi_rapat_kelulusan} berasal dari Balai Diklat Keagamaan Surabaya", 0, $fontstyle, $style);
             $section->addListItem("Khobibah, S.Ag, M.A., M.HI. berasal dari Balai Diklat Keagamaan Surabaya", 0, $fontstyle, $style);
             $section->addListItem("Dr. Yessi Fitri SE. Ak, M.Si, CA, berasal UIN Syarif Hidayatullah", 0, $fontstyle, $style);
             

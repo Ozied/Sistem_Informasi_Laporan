@@ -1159,21 +1159,13 @@ public function detailpelatihan()
 			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
 		} else {
 
-			// $data = array(
-			// 	'pelatihan' => $this->M_Admin->dataPelatihan($id_pelatihan)
-			// );
 			$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
 			
-			$materi_pertama = $pelatihan->materi[0] ?? null;
-			$data['pelatihan'] = $pelatihan;
-					
-			if (!empty($pelatihan->nama_mata_pelatihan_kel_dasar)) {
-				$pelatihan->materi_parsed = array_filter(
-					array_map('trim', preg_split("/\r\n|\n|\r/", $pelatihan->nama_mata_pelatihan_kel_dasar))
-				);
-			} else {
-				$pelatihan->materi_parsed = ["Materi tidak tersedia"]; // Fallback
-			}
+			$data = [
+				'pelatihan' => $pelatihan,
+				'detail' => $pelatihan->detail,
+				'pegawai' => $pelatihan->pegawai
+			];					
 
 			$filename = $this->wordgenerator->generate($data);
 			if (!$filename){

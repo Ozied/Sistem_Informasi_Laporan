@@ -9,27 +9,57 @@ class M_Admin extends CI_Model
 	 }
 
    function dataPelatihan($id_pelatihan){
-    //Ambil data pelatihan
-      $pelatihan = $this->db->get_where('tbl_pelatihan', ['id_pelatihan' => $id_pelatihan])->row();
-      if(!$pelatihan) return null;
+    $this->db->select('
+      p.*,
+      d.*,
+      peg.nama as nama_pegawai,
+      peg.nip,
+      r.nama_role
+    ');
+    $this->db->from('tbl_pelatihan p');
+    $this->db->join('tbl_detail_pelatihan d', 'p.id_pelatihan = d.id_pelatihan', 'left');
+    $this->db->join('tbl_pegawai peg', 'd.id_pegawai = peg.id_pegawai', 'left');
+    $this->db->join('tbl_role r', 'peg.id_role = r.id_role', 'left');
+    $this->db->where('p.id_pelatihan', $id_pelatihan);
+    $pelatihan = $this->db->get()->row();
+    // //Ambil data pelatihan
+      // $pelatihan = $this->db->get_where('tbl_pelatihan', ['id_pelatihan' => $id_pelatihan])->row();
+    //   if(!$pelatihan) return null;
 
-      //Ambil materi pelatihan
+    //   //Ambil detail pelatihan
+    //   $pelatihan->detail = $this->db->get_where('tbl_detail_pelatihan', ['id_pelatihan' => $id_pelatihan])->row();
+
+    //   //Ambil materi pelatihan
      $materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => $id_pelatihan])->result();
 
-     //Parsing materi
+     //Daftar materi
+      $kolom_materi = [
+          'nama_mata_pelatihan_kel_dasar',
+          'nama_mata_pelatihan_kel_inti',
+          'nama_mata_pelatihan_kel_penunjang'
+      ];
+
      foreach ($materi as $m) {
-      if (!empty($m->nama_mata_pelatihan_kel_dasar)){
-        $m->materi_parsed = array_filter(
-          array_map('trim', preg_split("/\r\n|\n|\r/", $m->nama_mata_pelatihan_kel_dasar))
-        );
-      } else {
-        $m->materi_parsed = ["Materi tidak tersedia"];
+      foreach ($kolom_materi as $kolom){
+        $materi_parsed = str_replace('nama_mata_pelatihan_', '', $kolom) . '_parsed';
+        $m->{$materi_parsed} = $this->_parse_materi($m->{$kolom} ?? '');
       }
      }
 
      $pelatihan->materi = $materi;
 
       return $pelatihan;
+   }
+
+   private function _parse_materi($text){
+    if (empty(trim($text))) return ["-"];
+
+    return array_values(array_filter(
+      array_map('trim', preg_split("/\r\n|\n|\r/", $text)),
+      function($item){
+        return !empty($item);
+      }
+    ));
    }
 
    function get_table($table_name)
