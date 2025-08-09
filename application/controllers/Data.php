@@ -1160,12 +1160,20 @@ public function detailpelatihan()
 		} else {
 
 			$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
+			$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
+			
 			
 			$data = [
 				'pelatihan' => $pelatihan,
-				'detail' => $pelatihan->detail,
-				'pegawai' => $pelatihan->pegawai
-			];					
+				// 'detail' => $pelatihan->detail,
+				// 'pegawai' => $pelatihan->pegawai,
+				'durasi' => $durasi
+			];		
+			if (!empty($pelatihan->materi)) {
+				foreach ($pelatihan->materi as $materi) {
+					$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
+				}
+			}			
 
 			$filename = $this->wordgenerator->generate($data);
 			if (!$filename){

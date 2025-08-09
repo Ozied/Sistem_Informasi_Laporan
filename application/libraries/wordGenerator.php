@@ -30,7 +30,8 @@ class wordGenerator{
 
             $phpword = new PhpWord();
             $pelatihan = is_array($data) ? (object)$data['pelatihan'] : $data->pelatihan;
-            $detail = is_array($data) ? (object)$data['detail'] : $data->detail;
+            $durasi = is_array($data) ? ($data['durasi'] ?? 0) : $data->durasi ?? 0;
+            // $detail = is_array($data) ? (object)$data['detail'] : $data->detail;
             // $fontstyle = new Font();
             // $paragraphstyle = new Paragraph();
             // $paragraphstyle = new Paragraph();
@@ -183,47 +184,47 @@ class wordGenerator{
             $section->addListItem("Nomor handphone aktif dengan jenis layanan prabayar (kartu dengan pengisian ulang pulsa) untuk penggantian biaya komunikasi berupa pulsa.", 0, $fontstyle, $style);
         
             $section->addListItem("Jumlah dan alokasi peserta", 0, $fontstyle, $alphaStyle);
-            $section->addText("Jumlah peserta seluruhnya " . $detail->jumlah_peserta . " orang;", $fontstyle, $paragraphstyle);
-            $section->addText("Alokasi peserta berada di lingkungan " . $detail->jabatan_peserta . " pada Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru;", $fontstyle, $paragraphstyle);
+            $section->addText("Jumlah peserta seluruhnya " . $pelatihan->jumlah_peserta . " orang;", $fontstyle, $paragraphstyle);
+            $section->addText("Alokasi peserta berada di lingkungan " . $pelatihan->jabatan_peserta . " pada Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru;", $fontstyle, $paragraphstyle);
             
             $section->addListItem("Tenaga Fasilitator/Widyaiswara", 0, $fontstyle, $alphaStyle);
             $section->addText("Tenaga Fasilitator/Widyaiswara pengajar pelatihan ini berasal dari :", $fontstyle, $paragraphstyle);
 
             $style = generate_list_style($phpword, 'decimal');
 
-            $section->addListItem("{$detail->wi_rapat_kelulusan} berasal dari Balai Diklat Keagamaan Surabaya", 0, $fontstyle, $style);
-            $section->addListItem("Khobibah, S.Ag, M.A., M.HI. berasal dari Balai Diklat Keagamaan Surabaya", 0, $fontstyle, $style);
-            $section->addListItem("Dr. Yessi Fitri SE. Ak, M.Si, CA, berasal UIN Syarif Hidayatullah", 0, $fontstyle, $style);
+            $section->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style);
+            $section->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style);
+            $section->addListItem("{$pelatihan->wi_3->nama}, berasal {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style);
             
             $section->addListItem("Pengajar/Fasilitator", 0, $fontstyle, $alphaStyle);
 
             $style = generate_list_style($phpword, 'decimal');
 
-            $section->addListItem("Drs. Khrisfison, S.IPI, M.Pd, Kepala Loka Diklat Keagamaan Pekanbaru", 0, $fontstyle, $style);
-            $section->addListItem("Dr. H. Muchammad Toha, S.Ag., M.Si., Kepala Balai Diklat Keagamaan Semarang", 0, $fontstyle, $style);
-            $section->addListItem("Prof. Dr. H. Samsul Nizar, M.Ag., Guru Besar STAIN Bengkalis", 0, $fontstyle, $style);
+            $section->addListItem("{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $style);
+            $section->addListItem("{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $style);
+            $section->addListItem("{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $style);
             
             //PENYELENGGARAAN PELATIHAN
             $section->addPageBreak();
-            $section->addTitle("PENYELENGGARAAN PELATIHAN");
+            $section->addTitle("PENYELENGGARAAN PELATIHAN");                                                        
 
             $alphaStyle = generate_list_style($phpword, 'upperLetter');
 
             $section->addListItem("Penyelenggara", 0, $fontstyle, $alphaStyle);
-            $section->addText("Penyelenggara Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I berasal dari Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru dengan susunan panitia sebagai berikut:", $fontstyle, $paragraphstyle);
+            $section->addText("Penyelenggara Pelatihan Jarak Jauh (PJJ) {$pelatihan->nama_pelatihan} berasal dari Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru dengan susunan panitia sebagai berikut:", $fontstyle, $paragraphstyle);
             $phpword->setDefaultParagraphStyle([
                 'tabs' => [
                     new Tab('left', 3000)
                     ]
             ]);
-            $section->addText("Penanggung Jawab\t:Drs.Khrisfison, S.IPI, M.Pd", $fontstyle, $paragraphstyle);
-            $section->addText("Ketua\t:Eko Oktaviadi, SH", $fontstyle, $paragraphstyle);
-            $section->addText("Bidang Akademis\t:Aryati, S.Pd.I", $fontstyle, $paragraphstyle);
-            $section->addText("Bidang Administrasi\t:Lani Clara Refiarika, A. Md", $fontstyle, $paragraphstyle);
-            $section->addText("Bidang Keuangan\t:Azrul Pajri, S.P", $fontstyle, $paragraphstyle);
+            $section->addText("Penanggung Jawab\t:{$pelatihan->penanggung_jawab->nama}", $fontstyle, $paragraphstyle);
+            $section->addText("Ketua\t:{$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
+            $section->addText("Bidang Akademis\t:{$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
+            $section->addText("Bidang Administrasi\t:{$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            $section->addText("Bidang Keuangan\t:{$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
 
             $section->addListItem("Lama (Durasi Waktu) Pelatihan", 0, $fontstyle, $alphaStyle);
-            $section->addText("Pelatihan ini dilaksanakan selama 7 hari hari, mulai dari tanggal 27 Agustus s.d 03 September 2024, dengan jumlah jam pelatihan sebanyak 60 Jam Pelatihan (JP).", $fontstyle, $paragraphstyle);
+            $section->addText("Pelatihan ini dilaksanakan selama $durasi hari, mulai dari tanggal $pelatihan->tanggal_mulai_pelatihan s.d $pelatihan->tanggal_selesai_pelatihan, dengan jumlah jam pelatihan sebanyak $materi->jumlah_jp Jam Pelatihan (JP).", $fontstyle, $paragraphstyle);
 
             $section->addListItem("Tempat Pelatihan", 0, $fontstyle, $alphaStyle);
             $section->addText("Pelatihan ini dilaksanakan secara virtual melalui whatsapp group, zoom meeting, dan LMS PJJ Kementerian Agama.", $fontstyle, $paragraphstyle);
@@ -273,9 +274,9 @@ class wordGenerator{
             $section->addText("Untuk menyelaraskan interaksi dan komunikasi antar peserta diharuskan melepaskan perbedaan status, pangkat/golongan, jabatan serta status sosial lainnya.", $fontstyle, $paragraphstyle);
             
             $section->addListItem("Penutup", 0, $fontstyle, $alphaStyle);
-            $section->addText("Demikian Panduan ini disusun untuk dijadikan acuan dalam pelaksanaan Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I baik bagi peserta, tenaga pengajar, maupun oleh penyelenggara. Regulasi yang belum diatur di dalam panduan ini akan disampaikan lebih lanjut oleh Panitia Penyelenggara.", $fontstyle, $paragraphstyle);
+            $section->addText("Demikian Panduan ini disusun untuk dijadikan acuan dalam pelaksanaan $pelatihan->nama_kegiatan baik bagi peserta, tenaga pengajar, maupun oleh penyelenggara. Regulasi yang belum diatur di dalam panduan ini akan disampaikan lebih lanjut oleh Panitia Penyelenggara.", $fontstyle, $paragraphstyle);
 
-            $section->addText('Pekanbaru, $ September 2024,', $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section->addText('Kepala Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
             $section->addTextBreak(3);
             $section->addText('H. Aprianto, S.Ag., M.A.', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
@@ -285,14 +286,15 @@ class wordGenerator{
             $section->addPageBreak();
             // $section->setStyle(['tabs' => []]);
             $section->addTitle("KATA PENGANTAR");
-            $section->addText("Puji syukur kehadirat Tuhan Yang Maha Esa atas rahmat dan karunia-Nya, sehingga Laporan Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I ini dapat diselesaikan dengan baik.", $fontstyle, $paragraphstyle);
-            $section->addText("Laporan ini disusun sebagai bentuk pertanggungjawaban atas pelaksanaan pelatihan yang telah dilaksanakan. Laporan pelatihan ini terdiri dari tiga bab. Bab I Pendahuluan, memuat organisasi diklat, nama unit/satuan kerja, nama diklat yang diselenggarakan, dasar hukum, sumber pembiayaan, susunan panitia, dan alamat penyelenggara. Bab II berisi tentang pelaksanaan Pelatihan Jarak Jauh Manajemen Zakat Angkatan I untuk Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru tahun 2024 yang mencakup tujuan dan sasaran, kurikulum, peserta, widyaiswara/narasumber, evaluasi, penyelenggaraan, keuangan, penjaminan mutu, dan lain-lain. Bab III sebagai penutup terdiri dari kesimpulan dan saran-saran. Laporan ini juga dilengkapi dengan lampiran-lampiran sebagai bukti fisik.", $fontstyle, $paragraphstyle);
+            $section->addText("Puji syukur kehadirat Tuhan Yang Maha Esa atas rahmat dan karunia-Nya, sehingga $pelatihan->nama_kegiatan ini dapat diselesaikan dengan baik.", $fontstyle, $paragraphstyle);
+            $section->addText("Laporan ini disusun sebagai bentuk pertanggungjawaban atas pelaksanaan pelatihan yang telah dilaksanakan. Laporan pelatihan ini terdiri dari tiga bab. Bab I Pendahuluan, memuat organisasi diklat, nama unit/satuan kerja, nama diklat yang diselenggarakan, dasar hukum, sumber pembiayaan, susunan panitia, dan alamat penyelenggara. Bab II berisi tentang pelaksanaan Pelatihan Jarak Jauh $pelatihan->nama_pelatihan untuk $pelatihan->tempat tahun $pelatihan->tahun yang mencakup tujuan dan sasaran, kurikulum, peserta, widyaiswara/narasumber, evaluasi, penyelenggaraan, keuangan, penjaminan mutu, dan lain-lain. Bab III sebagai penutup terdiri dari kesimpulan dan saran-saran. Laporan ini juga dilengkapi dengan lampiran-lampiran sebagai bukti fisik.", $fontstyle, $paragraphstyle);
             $section->addText("Diharapkan laporan ini dapat memberikan gambaran yang jelas mengenai pelaksanaan pelatihan, capaian yang telah diperoleh, serta rekomendasi untuk perbaikan di masa mendatang.", $fontstyle, $paragraphstyle);
 
-            $section->addText('Pekanbaru, $ September 2024,', $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section->addText('Ketua', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section->addTextBreak(3);
-            $section->addText('Eko Oktaviadi, S.H.', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section->addText("{$pelatihan->ketua_panitia->nama}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section->addText("NIP. {$pelatihan->ketua_panitia->NIP}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             
             // Daftar Isi
             $section->addPageBreak();
@@ -310,16 +312,16 @@ class wordGenerator{
             $section->addTitle("PENDAHULUAN", 1);
             $section->addTitle("A. Organisasi Diklat", 2);
             $section->addText("Dalam lanskap pendidikan dan pelatihan keagamaan yang terus berkembang, Kementerian Agama Republik Indonesia mengambil langkah strategis. Berdasarkan Peraturan Menteri Agama Nomor 15 Tahun 2021 tentang Organisasi Dan Tata Kerja Unit Pelaksana Teknis Pendidikan Dan Pelatihan Keagamaan lahirlah Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru. Pada bulan Maret tahun 2022 Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru memulai melaksanakan kegiatan operasional sebagai langkah awal untuk melaksanakan tugas pokok sebagai lembaga Pendidikan dan Pelatihan. Pendirian Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru sejalan dengan komitmen Kementerian Agama untuk meningkatkan kualitas sumber daya manusia (SDM) ASN dan mewujudkan mutu pendidikan serta layanan keagamaan yang lebih baik di wilayah Riau dan Kepulauan Riau. Pendirian Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru merupakan manifestasi nyata dari komitmen Kementerian Agama untuk meningkatkan kualitas sumber daya manusia (SDM) Aparatur Sipil Negara (ASN) di bidang keagamaan, khususnya di wilayah Riau dan Kepulauan Riau. Melalui berbagai program pelatihan, Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru berupaya mencetak ASN yang kompeten, profesional, dan mampu memberikan layanan keagamaan yang berkualitas kepada masyarakat.", $fontstyle, $paragraphstyle);
-            $section->addText("Salah satu program unggulan yang diselenggarakan oleh Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru adalah Pelatihan Jarak Jauh Manajemen Zakat Angkatan I. Pelatihan ini dirancang khusus untuk meningkatkan kemampuan para ASN dalam Melaksanakan pengelolaan zakat secara profesional.", $fontstyle, $paragraphstyle);
+            $section->addText("Salah satu program unggulan yang diselenggarakan oleh Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru adalah Pelatihan Jarak Jauh $pelatihan->nama_pelatihan. Pelatihan ini dirancang khusus untuk meningkatkan kemampuan para ASN dalam $materi->tujuan_pelatihan.", $fontstyle, $paragraphstyle);
             
             $section->addTitle("B. Nama Unit/Satuan Kerja", 2);
-            $section->addText("Nama unit/satuan kerja penyelenggara Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I ini adalah Loka Diklat Keagamaan Pekanbaru, Jl. Yos Sudarso, Rumbai, Pekanbaru.", $fontstyle, $paragraphstyle);
+            $section->addText("Nama unit/satuan kerja penyelenggara $pelatihan->nama_kegiatan ini adalah Loka Diklat Keagamaan Pekanbaru, Jl. Yos Sudarso, Rumbai, Pekanbaru.", $fontstyle, $paragraphstyle);
             
             $section->addTitle("C. Nama Diklat yang Diselenggarakan", 2);
-            $section->addText("Nama Diklat yang diselenggarakan adalah “Manajemen Zakat Angkatan I” bagi Pengurus Zakat di Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru Tahun 2024.", $fontstyle, $paragraphstyle);
+            $section->addText("Nama Diklat yang diselenggarakan adalah $pelatihan->nama_pelatihan bagi $pelatihan->jabatan_peserta di Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru Tahun 2024.", $fontstyle, $paragraphstyle);
             
             $section->addTitle("D. Dasar Hukum", 2);
-            $section->addText("Dasar Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I bagi Wilayah Kerja Kementerian Agama Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru ini adalah : ", $fontstyle, $paragraphstyle);
+            $section->addText("Dasar $pelatihan->nama_kegiatan bagi Wilayah Kerja Kementerian Agama $pelatihan->tempat ini adalah : ", $fontstyle, $paragraphstyle);
 
             $style = generate_list_style($phpword, 'decimal');
 
@@ -334,24 +336,24 @@ class wordGenerator{
             $section->addListItem("DIPA Loka Diklat Keagamaan Pekanbaru Tahun 2024 Nomor: DIPA 025.11.2. 690527/2022, tanggal 30 November 2023.", 0, $fontstyle, $style);
 
             $section->addTitle("E. Sumber Pembiayaan", 2);
-            $section->addText("Sumber biaya penyelenggaraan Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I bagi Wilayah Kerja Kementerian Agama Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru Tahun 2024 ini dibebankan pada DIPA Loka Diklat Keagamaan Pekanbaru Nomor : DIPA 025.11.2. 690527/2024, tanggal 30 November 2023.", $fontstyle, $paragraphstyle);
+            $section->addText("Sumber biaya penyelenggaraan $pelatihan->nama_kegiatan bagi Wilayah Kerja Kementerian Agama $pelatihan->nama_pelatihan Tahun $pelatihan->tahun ini dibebankan pada DIPA Loka Diklat Keagamaan Pekanbaru Nomor : DIPA 025.11.2. 690527/2024, tanggal 30 November 2023.", $fontstyle, $paragraphstyle);
             
             $section->addTitle("F. Susunan Panitia", 2);
-            $section->addText("Adapun susunan panitia penyelenggara Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I Wilayah Kerja Kementerian Agama Riau dan Kepulauan Riau Tahun 2024 adalah sebegai berikut:", $fontstyle, $paragraphstyle);
-            $section->addText("Ketua\t:Eko Oktaviadi, SH", $fontstyle, $paragraphstyle);
-            $section->addText("Seketaris/Akademis\t:Aryati, S.Pd.I", $fontstyle, $paragraphstyle);
-            $section->addText("Anggota/Keuangan\t:Azrul Pajri, S.P", $fontstyle, $paragraphstyle);
-            $section->addText("Anggota/Keuangan\t:Lani Clara Refiarika, A. Md", $fontstyle, $paragraphstyle);
+            $section->addText("Adapun susunan panitia penyelenggara $pelatihan->nama_kegiatan Wilayah Kerja Kementerian Agama $pelatihan->provinsi Tahun $pelatihan->tahun adalah sebegai berikut:", $fontstyle, $paragraphstyle);
+            $section->addText("Ketua\t:{$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
+            $section->addText("Seketaris/Akademis\t:{$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
+            $section->addText("Anggota/Keuangan\t:{$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            $section->addText("Anggota/Keuangan\t:{$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
 
             $section->addTitle("G. Alamat Penyelenggara", 2);
-            $section->addText("Alamat penyelenggara Pelatihan Jarak Jauh Manajemen Zakat Angkatan I Wilayah Kerja Kementerian Agama Provinsi Riau dan Kepulauan Riau Tahun 2024 ini adalah Loka Diklat Keagamaan Pekanbaru, Jl. Yos Sudarso, Rumbai, Pekanbaru. Email: loka_pekanbaru@kemenag.go.id.", $fontstyle, $paragraphstyle);
+            $section->addText("Alamat penyelenggara Pelatihan Jarak Jauh $pelatihan->nama_pelatihan Wilayah Kerja Kementerian Agama Provinsi $pelatihan->tempat Tahun $pelatihan->tahun ini adalah Loka Diklat Keagamaan Pekanbaru, Jl. Yos Sudarso, Rumbai, Pekanbaru. Email: loka_pekanbaru@kemenag.go.id.", $fontstyle, $paragraphstyle);
 
             // BAB II
             $section->addPageBreak();
             $section->addTitle("BAB II", 1);
             $section->addTitle("PELAKSANAAN DIKLAT", 1);
             $section->addTitle("A. Tujuan dan Sasaran", 2);
-            $section->addText("Pelatihan Jarak Jauh Pelatihan Jarak Jauh (PJJ) Manajemen zakat Angkatan I di Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru Tahun 2024 ini memiliki tujuan dan sasaran sebagai berikut :", $fontstyle, $paragraphstyle);
+            $section->addText("$pelatihan->nama_kegiatan di $pelatihan->tempat Tahun $pelatihan->tahun ini memiliki tujuan dan sasaran sebagai berikut :", $fontstyle, $paragraphstyle);
             
             $style = generate_list_style($phpword, 'decimal');
 
@@ -359,21 +361,34 @@ class wordGenerator{
             $section->addText("Pelatihan ini bertujuan untuk : ", $fontstyle, $paragraphstyle);
             
             $style = generate_list_style($phpword, 'decimal');
+            if (!empty($pelatihan->materi)) {
+                foreach ($pelatihan->materi as $materi) {
+                    if (!empty($materi->parsed_tujuan)) {
+                        foreach ($materi->parsed_tujuan as $item) {
+                            $section->addListItem($item['judul'], 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+                            if (!empty($item['deskripsi'])) {
+                                $section->addText($item['deskripsi'], $fontstyle, $paragraphstyle2);
+                            }
+                        }
+                    }
+                }
+            }
             
-            $section->addListItem("Peningkatan Pemahaman Tentang Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addText("Memahami konsep dasar zakat, jenis-jenis zakat (zakat mal dan zakat fitrah), dan dalil-dalil syariah yang mendasarinya.", $fontstyle, $paragraphstyle2);
-            $section->addListItem("Pengelolaan Dana Zakat yang Efektif", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addText("Membekali peserta dengan keterampilan teknis untuk mengelola dana zakat, mulai dari pengumpulan, pendistribusian, hingga pelaporan.", $fontstyle, $paragraphstyle2);
-            $section->addListItem("Peningkatan Kapasitas Lembaga Pengelola Zakat (LPZ)", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addText("Memperkuat manajemen lembaga zakat agar lebih profesional, transparan, dan akuntabel.", $fontstyle, $paragraphstyle2);
-            $section->addListItem("Strategi Pengumpulan Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addText("Mengajarkan teknik penggalangan dana zakat yang inovatif dan berbasis teknologi untuk menjangkau lebih banyak muzakki (pemberi zakat).", $fontstyle, $paragraphstyle2);
-            $section->addListItem("Distribusi Zakat yang Tepat Sasaran", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addText("Memberikan wawasan mengenai metode pendistribusian zakat yang adil, tepat sasaran, dan berdampak besar bagi mustahik (penerima zakat).", $fontstyle, $paragraphstyle2);
-            $section->addListItem("Peningkatan Kesejahteraan Umat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addText("Menanamkan nilai-nilai bahwa zakat adalah instrumen pemberdayaan ekonomi umat, bukan sekadar kewajiban agama.", $fontstyle, $paragraphstyle2);
-            $section->addListItem("Kepatuhan Syariah", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addText("Menjamin bahwa pengelolaan zakat dilakukan sesuai dengan kaidah syariah dan hukum positif yang berlaku, seperti Undang-Undang Pengelolaan Zakat.", $fontstyle, $paragraphstyle2);
+
+            // $section->addListItem("Peningkatan Pemahaman Tentang Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            // $section->addText("Memahami konsep dasar zakat, jenis-jenis zakat (zakat mal dan zakat fitrah), dan dalil-dalil syariah yang mendasarinya.", $fontstyle, $paragraphstyle2);
+            // $section->addListItem("Pengelolaan Dana Zakat yang Efektif", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            // $section->addText("Membekali peserta dengan keterampilan teknis untuk mengelola dana zakat, mulai dari pengumpulan, pendistribusian, hingga pelaporan.", $fontstyle, $paragraphstyle2);
+            // $section->addListItem("Peningkatan Kapasitas Lembaga Pengelola Zakat (LPZ)", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            // $section->addText("Memperkuat manajemen lembaga zakat agar lebih profesional, transparan, dan akuntabel.", $fontstyle, $paragraphstyle2);
+            // $section->addListItem("Strategi Pengumpulan Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            // $section->addText("Mengajarkan teknik penggalangan dana zakat yang inovatif dan berbasis teknologi untuk menjangkau lebih banyak muzakki (pemberi zakat).", $fontstyle, $paragraphstyle2);
+            // $section->addListItem("Distribusi Zakat yang Tepat Sasaran", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            // $section->addText("Memberikan wawasan mengenai metode pendistribusian zakat yang adil, tepat sasaran, dan berdampak besar bagi mustahik (penerima zakat).", $fontstyle, $paragraphstyle2);
+            // $section->addListItem("Peningkatan Kesejahteraan Umat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            // $section->addText("Menanamkan nilai-nilai bahwa zakat adalah instrumen pemberdayaan ekonomi umat, bukan sekadar kewajiban agama.", $fontstyle, $paragraphstyle2);
+            // $section->addListItem("Kepatuhan Syariah", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            // $section->addText("Menjamin bahwa pengelolaan zakat dilakukan sesuai dengan kaidah syariah dan hukum positif yang berlaku, seperti Undang-Undang Pengelolaan Zakat.", $fontstyle, $paragraphstyle2);
 
             $style = generate_list_style($phpword, 'decimal', 2);
 
@@ -684,35 +699,35 @@ class wordGenerator{
             $section->addText("Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru", ['bold' => true], ['alignment' => Jc::CENTER]);
             $section->addText("Tahun 2024", ['bold' => true], ['alignment' => Jc::CENTER]);
 
-            $table = $section->addTable([
-                'borderSize' => 6,
-                'borderColor' => '000000',
-                'cellMargin' => 50,
-            ]);
+            // $table = $section->addTable([
+            //     'borderSize' => 6,
+            //     'borderColor' => '000000',
+            //     'cellMargin' => 50,
+            // ]);
 
             //Header
-            $table->addRow();
-            $table->addCell(500)->addText('NO.', ['bold' => true], ['alignment' => Jc::CENTER]);
-            $table->addCell(2500)->addText('NAMA', ['bold' => true], ['alignment' => Jc::CENTER]);
-            $table->addCell(2500)->addText('JABATAN', ['bold' => true], ['alignment' => Jc::CENTER]);
-            $cell = $table->addCell(4000);
-            $cell->getStyle()->setGridSpan(2);
-            $cell->addText('TANDA TANGAN', ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $table->addRow();
+            // $table->addCell(500)->addText('NO.', ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $table->addCell(2500)->addText('NAMA', ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $table->addCell(2500)->addText('JABATAN', ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $cell = $table->addCell(4000);
+            // $cell->getStyle()->setGridSpan(2);
+            // $cell->addText('TANDA TANGAN', ['bold' => true], ['alignment' => Jc::CENTER]);
 
             //Baris 2
-            $table->addRow();
-            $table->addCell(500)->addText('1');
-            $table->addCell(2500)->addText('Eko Oktaviadi, SH');
-            $table->addCell(2500)->addText('Ketua Panitia');
-            $table->addCell(2000, ['borderRightSize' => 0, 'borderRightColor' => 'FFFFFF'])->addText('1......');
-            $table->addCell(2000)->addText('');
+            // $table->addRow();
+            // $table->addCell(500)->addText('1');
+            // $table->addCell(2500)->addText('Eko Oktaviadi, SH');
+            // $table->addCell(2500)->addText('Ketua Panitia');
+            // $table->addCell(2000, ['borderRightSize' => 0, 'borderRightColor' => 'FFFFFF'])->addText('1......');
+            // $table->addCell(2000)->addText('');
 
-            $section->addText('Pekanbaru, $ September 2024,', $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section->addText('Panitia Penyelenggara', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
-            $section->addText('Ketua,', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
-            $section->addTextBreak(3);
-            $section->addText('H. Aprianto, S.Ag., M.A.', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section->addText('NIP. 196702161994031005', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            // $section->addText('Pekanbaru, $ September 2024,', $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            // $section->addText('Panitia Penyelenggara', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
+            // $section->addText('Ketua,', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
+            // $section->addTextBreak(3);
+            // $section->addText('H. Aprianto, S.Ag., M.A.', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            // $section->addText('NIP. 196702161994031005', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
             
             //$this->generateListSection($phpword, $section, $lists);
