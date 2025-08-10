@@ -21,6 +21,8 @@ class M_Admin extends CI_Model
 
     $pegawai_ids = [];
     $pegawai_fields = [
+      'id_pejabat_pembuka',
+      'id_pejabat_penutup',
       'id_penanggung_jawab',
       'id_ketua_panitia',
       'id_akademis',
@@ -43,9 +45,9 @@ class M_Admin extends CI_Model
     }
 
     if(!empty($pegawai_ids)) {
-      $this->db->select('p.*, r.nama_role');
+      $this->db->select('p.*, r.nama_role as jabatan');
       $this->db->from('tbl_pegawai p');
-      $this->db->from('tbl_role r', 'p.jabatan = r.id_role', 'left');
+      $this->db->join('tbl_role r', 'p.jabatan = r.id_role', 'left');
       $this->db->where_in('p.id_pegawai', array_unique($pegawai_ids));
       $pegawai_data = $this->db->get()->result();
 
@@ -80,8 +82,9 @@ class M_Admin extends CI_Model
 
       return $pelatihan;
    }
+  }
 
-   private function _parse_materi($text){
+  private function _parse_materi($text){
     if (empty(trim($text))) return ["-"];
 
     return array_values(array_filter(
@@ -90,9 +93,13 @@ class M_Admin extends CI_Model
         return !empty($item);
       }
     ));
-   }
+  }
 
-   public function parseTujuanKursil($text) {
+  public function get_ketua_loka() {
+    return $this->db->get_where('tbl_pegawai', ['id_pegawai' => 3])->row();
+  }
+
+  public function parseTujuanKursil($text) {
     if (empty($text)) return [];
 
     // Normalisasi newline dan pecah menjadi array

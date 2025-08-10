@@ -4,18 +4,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Data extends CI_Controller {
 	function __construct(){
-	 parent::__construct();
-	$this->load->library('wordGenerator');
-	$this->load->model('M_Admin');
-	$this->load->library('form_validation');
-	 	//validasi jika user belum login
-     $this->data['CI'] =& get_instance();
-     $this->load->helper(array('form', 'url'));
-     $this->load->model('M_Admin');
-		if($this->session->userdata('masuk_perpus') != TRUE){
-				$url=base_url('login');
-				redirect($url);
-		}
+	 	parent::__construct();
+
+		$this->load->library('wordGenerator');
+		$this->load->model('M_Admin');
+		$this->load->library('form_validation');
+		$this->load->helper('date');
+		
+		//validasi jika user belum login
+		$this->data['CI'] =& get_instance();
+		$this->load->helper(array('form', 'url'));
+		$this->load->model('M_Admin');
+			if($this->session->userdata('masuk_perpus') != TRUE){
+					$url=base_url('login');
+					redirect($url);
+			}
 	}
 
 	// public function index()
@@ -569,6 +572,7 @@ public function detailpelatihan()
 			'id_pengajar_3' => !empty($post['id_pengajar_3']) ? htmlentities($post['id_pengajar_3']) : NULL,
 
 			'jumlah_wi_pengajar' => htmlentities($post['jumlah_wi_pengajar']),
+			'jumlah_pendidikan_wi_d2' => htmlentities($post['jumlah_pendidikan_wi_d2']),
 			'jumlah_pendidikan_wi_s1' => htmlentities($post['jumlah_pendidikan_wi_s1']),
 			'jumlah_pendidikan_wi_s2' => htmlentities($post['jumlah_pendidikan_wi_s2']),
 			'jumlah_pendidikan_wi_s3' => htmlentities($post['jumlah_pendidikan_wi_s3']),
@@ -585,6 +589,7 @@ public function detailpelatihan()
 			'jumlah_peserta_wanita' => htmlentities($post['jumlah_peserta_wanita']),
 
 			'jumlah_pendidikan_peserta_sma' => htmlentities($post['jumlah_pendidikan_peserta_sma']),
+			'jumlah_pendidikan_peserta_d3' => htmlentities($post['jumlah_pendidikan_peserta_d3']),
 			'jumlah_pendidikan_peserta_s1' => htmlentities($post['jumlah_pendidikan_peserta_s1']),
 			'jumlah_pendidikan_peserta_s2' => htmlentities($post['jumlah_pendidikan_peserta_s2']),
 			'jumlah_pendidikan_peserta_s3' => htmlentities($post['jumlah_pendidikan_peserta_s3']),
@@ -628,6 +633,7 @@ public function detailpelatihan()
 			'id_pengajar_3' => !empty($post['id_pengajar_3']) ? htmlentities($post['id_pengajar_3']) : NULL,
 
 			'jumlah_wi_pengajar' => htmlentities($post['jumlah_wi_pengajar']),
+			'jumlah_pendidikan_wi_d2' => htmlentities($post['jumlah_pendidikan_wi_d2']),
 			'jumlah_pendidikan_wi_s1' => htmlentities($post['jumlah_pendidikan_wi_s1']),
 			'jumlah_pendidikan_wi_s2' => htmlentities($post['jumlah_pendidikan_wi_s2']),
 			'jumlah_pendidikan_wi_s3' => htmlentities($post['jumlah_pendidikan_wi_s3']),
@@ -644,6 +650,7 @@ public function detailpelatihan()
 			'jumlah_peserta_wanita' => htmlentities($post['jumlah_peserta_wanita']),
 
 			'jumlah_pendidikan_peserta_sma' => htmlentities($post['jumlah_pendidikan_peserta_sma']),
+			'jumlah_pendidikan_peserta_d3' => htmlentities($post['jumlah_pendidikan_peserta_d3']),
 			'jumlah_pendidikan_peserta_s1' => htmlentities($post['jumlah_pendidikan_peserta_s1']),
 			'jumlah_pendidikan_peserta_s2' => htmlentities($post['jumlah_pendidikan_peserta_s2']),
 			'jumlah_pendidikan_peserta_s3' => htmlentities($post['jumlah_pendidikan_peserta_s3']),
@@ -1153,6 +1160,7 @@ public function detailpelatihan()
 	{
 		// $this->data['idbo'] = $this->session->userdata('ses_id');
 		$sess = $this->session->userdata('ses_id');
+		$this->load->helper('date');
 
 		if ($sess == null){
 			redirect('cetak_laporan/list_pelatihan_pjj');
@@ -1161,19 +1169,30 @@ public function detailpelatihan()
 
 			$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
 			$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
-			
-			
+			$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
+			$ketua_loka = $this->M_Admin->get_ketua_loka();
+
+			// echo '<pre>'; 
+			// print_r($ketua_loka ?? 'Tidak ada data'); 
+			// die();
+	
 			$data = [
 				'pelatihan' => $pelatihan,
 				// 'detail' => $pelatihan->detail,
 				// 'pegawai' => $pelatihan->pegawai,
-				'durasi' => $durasi
-			];		
+				'durasi' => $durasi,
+				'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
+            	'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
+				'ketua_loka' => $ketua_loka
+			];
+
 			if (!empty($pelatihan->materi)) {
 				foreach ($pelatihan->materi as $materi) {
 					$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
 				}
-			}			
+			}	
+			
+			
 
 			$filename = $this->wordgenerator->generate($data);
 			if (!$filename){

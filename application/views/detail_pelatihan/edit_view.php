@@ -85,13 +85,14 @@
               <?php
                 $stat_fields = [
                   'jumlah_wi_pengajar' => 'Jumlah WI & Pengajar',
+                  'jumlah_pendidikan_wi_d2' => 'WI D2/D3',
                   'jumlah_pendidikan_wi_s1' => 'WI S1',
                   'jumlah_pendidikan_wi_s2' => 'WI S2',
                   'jumlah_pendidikan_wi_s3' => 'WI S3',
                 ];
               ?>
               <?php foreach ($stat_fields as $name => $label): ?>
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-4">
                   <label><?= $label ?></label>
                   <input type="number" name="<?= $name ?>" class="form-control" min="0" value="<?= $detail_pelatihan->$name; ?>">
                 </div>
@@ -113,13 +114,14 @@
                   'jumlah_peserta_laki' => 'Peserta Laki-laki',
                   'jumlah_peserta_wanita' => 'Peserta Perempuan',
                   'jumlah_pendidikan_peserta_sma' => 'Pendidikan Peserta SMA',
+                  'jumlah_pendidikan_peserta_d3' => 'Pendidikan Peserta D3',
                   'jumlah_pendidikan_peserta_s1' => 'Pendidikan Peserta S1',
                   'jumlah_pendidikan_peserta_s2' => 'Pendidikan Peserta S2',
                   'jumlah_pendidikan_peserta_s3' => 'Pendidikan Peserta S3',
                 ];
               ?>
               <?php foreach ($peserta_fields as $name => $label): ?>
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-4">
                   <label><?= $label ?></label>
                   <input type="number" name="<?= $name ?>" class="form-control" min="0" value="<?= $detail_pelatihan->$name; ?>">
                 </div>

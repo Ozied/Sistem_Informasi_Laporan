@@ -76,19 +76,23 @@
           <div class="box box-warning">
             <div class="box-header with-border"><h4 class="box-title">Statistik Widyaiswara & Pengajar</h4></div>
             <div class="box-body row">
-              <div class="form-group col-md-3">
+              <div class="form-group col-md-4">
                 <label>Jumlah WI & Pengajar</label>
                 <input type="number" name="jumlah_wi_pengajar" class="form-control" min="0" value="0">
               </div>
-              <div class="form-group col-md-3">
+              <div class="form-group col-md-4">
+                <label>WI D2/D3</label>
+                <input type="number" name="jumlah_pendidikan_wi_d2" class="form-control" min="0" value="0">
+              </div>
+              <div class="form-group col-md-4">
                 <label>WI S1</label>
                 <input type="number" name="jumlah_pendidikan_wi_s1" class="form-control" min="0" value="0">
               </div>
-              <div class="form-group col-md-3">
+              <div class="form-group col-md-4">
                 <label>WI S2</label>
                 <input type="number" name="jumlah_pendidikan_wi_s2" class="form-control" min="0" value="0">
               </div>
-              <div class="form-group col-md-3">
+              <div class="form-group col-md-4">
                 <label>WI S3</label>
                 <input type="number" name="jumlah_pendidikan_wi_s3" class="form-control" min="0" value="0">
               </div>
@@ -109,13 +113,14 @@
                   'jumlah_peserta_laki' => 'Peserta Laki-laki',
                   'jumlah_peserta_wanita' => 'Peserta Perempuan',
                   'jumlah_pendidikan_peserta_sma' => 'Pendidikan Peserta SMA',
+                  'jumlah_pendidikan_peserta_d3' => 'Pendidikan Peserta D3',
                   'jumlah_pendidikan_peserta_s1' => 'Pendidikan Peserta S1',
                   'jumlah_pendidikan_peserta_s2' => 'Pendidikan Peserta S2',
                   'jumlah_pendidikan_peserta_s3' => 'Pendidikan Peserta S3',
                 ];
               ?>
               <?php foreach ($peserta_fields as $name => $label): ?>
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-4">
                   <label><?= $label ?></label>
                   <input type="number" name="<?= $name; ?>" class="form-control" value="0" min="0">
                 </div>
