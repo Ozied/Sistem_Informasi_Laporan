@@ -67,7 +67,7 @@
                             </button>
                             <!-- Tombol Lihat Foto -->
                             <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modalPhotoGallery<?= $kegiatan['id_activity']; ?>">
-                                <i class="fa fa-image"></i> Lihat Foto
+                                <i class="fa fa-eye"></i> Lihat Foto
                             </button>
                           <a href="<?= base_url('data/proseskegiatanpelatihan?id_activity=' . $kegiatan['id_activity'] . '&id_pelatihan=' . $id_pelatihan); ?>" onclick="return confirm('Yakin ingin menghapus kegiatan ini?');">
                             <button class="btn btn-danger"><i class="fa fa-trash"></i></button>
@@ -143,6 +143,91 @@
                     </div>
                     </div>
 
+                    <!-- Modal Upload Foto -->
+                    <div class="modal fade" id="modalUploadFoto<?= $kegiatan['id_activity']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalUploadFotoLabel<?= $kegiatan['id_activity']; ?>">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <form action="<?= base_url('data/proseskegiatanpelatihan'); ?>" method="POST" enctype="multipart/form-data">
+                            <div class="modal-header bg-blue">
+                              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                              <h4 class="modal-title" id="modalUploadFotoLabel<?= $kegiatan['id_activity']; ?>">
+                                <i class="fa fa-upload" style="color:white;"></i> Upload Foto Kegiatan
+                              </h4>
+                            </div>
+
+                            <div class="modal-body">
+                              <input type="hidden" name="upload_foto" value="1">
+                              <input type="hidden" name="id_activity" value="<?= $kegiatan['id_activity']; ?>">
+                              <input type="hidden" name="id_pelatihan" value="<?= $id_pelatihan; ?>">
+
+                              <div class="form-group">
+                                <label for="foto_kegiatan">Pilih Foto</label>
+                                <input type="file" name="foto_kegiatan[]" class="form-control" multiple accept="image/*" required>
+                                <small class="text-muted">Dapat mengunggah lebih dari satu foto.</small>
+                              </div>
+                              <div class="form-group">
+                                <label for="keterangan">Keterangan</label>
+                                <textarea name="keterangan" class="form-control" rows="2" placeholder="Keterangan foto (opsional)"></textarea>
+                              </div>
+                              <div class="form-group">
+                                <label for="tanggal_foto">Tanggal Foto</label>
+                                <input type="date" name="tanggal_foto" class="form-control" value="<?= $kegiatan['tanggal_activity']; ?>" required>
+                              </div>
+                            </div>
+
+                            <div class="modal-footer">
+                              <button type="submit" class="btn btn-primary"><i class="fa fa-upload"></i> Upload</button>
+                              <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Modal Photo Gallery -->
+                    <div class="modal fade" id="modalPhotoGallery<?= $kegiatan['id_activity']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalPhotoGalleryLabel<?= $kegiatan['id_activity']; ?>">
+                      <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header bg-purple">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="modalPhotoGalleryLabel<?= $kegiatan['id_activity']; ?>">
+                              <i class="fa fa-image" style="color:white;"></i> Galeri Foto Kegiatan
+                            </h4>
+                          </div>
+                          <div class="modal-body">
+                            <div class="row">
+                              <?php
+                              $fotos = $this->db->get_where('tbl_pelatihan_foto', ['id_activity' => $kegiatan['id_activity'], 'deleted_at' => NULL])->result();
+                              if (count($fotos) > 0) {
+                                foreach ($fotos as $foto) {
+                              ?>
+                                  <div class="col-md-4">
+                                    <div class="thumbnail">
+                                      <img src="<?= base_url($foto->foto_path); ?>" alt="<?= htmlentities($foto->keterangan); ?>" style="width:100%;">
+                                      <div class="caption">
+                                        <p><?= htmlentities($foto->keterangan); ?></p>
+                                        <p>
+                                          <a href="#" class="btn btn-danger btn-xs" onclick="deletePhoto(<?= $foto->id_foto; ?>, <?= $kegiatan['id_pelatihan']; ?>)">
+                                            <i class="fa fa-trash"></i> Hapus
+                                          </a>
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                              <?php
+                                }
+                              } else {
+                                echo '<div class="col-md-12"><p>Tidak ada foto untuk kegiatan ini.</p></div>';
+                              }
+                              ?>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   <?php $no++; } ?>
                 </tbody>
               </table>
@@ -214,93 +299,6 @@
           <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
         </div>
       </form>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Upload Foto -->
-<div class="modal fade" id="modalUploadFoto<?= $kegiatan['id_activity']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalUploadFotoLabel<?= $kegiatan['id_activity']; ?>">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <form action="<?= base_url('data/proseskegiatanpelatihan'); ?>" method="POST" enctype="multipart/form-data">
-        <div class="modal-header bg-blue">
-          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-          <h4 class="modal-title" id="modalUploadFotoLabel<?= $kegiatan['id_activity']; ?>">
-            <i class="fa fa-upload" style="color:white"></i> Upload Foto Kegiatan
-          </h4>
-        </div>
-
-        <div class="modal-body">
-          <input type="hidden" name="upload_foto" value="1">
-          <input type="hidden" name="id_activity" value="<?= $kegiatan['id_activity']; ?>">
-          <input type="hidden" name="id_pelatihan" value="<?= $id_pelatihan; ?>">
-
-          <div class="form-group">
-            <label for="foto_kegiatan">Pilih Foto</label>
-            <input type="file" name="foto_kegiatan[]" class="form-control" multiple accept="image/*" required>
-            <small class="text-muted">Dapat mengunggah lebih dari satu foto.</small>
-          </div>
-          <div class="form-group">
-            <label for="keterangan">Keterangan</label>
-            <textarea name="keterangan" class="form-control" rows="2" placeholder="Keterangan foto (opsional)"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="tanggal_foto">Tanggal Foto</label>
-            <input type="date" name="tanggal_foto" class="form-control" value="<?= $kegiatan['tanggal_activity']; ?>" required>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary"><i class="fa fa-upload"></i> Upload</button>
-          <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal Photo Gallery -->
-<div class="modal fade" id="modalPhotoGallery<?= $kegiatan['id_activity']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalPhotoGalleryLabel<?= $kegiatan['id_activity']; ?>">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-purple">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="modalPhotoGalleryLabel<?= $kegiatan['id_activity']; ?>">
-          <i class="fa fa-image" style="color:white;"></i> Galeri Foto Kegiatan
-        </h4>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <?php
-          $fotos = $this->db->get_where('tbl_pelatihan_foto', ['id_activity' => $kegiatan['id_activity'], 'deleted_at' => NULL])->result();
-          if (count($fotos) > 0) {
-            foreach ($fotos as $foto) {
-          ?>
-              <div class="col-md-4">
-                <div class="thumbnail">
-                  <img src="<?= base_url($foto->foto_path); ?>" alt="<?= htmlentities($foto->keterangan); ?>" style="width:100%;">
-                  <div class="caption">
-                    <p><?= htmlentities($foto->keterangan); ?></p>
-                    <p>
-                      <a href="#" class="btn btn-danger btn-xs" onclick="deletePhoto(<?= $foto->id_foto; ?>, <?= $kegiatan['id_pelatihan']; ?>)">
-                        <i class="fa fa-trash"></i> Hapus
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              </div>
-          <?php
-            }
-          } else {
-            echo '<div class="col-md-12"><p>Tidak ada foto untuk kegiatan ini.</p></div>';
-          }
-          ?>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
-      </div>
     </div>
   </div>
 </div>

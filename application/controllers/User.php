@@ -14,17 +14,40 @@ class User extends CI_Controller {
 		}
      }
      
-    public function index()
-    {	
-        $this->data['idbo'] = $this->session->userdata('ses_id');
-        $this->data['user'] = $this->M_Admin->get_table('tbl_login');
+    // public function index()
+    // {	
+    //     $this->data['idbo'] = $this->session->userdata('ses_id');
+    //     $this->data['user'] = $this->M_Admin->get_table('tbl_login');
 
-        $this->data['title_web'] = 'Data User ';
-        $this->load->view('header_view',$this->data);
-        $this->load->view('sidebar_view',$this->data);
-        $this->load->view('user/user_view',$this->data);
-        $this->load->view('footer_view',$this->data);
-    }
+    //     $this->data['title_web'] = 'Data User ';
+    //     $this->load->view('header_view',$this->data);
+    //     $this->load->view('sidebar_view',$this->data);
+    //     $this->load->view('user/user_view',$this->data);
+    //     $this->load->view('footer_view',$this->data);
+    // }
+
+	public function index()
+{	
+    $this->data['idbo'] = $this->session->userdata('ses_id');
+
+    // Fetch all users first
+    $all_users = $this->M_Admin->get_table('tbl_login');
+
+    // Filter only users who are NOT soft-deleted (deleted_at IS NULL)
+    $filtered_users = array_filter($all_users, function($user) {
+        return $user['deleted_at'] === NULL;
+    });
+
+    // Reset array keys (important for view)
+    $this->data['user'] = array_values($filtered_users);
+
+    $this->data['title_web'] = 'Data User';
+    $this->load->view('header_view', $this->data);
+    $this->load->view('sidebar_view', $this->data);
+    $this->load->view('user/user_view', $this->data);
+    $this->load->view('footer_view', $this->data);
+}
+
 
     public function tambah()
     {	
@@ -304,17 +327,48 @@ class User extends CI_Controller {
 			}
 		}
     }
-    public function del()
-    {
-        if($this->uri->segment('3') == ''){ echo '<script>alert("halaman tidak ditemukan");window.location="'.base_url('user').'";</script>';}
+    // public function del()
+    // {
+    //     if($this->uri->segment('3') == ''){ echo '<script>alert("halaman tidak ditemukan");window.location="'.base_url('user').'";</script>';}
         
-        $user = $this->M_Admin->get_tableid_edit('tbl_login','id_login',$this->uri->segment('3'));
-        unlink('./assets_style/image/'.$user->foto);
-		$this->M_Admin->delete_table('tbl_login','id_login',$this->uri->segment('3'));
+    //     $user = $this->M_Admin->get_tableid_edit('tbl_login','id_login',$this->uri->segment('3'));
+    //     unlink('./assets_style/image/'.$user->foto);
+	// 	$this->M_Admin->delete_table('tbl_login','id_login',$this->uri->segment('3'));
 		
-		$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-warning">
-		<p> Berhasil Hapus User !</p>
-		</div></div>');
-		redirect(base_url('user'));  
+	// 	$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-warning">
+	// 	<p> Berhasil Hapus User !</p>
+	// 	</div></div>');
+	// 	redirect(base_url('user'));  
+    // }
+
+	public function del() 
+{
+    $id_login = $this->uri->segment(3);
+    
+    if (empty($id_login)) {
+        echo '<script>alert("Halaman tidak ditemukan");window.location="'.base_url('user').'";</script>';
+        return;
     }
+
+    $user = $this->M_Admin->get_tableid_edit('tbl_login', 'id_login', $id_login);
+
+    if ($user) {
+        // Optional: Remove photo file
+        if (!empty($user->foto) && $user->foto !== "-" && file_exists('./assets_style/image/' . $user->foto)) {
+            unlink('./assets_style/image/' . $user->foto);
+        }
+
+        // Soft delete user (set deleted_at timestamp)
+        $this->db->set('deleted_at', date('Y-m-d H:i:s'));
+        $this->db->where('id_login', $id_login);
+        $this->db->update('tbl_login');
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-warning">
+        <p> Berhasil Hapus User (Soft Delete)!</p>
+        </div></div>');
+    }
+
+    redirect(base_url('user'));
+}
+
 }

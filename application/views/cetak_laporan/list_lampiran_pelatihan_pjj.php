@@ -48,15 +48,20 @@
                     <td><?= htmlentities($isi['tahun']); ?></td>
                    <td>
                     <?php if($this->session->userdata('level') == 'Petugas'){ ?>
-                        <a href="<?= base_url('data/exportlampiranpelatihan/'.$isi['id_pelatihan']); ?>">
+                        <a href="<?= base_url('data/exportFotoPelatihan/'.$isi['id_pelatihan']); ?>">
                         <button class="btn btn-primary">
-                            <i class="fa fa-file"></i> Cetak Lampiran Pelatihan
+                            <i class="fa fa-file"></i> Cetak Foto
+                        </button>
+                        </a>
+                        <a href="<?= base_url('data/exportLampiranPelatihan/'.$isi['id_pelatihan']); ?>">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-file"></i> Cetak Lampiran
                         </button>
                         </a>
                     <?php } else { ?>
-                        <a href="<?= base_url('data/exportlampiranpelatihan/'.$isi['id_pelatihan']); ?>">
+                        <a href="<?= base_url('data/exportFotoPelatihan/'.$isi['id_pelatihan']); ?>">
                         <button class="btn btn-primary">
-                            <i class="fa fa-file"></i> Cetak Lampiran Pelatihan
+                            <i class="fa fa-file"></i> Cetak Lampiran
                         </button>
                         </a>
                     <?php } ?>

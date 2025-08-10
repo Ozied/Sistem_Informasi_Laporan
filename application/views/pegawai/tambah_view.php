@@ -19,17 +19,26 @@
             <form action="<?= base_url('data/prosespegawai'); ?>" method="POST">
               
               <div class="form-group">
-                <label>Nama Pegawai</label>
+                <label>Nama Pegawai 
+                  <i class="fa fa-info-circle text-blue" data-toggle="tooltip" data-placement="right" 
+                     title="Masukkan nama lengkap pegawai sesuai dengan identitas resmi"></i>
+                </label>
                 <input type="text" name="nama" class="form-control" required placeholder="Masukkan nama lengkap pegawai">
               </div>
 
               <div class="form-group">
-                <label>NIP</label>
+                <label>NIP
+                  <i class="fa fa-info-circle text-blue" data-toggle="tooltip" data-placement="right" 
+                     title="Nomor Induk Pegawai (NIP) 18 digit. Bisa dikosongkan jika tidak tersedia"></i>
+                </label>
                 <input type="text" name="nip" class="form-control" placeholder="Masukkan NIP (boleh kosong)">
               </div>
 
               <div class="form-group">
-                <label>Jabatan</label>
+                <label>Jabatan
+                  <i class="fa fa-info-circle text-blue" data-toggle="tooltip" data-placement="right" 
+                     title="Pilih jabatan pegawai dari daftar yang tersedia"></i>
+                </label>
                 <select name="jabatan" class="form-control select2" required>
                   <option disabled selected value>-- Pilih Jabatan --</option>
                   <?php foreach ($roles as $isi) { ?>
@@ -39,7 +48,10 @@
               </div>
 
               <div class="form-group">
-                <label>Asal Satuan Kerja</label>
+                <label>Asal Satuan Kerja
+                  <i class="fa fa-info-circle text-blue" data-toggle="tooltip" data-placement="right" 
+                     title="Unit kerja asal pegawai. Contoh: Pusbangkom MK MB, Loka Diklat Keagamaan Pekanbaru"></i>
+                </label>
                 <input type="text" name="asal_satker" class="form-control" placeholder="Masukkan asal instansi atau unit kerja">
               </div>
 
@@ -56,3 +68,10 @@
     </div>
   </section>
 </div>
+
+<script>
+// Initialize tooltips
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip(); 
+});
+</script>

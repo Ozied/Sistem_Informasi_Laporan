@@ -74,6 +74,11 @@
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           <li>
+            <a href="<?php echo base_url('data/faqsistem');?>">
+              <i class="fa fa-question-circle"></i> FAQ
+            </a>
+          </li>
+          <li>
             <?php
               $d = $this->db->query("SELECT * FROM tbl_login WHERE id_login = '$idbo'")->row();
              ?>
