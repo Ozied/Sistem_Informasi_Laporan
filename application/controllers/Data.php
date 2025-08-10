@@ -1780,6 +1780,39 @@ public function exportFotoPelatihan($id_pelatihan)
     ]);
 }
 
+// ini dipake sebelummnya utk export lampiran
+// public function exportLampiranPelatihan($id_pelatihan)
+// {
+//     $pelatihan = $this->db->get_where('tbl_pelatihan', [
+//         'id_pelatihan' => $id_pelatihan,
+//         'deleted_at' => NULL
+//     ])->row_array();
+
+//     if (!$pelatihan) {
+//         show_404();
+//     }
+
+//     // Get all documents for this training
+//     $documents = $this->db->query("
+//         SELECT pd.*, d.nama_dokumen, d.deskripsi
+//         FROM tbl_pelatihan_dokumen pd
+//         JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
+//         WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
+//         ORDER BY pd.tanggal_upload ASC
+//     ", [$id_pelatihan])->result_array();
+    
+//     // Add full path to each document
+//     foreach ($documents as &$doc) {
+//         $doc['full_path'] = FCPATH . 'assets_style/assets/dokumen/' . $doc['file_path'];
+//     }
+    
+//     // Pass data to view
+//     $this->load->view('cetak_laporan/export_lampiran_pelatihan', [
+//         'pelatihan' => $pelatihan,
+//         'documents' => $documents
+//     ]);
+// }
+
 public function exportLampiranPelatihan($id_pelatihan)
 {
     $pelatihan = $this->db->get_where('tbl_pelatihan', [
@@ -1793,12 +1826,38 @@ public function exportLampiranPelatihan($id_pelatihan)
 
     // Get all documents for this training
     $documents = $this->db->query("
-        SELECT pd.*, d.nama_dokumen, d.deskripsi
+        SELECT pd.*, d.id_dokumen, d.nama_dokumen, d.deskripsi
         FROM tbl_pelatihan_dokumen pd
         JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
         WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
         ORDER BY pd.tanggal_upload ASC
     ", [$id_pelatihan])->result_array();
+    
+    // Define the custom order of document types
+    $customOrder = [
+        'Susunan Acara Pembukaan' => 1,
+        'Susunan Acara Penutupan' => 2,
+        'Surat Tanda Tamat Pelatihan (STTP)' => 3,
+        'Daftar Hadir Rapat Persiapan' => 4,
+        'Daftar Hadir Pelaksanaan Kegiatan Pelatihan' => 5,
+        'Daftar Hadir Rapat Evaluasi' => 6,
+        'Notulen Rapat Persiapan' => 7,
+        'Notulen Rapat Evaluasi' => 8,
+        'Surat Permohonan Widyaiswara' => 9,
+        'Surat Pemberitahuan' => 10,
+        'Jadwal Kegiatan' => 11,
+        'Buku Panduan' => 12,
+        'Bahan Tayang Widyaiswara' => 13,
+        'Bahan Ajar Widyaiswara' => 14
+    ];
+    
+    // Sort documents according to custom order
+    usort($documents, function($a, $b) use ($customOrder) {
+        $orderA = $customOrder[$a['nama_dokumen']] ?? PHP_INT_MAX;
+        $orderB = $customOrder[$b['nama_dokumen']] ?? PHP_INT_MAX;
+        
+        return $orderA <=> $orderB;
+    });
     
     // Add full path to each document
     foreach ($documents as &$doc) {
