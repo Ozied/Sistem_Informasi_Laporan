@@ -8,6 +8,137 @@ class M_Admin extends CI_Model
 	 //validasi jika user belum login
 	 }
 
+   function dataPelatihan($id_pelatihan){
+    $this->db->select('p.*, d.*');
+    $this->db->from('tbl_pelatihan p');
+    $this->db->join('tbl_detail_pelatihan d', 'p.id_pelatihan = d.id_pelatihan', 'left');
+    $this->db->where('p.id_pelatihan', $id_pelatihan);
+    $pelatihan = $this->db->get()->row();
+
+    // $pelatihan->materi->tujuan_parsed = $this->parseTujuanKursil($pelatihan->materi->tujuan_kursil ?? '');
+
+    if(!$pelatihan) return null;
+
+    $pegawai_ids = [];
+    $pegawai_fields = [
+      'id_pejabat_pembuka',
+      'id_pejabat_penutup',
+      'id_penanggung_jawab',
+      'id_ketua_panitia',
+      'id_akademis',
+      'id_keuangan',
+      'id_administrasi',
+      'id_wi_1',
+      'id_wi_2',
+      'id_wi_3',
+      'id_wi_4',
+      'id_wi_rapat_kelulusan',
+      'id_pengajar_1',
+      'id_pengajar_2',
+      'id_pengajar_3'
+    ];
+
+    foreach ($pegawai_fields as $field){
+      if (!empty($pelatihan->{$field})) {
+        $pegawai_ids[] = $pelatihan->{$field};
+      }
+    }
+
+    if(!empty($pegawai_ids)) {
+      $this->db->select('p.*, r.nama_role as jabatan');
+      $this->db->from('tbl_pegawai p');
+      $this->db->join('tbl_role r', 'p.jabatan = r.id_role', 'left');
+      $this->db->where_in('p.id_pegawai', array_unique($pegawai_ids));
+      $pegawai_data = $this->db->get()->result();
+
+      $pegawai_map = array_column($pegawai_data, null, 'id_pegawai');
+
+      foreach ($pegawai_fields as $field) {
+        $key = str_replace('id_', '', $field);
+        if (!empty($pelatihan->{$field}) && isset($pegawai_map[$pelatihan->{$field}])) {
+          $pelatihan->{$key} = $pegawai_map[$pelatihan->{$field}];
+        }
+      }
+
+      //Ambil materi pelatihan
+     $materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => $id_pelatihan])->result();
+
+     //Daftar materi
+      $kolom_materi = [
+          'nama_mata_pelatihan_kel_dasar',
+          'nama_mata_pelatihan_kel_inti',
+          'nama_mata_pelatihan_kel_penunjang'
+      ];
+
+     foreach ($materi as $m) {
+      $m->tujuan_kursil_parsed = $this->parseTujuanKursil($m->tujuan_kursil ?? '');
+      foreach ($kolom_materi as $kolom){
+        $materi_parsed = str_replace('nama_mata_pelatihan_', '', $kolom) . '_parsed';
+        $m->{$materi_parsed} = $this->_parse_materi($m->{$kolom} ?? '');
+      }
+     }
+
+     $pelatihan->materi = $materi;
+
+      return $pelatihan;
+   }
+  }
+
+  private function _parse_materi($text){
+    if (empty(trim($text))) return ["-"];
+
+    return array_values(array_filter(
+      array_map('trim', preg_split("/\r\n|\n|\r/", $text)),
+      function($item){
+        return !empty($item);
+      }
+    ));
+  }
+
+  public function get_ketua_loka() {
+    return $this->db->get_where('tbl_pegawai', ['id_pegawai' => 3])->row();
+  }
+
+  public function parseTujuanKursil($text) {
+    if (empty($text)) return [];
+
+    // Normalisasi newline dan pecah menjadi array
+    $items = array_filter(
+        explode("\n", str_replace(["\r\n", "\r"], "\n", $text)),
+        function($line) {
+            return !empty(trim($line));
+        }
+    );
+
+    // Kelompokkan judul dan deskripsi berpasangan
+    $result = [];
+    for ($i = 0; $i < count($items); $i += 2) {
+        $result[] = [
+            'judul' => trim($items[$i] ?? ''),
+            'deskripsi' => trim($items[$i+1] ?? '')
+        ];
+    }
+
+    return $result;
+  }
+
+   public function get_durasi_pelatihan($id_pelatihan){
+    //Ambil data tanggal
+    $this->db->select('tanggal_mulai_pelatihan, tanggal_selesai_pelatihan');
+    $this->db->where('id_pelatihan', $id_pelatihan);
+    $pelatihan = $this->db->get('tbl_pelatihan')->row();
+
+    if(!$pelatihan) return 0;
+
+    //Hitung durasi
+    $mulai = new DateTime($pelatihan->tanggal_mulai_pelatihan);
+    $selesai = new DateTime($pelatihan->tanggal_selesai_pelatihan);
+    $interval = $mulai->diff($selesai);
+
+    //Return jumlah hari + 1
+    return $interval->days;
+   }
+
    function get_table($table_name)
    {
      $get_user = $this->db->get($table_name);

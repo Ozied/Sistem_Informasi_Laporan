@@ -1,4 +1,5 @@
 <?php
+require 'vendor/autoload.php';
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 
@@ -11,15 +12,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Data extends CI_Controller {
 	function __construct(){
-	 parent::__construct();
-	 	//validasi jika user belum login
-     $this->data['CI'] =& get_instance();
-     $this->load->helper(array('form', 'url'));
-     $this->load->model('M_Admin');
-		if($this->session->userdata('masuk_perpus') != TRUE){
-				$url=base_url('login');
-				redirect($url);
-		}
+	 	parent::__construct();
+
+		$this->load->library('wordGenerator');
+		$this->load->model('M_Admin');
+		$this->load->library('form_validation');
+		$this->load->helper('date');
+		
+		//validasi jika user belum login
+		$this->data['CI'] =& get_instance();
+		$this->load->helper(array('form', 'url'));
+		$this->load->model('M_Admin');
+			if($this->session->userdata('masuk_perpus') != TRUE){
+					$url=base_url('login');
+					redirect($url);
+			}
 	}
 
 	// public function index()
@@ -33,7 +40,7 @@ class Data extends CI_Controller {
     //     $this->load->view('footer_view',$this->data);
 	// }
 
-		public function index()
+	public function index()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
 		// Ambil semua role yang belum dihapus (deleted_at IS NULL)
@@ -573,6 +580,7 @@ public function detailpelatihan()
 			'id_pengajar_3' => !empty($post['id_pengajar_3']) ? htmlentities($post['id_pengajar_3']) : NULL,
 
 			'jumlah_wi_pengajar' => htmlentities($post['jumlah_wi_pengajar']),
+			'jumlah_pendidikan_wi_d2' => htmlentities($post['jumlah_pendidikan_wi_d2']),
 			'jumlah_pendidikan_wi_s1' => htmlentities($post['jumlah_pendidikan_wi_s1']),
 			'jumlah_pendidikan_wi_s2' => htmlentities($post['jumlah_pendidikan_wi_s2']),
 			'jumlah_pendidikan_wi_s3' => htmlentities($post['jumlah_pendidikan_wi_s3']),
@@ -589,6 +597,7 @@ public function detailpelatihan()
 			'jumlah_peserta_wanita' => htmlentities($post['jumlah_peserta_wanita']),
 
 			'jumlah_pendidikan_peserta_sma' => htmlentities($post['jumlah_pendidikan_peserta_sma']),
+			'jumlah_pendidikan_peserta_d3' => htmlentities($post['jumlah_pendidikan_peserta_d3']),
 			'jumlah_pendidikan_peserta_s1' => htmlentities($post['jumlah_pendidikan_peserta_s1']),
 			'jumlah_pendidikan_peserta_s2' => htmlentities($post['jumlah_pendidikan_peserta_s2']),
 			'jumlah_pendidikan_peserta_s3' => htmlentities($post['jumlah_pendidikan_peserta_s3']),
@@ -632,6 +641,7 @@ public function detailpelatihan()
 			'id_pengajar_3' => !empty($post['id_pengajar_3']) ? htmlentities($post['id_pengajar_3']) : NULL,
 
 			'jumlah_wi_pengajar' => htmlentities($post['jumlah_wi_pengajar']),
+			'jumlah_pendidikan_wi_d2' => htmlentities($post['jumlah_pendidikan_wi_d2']),
 			'jumlah_pendidikan_wi_s1' => htmlentities($post['jumlah_pendidikan_wi_s1']),
 			'jumlah_pendidikan_wi_s2' => htmlentities($post['jumlah_pendidikan_wi_s2']),
 			'jumlah_pendidikan_wi_s3' => htmlentities($post['jumlah_pendidikan_wi_s3']),
@@ -648,6 +658,7 @@ public function detailpelatihan()
 			'jumlah_peserta_wanita' => htmlentities($post['jumlah_peserta_wanita']),
 
 			'jumlah_pendidikan_peserta_sma' => htmlentities($post['jumlah_pendidikan_peserta_sma']),
+			'jumlah_pendidikan_peserta_d3' => htmlentities($post['jumlah_pendidikan_peserta_d3']),
 			'jumlah_pendidikan_peserta_s1' => htmlentities($post['jumlah_pendidikan_peserta_s1']),
 			'jumlah_pendidikan_peserta_s2' => htmlentities($post['jumlah_pendidikan_peserta_s2']),
 			'jumlah_pendidikan_peserta_s3' => htmlentities($post['jumlah_pendidikan_peserta_s3']),
@@ -848,6 +859,7 @@ public function detailpelatihan()
             'jp_kel_inti' => !empty($post['jp_kel_inti']) ? htmlentities($post['jp_kel_inti']) : 0,
             'jp_kel_penunjang' => !empty($post['jp_kel_penunjang']) ? htmlentities($post['jp_kel_penunjang']) : 0,
             'nama_mata_pelatihan_kel_dasar' => htmlentities($post['nama_mata_pelatihan_kel_dasar']),
+			// 'nama_mata_pelatihan_kel_dasar' => json_encode(array_map('trim', preg_split('/\d+\./', $post['nama_mata_pelatihan_kel_dasar'], -1, PREG_SPLIT_NO_EMPTY))),
             'nama_mata_pelatihan_kel_inti' => htmlentities($post['nama_mata_pelatihan_kel_inti']),
             'nama_mata_pelatihan_kel_penunjang' => htmlentities($post['nama_mata_pelatihan_kel_penunjang']),
             'latar_belakang' => htmlentities($post['latar_belakang']),
@@ -1154,17 +1166,75 @@ public function detailpelatihan()
 
 	public function listdokumenpelatihan($id_pelatihan)
 	{
-		$this->data['idbo'] = $this->session->userdata('ses_id');
+		// $this->data['idbo'] = $this->session->userdata('ses_id');
+		$sess = $this->session->userdata('ses_id');
+		$this->load->helper('date');
 
-		$cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
-			'id_pelatihan' => $id_pelatihan,
-			'deleted_at' => NULL
-		])->row();
-
-		if (!$cek_pelatihan) {
+		if ($sess == null){
+			redirect('cetak_laporan/list_pelatihan_pjj');
 			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
-			return;
+		} else {
+
+			$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
+			$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
+			$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
+			$ketua_loka = $this->M_Admin->get_ketua_loka();
+
+			// echo '<pre>'; 
+			// print_r($ketua_loka ?? 'Tidak ada data'); 
+			// die();
+	
+			$data = [
+				'pelatihan' => $pelatihan,
+				// 'detail' => $pelatihan->detail,
+				// 'pegawai' => $pelatihan->pegawai,
+				'durasi' => $durasi,
+				'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
+            	'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
+				'ketua_loka' => $ketua_loka
+			];
+
+			if (!empty($pelatihan->materi)) {
+				foreach ($pelatihan->materi as $materi) {
+					$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
+				}
+			}	
+			
+			
+
+			$filename = $this->wordgenerator->generate($data);
+			if (!$filename){
+				show_error('Gagal generate dokumen');
+			}
+			$filepath = FCPATH . 'downloads/' . $filename;
+			if(file_exists($filepath)){
+				
+				header("Content-Description: File Transfer");
+				header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+				header("Content-Disposition: inline; filename= " .basename($filepath));
+				header("Content-Transfer-Encoding: binary");
+				header("Expires: 0");
+				header("Cache-Control: must-revalidate");
+				header("Pragma: public");
+				header("Content-Length: " . filesize($filepath));
+				
+				readfile($filepath);
+				exit;
+			} else {
+				show_error('File tidak ditemukan' . $filepath);
+			}
+
 		}
+
+		// $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+		// 	'id_pelatihan' => $id_pelatihan,
+		// 	'deleted_at' => NULL
+		// ])->row();
+
+		// if (!$cek_pelatihan) {
+		// 	echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+		// 	return;
+		// }
 
 		$this->data['pelatihan'] = $cek_pelatihan;
 		$this->data['dokumen_pelatihan'] = $this->db->query("
@@ -1208,20 +1278,21 @@ public function detailpelatihan()
 			->order_by('id_dokumen', 'DESC')
 			->get('tbl_dokumen')
 			->result();
-	} else {
-		$this->data['dokumen_all_raw'] = $this->db
-			->where('deleted_at', NULL)
-			->order_by('id_dokumen', 'DESC')
-			->get('tbl_dokumen')
-			->result();
-}
+			} else {
+				$this->data['dokumen_all_raw'] = $this->db
+					->where('deleted_at', NULL)
+					->order_by('id_dokumen', 'DESC')
+					->get('tbl_dokumen')
+					->result();
+		}
 
 		$this->data['id_pelatihan'] = $id_pelatihan;
-		$this->data['title_web'] = 'Lampiran Dokumen - ' . htmlentities($cek_pelatihan->nama_pelatihan);
-		$this->load->view('header_view', $this->data);
-		$this->load->view('sidebar_view', $this->data);
-		$this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
-		$this->load->view('footer_view', $this->data);
+		
+		// $this->data['title_web'] = 'Lampiran Dokumen - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+		// $this->load->view('header_view', $this->data);
+		// $this->load->view('sidebar_view', $this->data);
+		// $this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
+		// $this->load->view('footer_view', $this->data);
 	}
 
 	public function prosesdokumenpelatihan()
