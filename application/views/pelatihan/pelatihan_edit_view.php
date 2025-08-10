@@ -21,47 +21,47 @@
                 <div class="col-sm-6">
 
                   <div class="form-group">
-                    <label>Nama Kegiatan</label>
+                    <label>Nama Kegiatan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Masukkan nama kegiatan pelatihan secara lengkap"></i></label>
                     <input type="text" name="nama_kegiatan" class="form-control" required value="<?= $pelatihan->nama_kegiatan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Nama Pelatihan</label>
+                    <label>Nama Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Nama resmi pelatihan sesuai dokumen"></i></label>
                     <input type="text" name="nama_pelatihan" class="form-control" required value="<?= $pelatihan->nama_pelatihan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Provinsi</label>
+                    <label>Provinsi <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Provinsi tempat pelatihan dilaksanakan"></i></label>
                     <input type="text" name="provinsi" class="form-control" required value="<?= $pelatihan->provinsi; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Kabupaten/Kota</label>
+                    <label>Kabupaten/Kota <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Kabupaten/Kota tempat pelatihan"></i></label>
                     <input type="text" name="kab_kota" class="form-control" value="<?= $pelatihan->kab_kota; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Tempat</label>
+                    <label>Tempat <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Nama lokasi pelatihan"></i></label>
                     <input type="text" name="tempat" class="form-control" required value="<?= $pelatihan->tempat; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Tanggal Mulai Pelatihan</label>
+                    <label>Tanggal Mulai Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tanggal pertama kegiatan pelatihan"></i></label>
                     <input type="date" name="tanggal_mulai" class="form-control" required value="<?= $pelatihan->tanggal_mulai_pelatihan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Tanggal Selesai Pelatihan</label>
+                    <label>Tanggal Selesai Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tanggal terakhir kegiatan pelatihan"></i></label>
                     <input type="date" name="tanggal_selesai" class="form-control" required value="<?= $pelatihan->tanggal_selesai_pelatihan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Bulan TTD Laporan</label>
+                    <label>Bulan TTD Laporan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Bulan yang tercantum pada dokumen laporan"></i></label>
                     <input type="text" name="bulan_ttd" class="form-control" required value="<?= $pelatihan->bulan_ttd_lap; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Tahun</label>
+                    <label>Tahun <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tahun pelaksanaan pelatihan"></i></label>
                     <input type="number" name="tahun" class="form-control" required value="<?= $pelatihan->tahun; ?>">
                   </div>
 
@@ -70,17 +70,17 @@
                 <div class="col-sm-6">
 
                   <div class="form-group">
-                    <label>Tanggal Pembukaan</label>
+                    <label>Tanggal Pembukaan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tanggal acara pembukaan pelatihan"></i></label>
                     <input type="date" name="hari_tanggal_pembukaan" class="form-control" value="<?= $pelatihan->hari_tanggal_pembukaan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Waktu Pembukaan</label>
+                    <label>Waktu Pembukaan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam acara pembukaan (format 24 jam)"></i></label>
                     <input type="time" name="waktu_pembukaan" class="form-control" value="<?= $pelatihan->waktu_pembukaan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Pejabat Pembuka</label>
+                    <label>Pejabat Pembuka <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pejabat yang membuka acara pelatihan"></i></label>
                     <select class="form-control select2" name="id_pejabat_pembuka" required>
                       <option disabled selected value> -- Pilih Pegawai -- </option>
                       <?php foreach($pegawais as $isi){ ?>
@@ -92,7 +92,7 @@
                   </div>
 
                   <div class="form-group">
-                    <label>Jabatan Pejabat Pembuka</label>
+                    <label>Jabatan Pejabat Pembuka <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jabatan pejabat pembuka acara"></i></label>
                     <select class="form-control select2" name="id_role_pembuka" required>
                       <option disabled selected value> -- Pilih Jabatan -- </option>
                       <?php foreach($roles as $isi){ ?>
@@ -104,17 +104,17 @@
                   </div>
 
                   <div class="form-group">
-                    <label>Tanggal Penutupan</label>
+                    <label>Tanggal Penutupan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tanggal acara penutupan pelatihan"></i></label>
                     <input type="date" name="hari_tanggal_penutupan" class="form-control" value="<?= $pelatihan->hari_tanggal_penutupan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Waktu Penutupan</label>
+                    <label>Waktu Penutupan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam acara penutupan (format 24 jam)"></i></label>
                     <input type="time" name="waktu_penutupan" class="form-control" value="<?= $pelatihan->waktu_penutupan; ?>">
                   </div>
 
                   <div class="form-group">
-                    <label>Pejabat Penutup</label>
+                    <label>Pejabat Penutup <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pejabat yang menutup acara pelatihan"></i></label>
                     <select class="form-control select2" name="id_pejabat_penutup" required>
                       <option disabled selected value> -- Pilih Pegawai -- </option>
                       <?php foreach($pegawais as $isi){ ?>
@@ -126,7 +126,7 @@
                   </div>
 
                   <div class="form-group">
-                    <label>Jabatan Pejabat Penutup</label>
+                    <label>Jabatan Pejabat Penutup <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jabatan pejabat penutup acara"></i></label>
                     <select class="form-control select2" name="id_role_penutup" required>
                       <option disabled selected value> -- Pilih Jabatan -- </option>
                       <?php foreach($roles as $isi){ ?>
@@ -153,3 +153,14 @@
     </div>
   </section>
 </div>
+
+<script>
+// Initialize tooltips
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip({
+        trigger: 'hover',
+        placement: 'right',
+        container: 'body'
+    }); 
+});
+</script>

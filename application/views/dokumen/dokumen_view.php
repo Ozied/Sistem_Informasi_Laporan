@@ -65,40 +65,44 @@
                     </tr>
                     <!-- Modal Edit Dokumen -->
                     <div class="modal fade" id="modalEditDokumen<?= $isi['id_dokumen']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalEditDokumenLabel<?= $isi['id_dokumen']; ?>">
-                      <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                          <form action="<?= base_url('data/prosesdokumen'); ?>" method="POST">
-                            <div class="modal-header bg-green">
-                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                              </button>
-                              <h4 class="modal-title" id="modalEditDokumenLabel<?= $isi['id_dokumen']; ?>">
-                                <i class="fa fa-edit" style="color:white;"></i> Edit Dokumen
-                              </h4>
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <form action="<?= base_url('data/prosesdokumen'); ?>" method="POST">
+                          <div class="modal-header bg-green">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title" id="modalEditDokumenLabel<?= $isi['id_dokumen']; ?>">
+                              <i class="fa fa-edit" style="color:white;"></i> Edit Dokumen
+                            </h4>
+                          </div>
+
+                          <div class="modal-body">
+                            <div class="form-group">
+                              <label for="nama_dokumen_<?= $isi['id_dokumen']; ?>">
+                                Nama Dokumen <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Nama resmi dokumen"></i>
+                              </label>
+                              <input type="text" name="nama_dokumen" class="form-control" id="nama_dokumen_<?= $isi['id_dokumen']; ?>" value="<?= htmlentities($isi['nama_dokumen']); ?>" required>
                             </div>
 
-                            <div class="modal-body">
-                              <div class="form-group">
-                                <label for="nama_dokumen_<?= $isi['id_dokumen']; ?>">Nama Dokumen</label>
-                                <input type="text" name="nama_dokumen" class="form-control" id="nama_dokumen_<?= $isi['id_dokumen']; ?>" value="<?= htmlentities($isi['nama_dokumen']); ?>" required>
-                              </div>
-
-                              <div class="form-group">
-                                <label for="deskripsi_<?= $isi['id_dokumen']; ?>">Deskripsi</label>
-                                <textarea name="deskripsi" class="form-control" id="deskripsi_<?= $isi['id_dokumen']; ?>" rows="4"><?= htmlentities($isi['deskripsi']); ?></textarea>
-                              </div>
-
-                              <input type="hidden" name="edit" value="<?= $isi['id_dokumen']; ?>">
+                            <div class="form-group">
+                              <label for="deskripsi_<?= $isi['id_dokumen']; ?>">
+                                Deskripsi <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Detail informasi tentang dokumen"></i>
+                              </label>
+                              <textarea name="deskripsi" class="form-control" id="deskripsi_<?= $isi['id_dokumen']; ?>" rows="4"><?= htmlentities($isi['deskripsi']); ?></textarea>
                             </div>
 
-                            <div class="modal-footer">
-                              <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Simpan Perubahan</button>
-                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Batal</button>
-                            </div>
-                          </form>
-                        </div>
+                            <input type="hidden" name="edit" value="<?= $isi['id_dokumen']; ?>">
+                          </div>
+
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Simpan Perubahan</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Batal</button>
+                          </div>
+                        </form>
                       </div>
                     </div>
+</div>
 
                   <?php $no++;
                   } ?>
@@ -113,7 +117,7 @@
 </div>
 
 
-<!-- Modal Tambah Dokumen -->
+<!-- Modal Tambah Dokumen (with tooltips) -->
 <div class="modal fade" id="modalTambahDokumen" tabindex="-1" role="dialog" aria-labelledby="modalTambahDokumenLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -127,12 +131,16 @@
         <div class="modal-body">
           
           <div class="form-group">
-            <label for="nama_dokumen">Nama Dokumen</label>
+            <label for="nama_dokumen">
+              Nama Dokumen <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Masukkan nama dokumen (contoh: Surat Izin, SK, Nota Dinas)"></i>
+            </label>
             <input type="text" class="form-control" name="nama_dokumen" id="nama_dokumen" placeholder="Contoh: Surat Izin, SK, dll" required>
           </div>
 
           <div class="form-group">
-            <label for="deskripsi">Deskripsi</label>
+            <label for="deskripsi">
+              Deskripsi <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Penjelasan singkat tentang dokumen (maksimal 255 karakter)"></i>
+            </label>
             <textarea class="form-control" name="deskripsi" id="deskripsi" rows="4" placeholder="Deskripsi singkat tentang dokumen..."></textarea>
           </div>
 
@@ -146,4 +154,27 @@
     </div>
   </div>
 </div>
+
+<script>
+// Initialize tooltips for all modals
+$(document).ready(function(){
+    // Function to initialize tooltips
+    function initTooltips() {
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger: 'hover',
+            placement: 'right',
+            container: 'body'
+        });
+    }
+    
+    // Initialize for tambah modal
+    $('#modalTambahDokumen').on('shown.bs.modal', initTooltips);
+    
+    // Initialize for all edit modals
+    $('[id^="modalEditDokumen"]').on('shown.bs.modal', initTooltips);
+    
+    // Initialize tooltips on page load
+    initTooltips();
+});
+</script>
 

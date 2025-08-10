@@ -18,7 +18,7 @@
             <div class="box-header with-border"><h4 class="box-title">Informasi Pelatihan</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-6">
-                <label>Nama Kegiatan Pelatihan</label>
+                <label>Nama Kegiatan Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih pelatihan yang akan diedit materinya"></i></label>
                 <select class="form-control select2" name="id_pelatihan" required>
                   <option disabled>-- Pilih Kegiatan --</option>
                   <?php foreach ($pelatihans as $isi): ?>
@@ -29,7 +29,7 @@
                 </select>
               </div>
               <div class="form-group col-md-6">
-                <label>Jumlah Jam Pelajaran (JP)</label>
+                <label>Jumlah Jam Pelajaran (JP) <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Total jam pelatihan seluruhnya"></i></label>
                 <input type="number" class="form-control" name="jumlah_jp" min="0" value="<?= $materi_pelatihan->jumlah_jp; ?>">
               </div>
             </div>
@@ -40,15 +40,15 @@
             <div class="box-header with-border"><h4 class="box-title">Jumlah Jam Pelatihan (JP)</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-4">
-                <label>JP Kelompok Dasar</label>
+                <label>JP Kelompok Dasar <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam pelatihan untuk kelompok dasar"></i></label>
                 <input type="number" class="form-control" name="jp_kel_dasar" min="0" value="<?= $materi_pelatihan->jp_kel_dasar; ?>">
               </div>
               <div class="form-group col-md-4">
-                <label>JP Kelompok Inti</label>
+                <label>JP Kelompok Inti <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam pelatihan untuk kelompok inti"></i></label>
                 <input type="number" class="form-control" name="jp_kel_inti" min="0" value="<?= $materi_pelatihan->jp_kel_inti; ?>">
               </div>
               <div class="form-group col-md-4">
-                <label>JP Kelompok Penunjang</label>
+                <label>JP Kelompok Penunjang <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam pelatihan untuk kelompok penunjang"></i></label>
                 <input type="number" class="form-control" name="jp_kel_penunjang" min="0" value="<?= $materi_pelatihan->jp_kel_penunjang; ?>">
               </div>
             </div>
@@ -59,15 +59,15 @@
             <div class="box-header with-border"><h4 class="box-title">Nama Mata Pelatihan</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-4">
-                <label>Mata Pelatihan Kel. Dasar</label>
+                <label>Mata Pelatihan Kel. Dasar <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Daftar mata pelatihan kelompok dasar (pisahkan dengan enter)"></i></label>
                 <textarea name="nama_mata_pelatihan_kel_dasar" class="form-control" rows="2"><?= $materi_pelatihan->nama_mata_pelatihan_kel_dasar; ?></textarea>
               </div>
               <div class="form-group col-md-4">
-                <label>Mata Pelatihan Kel. Inti</label>
+                <label>Mata Pelatihan Kel. Inti <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Daftar mata pelatihan kelompok inti (pisahkan dengan enter)"></i></label>
                 <textarea name="nama_mata_pelatihan_kel_inti" class="form-control" rows="2"><?= $materi_pelatihan->nama_mata_pelatihan_kel_inti; ?></textarea>
               </div>
               <div class="form-group col-md-4">
-                <label>Mata Pelatihan Kel. Penunjang</label>
+                <label>Mata Pelatihan Kel. Penunjang <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Daftar mata pelatihan kelompok penunjang (pisahkan dengan enter)"></i></label>
                 <textarea name="nama_mata_pelatihan_kel_penunjang" class="form-control" rows="2"><?= $materi_pelatihan->nama_mata_pelatihan_kel_penunjang; ?></textarea>
               </div>
             </div>
@@ -78,19 +78,19 @@
             <div class="box-header with-border"><h4 class="box-title">Latar Belakang & Tujuan</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-6">
-                <label>Latar Belakang</label>
+                <label>Latar Belakang <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Penjelasan latar belakang penyelenggaraan pelatihan"></i></label>
                 <textarea name="latar_belakang" class="form-control" rows="3"><?= $materi_pelatihan->latar_belakang; ?></textarea>
               </div>
               <div class="form-group col-md-6">
-                <label>Tujuan Pelatihan</label>
+                <label>Tujuan Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tujuan umum penyelenggaraan pelatihan"></i></label>
                 <textarea name="tujuan_pelatihan" class="form-control" rows="3"><?= $materi_pelatihan->tujuan_pelatihan; ?></textarea>
               </div>
               <div class="form-group col-md-6">
-                <label>Tujuan Kursil</label>
+                <label>Tujuan Kursil <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tujuan khusus dari kurikulum silabus"></i></label>
                 <textarea name="tujuan_kursil" class="form-control" rows="3"><?= $materi_pelatihan->tujuan_kursil; ?></textarea>
               </div>
               <div class="form-group col-md-6">
-                <label>Asal Kursil</label>
+                <label>Asal Kursil <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Sumber/referensi kurikulum silabus"></i></label>
                 <textarea name="asal_kursil" class="form-control" rows="3"><?= $materi_pelatihan->asal_kursil; ?></textarea>
               </div>
             </div>
@@ -108,3 +108,14 @@
     </form>
   </section>
 </div>
+
+<script>
+// Initialize tooltips
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip({
+        trigger: 'hover',
+        placement: 'right',
+        container: 'body'
+    }); 
+});
+</script>

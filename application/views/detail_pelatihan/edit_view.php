@@ -18,7 +18,7 @@
             <div class="box-header with-border"><h4 class="box-title">Informasi Kegiatan</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-6">
-                <label>Nama Kegiatan</label>
+                <label>Nama Kegiatan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih kegiatan pelatihan yang akan diedit"></i></label>
                 <select class="form-control select2" name="id_pelatihan" required>
                   <option disabled <?= is_null($detail_pelatihan->id_pelatihan) ? 'selected' : ''; ?>>-- Pilih Kegiatan --</option>
                   <?php foreach($pelatihans as $isi): ?>
@@ -29,7 +29,7 @@
                 </select>
               </div>
               <div class="form-group col-md-6">
-                <label>Penanggung Jawab</label>
+                <label>Penanggung Jawab <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih panitia yang bertanggung jawab atas kegiatan ini"></i></label>
                 <select class="form-control select2" name="id_penanggung_jawab" required>
                   <option disabled <?= is_null($detail_pelatihan->id_penanggung_jawab) ? 'selected' : ''; ?>>-- Pilih Pegawai --</option>
                   <?php foreach($pegawais as $isi): ?>
@@ -48,23 +48,23 @@
             <div class="box-body row">
               <?php
                 $positions = [
-                  'id_ketua_panitia' => 'Ketua Panitia',
-                  'id_akademis' => 'Akademis',
-                  'id_keuangan' => 'Keuangan',
-                  'id_administrasi' => 'Administrasi',
-                  'id_wi_1' => 'WI 1',
-                  'id_wi_2' => 'WI 2',
-                  'id_wi_3' => 'WI 3',
-                  'id_wi_4' => 'WI 4',
-                  'id_wi_rapat_kelulusan' => 'WI Rapat Kelulusan',
-                  'id_pengajar_1' => 'Pengajar 1',
-                  'id_pengajar_2' => 'Pengajar 2',
-                  'id_pengajar_3' => 'Pengajar 3',
+                  'id_ketua_panitia' => ['label' => 'Ketua Panitia', 'desc' => 'Pilih ketua panitia pelaksana kegiatan'],
+                  'id_akademis' => ['label' => 'Akademis', 'desc' => 'Pilih penanggung jawab akademik kegiatan'],
+                  'id_keuangan' => ['label' => 'Keuangan', 'desc' => 'Pilih penanggung jawab keuangan kegiatan'],
+                  'id_administrasi' => ['label' => 'Administrasi', 'desc' => 'Pilih penanggung jawab administrasi kegiatan'],
+                  'id_wi_1' => ['label' => 'WI 1', 'desc' => 'Pilih widyaiswara pertama'],
+                  'id_wi_2' => ['label' => 'WI 2', 'desc' => 'Pilih widyaiswara kedua'],
+                  'id_wi_3' => ['label' => 'WI 3', 'desc' => 'Pilih widyaiswara ketiga'],
+                  'id_wi_4' => ['label' => 'WI 4', 'desc' => 'Pilih widyaiswara keempat'],
+                  'id_wi_rapat_kelulusan' => ['label' => 'WI Rapat Kelulusan', 'desc' => 'Pilih widyaiswara yang hadir dalam rapat kelulusan'],
+                  'id_pengajar_1' => ['label' => 'Pengajar 1', 'desc' => 'Pilih pengajar pertama'],
+                  'id_pengajar_2' => ['label' => 'Pengajar 2', 'desc' => 'Pilih pengajar kedua'],
+                  'id_pengajar_3' => ['label' => 'Pengajar 3', 'desc' => 'Pilih pengajar ketiga'],
                 ];
               ?>
-              <?php foreach ($positions as $name => $label): ?>
+              <?php foreach ($positions as $name => $data): ?>
                 <div class="form-group col-md-4">
-                  <label><?= $label ?></label>
+                  <label><?= $data['label'] ?> <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i></label>
                   <select class="form-control select2" name="<?= $name; ?>">
                     <option disabled <?= is_null($detail_pelatihan->$name) ? 'selected' : ''; ?>>-- Pilih Pegawai --</option>
                     <?php foreach($pegawais as $isi): ?>
@@ -84,15 +84,15 @@
             <div class="box-body row">
               <?php
                 $stat_fields = [
-                  'jumlah_wi_pengajar' => 'Jumlah WI & Pengajar',
-                  'jumlah_pendidikan_wi_s1' => 'WI S1',
-                  'jumlah_pendidikan_wi_s2' => 'WI S2',
-                  'jumlah_pendidikan_wi_s3' => 'WI S3',
+                  'jumlah_wi_pengajar' => ['label' => 'Jumlah WI & Pengajar', 'desc' => 'Total jumlah widyaiswara dan pengajar'],
+                  'jumlah_pendidikan_wi_s1' => ['label' => 'WI S1', 'desc' => 'Jumlah widyaiswara dengan pendidikan S1'],
+                  'jumlah_pendidikan_wi_s2' => ['label' => 'WI S2', 'desc' => 'Jumlah widyaiswara dengan pendidikan S2'],
+                  'jumlah_pendidikan_wi_s3' => ['label' => 'WI S3', 'desc' => 'Jumlah widyaiswara dengan pendidikan S3'],
                 ];
               ?>
-              <?php foreach ($stat_fields as $name => $label): ?>
+              <?php foreach ($stat_fields as $name => $data): ?>
                 <div class="form-group col-md-3">
-                  <label><?= $label ?></label>
+                  <label><?= $data['label'] ?> <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i></label>
                   <input type="number" name="<?= $name ?>" class="form-control" min="0" value="<?= $detail_pelatihan->$name; ?>">
                 </div>
               <?php endforeach; ?>
@@ -105,27 +105,27 @@
             <div class="box-body row">
               <?php
                 $peserta_fields = [
-                  'jumlah_peserta' => 'Jumlah Peserta',
-                  'jumlah_lulus' => 'Jumlah Lulus',
-                  'jumlah_tidak_lulus' => 'Jumlah Tidak Lulus',
-                  'jumlah_peserta_asn' => 'Peserta ASN',
-                  'jumlah_peserta_non_asn' => 'Peserta Non-ASN',
-                  'jumlah_peserta_laki' => 'Peserta Laki-laki',
-                  'jumlah_peserta_wanita' => 'Peserta Perempuan',
-                  'jumlah_pendidikan_peserta_sma' => 'Pendidikan Peserta SMA',
-                  'jumlah_pendidikan_peserta_s1' => 'Pendidikan Peserta S1',
-                  'jumlah_pendidikan_peserta_s2' => 'Pendidikan Peserta S2',
-                  'jumlah_pendidikan_peserta_s3' => 'Pendidikan Peserta S3',
+                  'jumlah_peserta' => ['label' => 'Jumlah Peserta', 'desc' => 'Total seluruh peserta pelatihan'],
+                  'jumlah_lulus' => ['label' => 'Jumlah Lulus', 'desc' => 'Jumlah peserta yang lulus pelatihan'],
+                  'jumlah_tidak_lulus' => ['label' => 'Jumlah Tidak Lulus', 'desc' => 'Jumlah peserta yang tidak lulus pelatihan'],
+                  'jumlah_peserta_asn' => ['label' => 'Peserta ASN', 'desc' => 'Jumlah peserta yang berstatus ASN'],
+                  'jumlah_peserta_non_asn' => ['label' => 'Peserta Non-ASN', 'desc' => 'Jumlah peserta yang berstatus non-ASN'],
+                  'jumlah_peserta_laki' => ['label' => 'Peserta Laki-laki', 'desc' => 'Jumlah peserta laki-laki'],
+                  'jumlah_peserta_wanita' => ['label' => 'Peserta Perempuan', 'desc' => 'Jumlah peserta perempuan'],
+                  'jumlah_pendidikan_peserta_sma' => ['label' => 'Pendidikan Peserta SMA', 'desc' => 'Jumlah peserta dengan pendidikan terakhir SMA'],
+                  'jumlah_pendidikan_peserta_s1' => ['label' => 'Pendidikan Peserta S1', 'desc' => 'Jumlah peserta dengan pendidikan terakhir S1'],
+                  'jumlah_pendidikan_peserta_s2' => ['label' => 'Pendidikan Peserta S2', 'desc' => 'Jumlah peserta dengan pendidikan terakhir S2'],
+                  'jumlah_pendidikan_peserta_s3' => ['label' => 'Pendidikan Peserta S3', 'desc' => 'Jumlah peserta dengan pendidikan terakhir S3'],
                 ];
               ?>
-              <?php foreach ($peserta_fields as $name => $label): ?>
+              <?php foreach ($peserta_fields as $name => $data): ?>
                 <div class="form-group col-md-3">
-                  <label><?= $label ?></label>
+                  <label><?= $data['label'] ?> <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i></label>
                   <input type="number" name="<?= $name ?>" class="form-control" min="0" value="<?= $detail_pelatihan->$name; ?>">
                 </div>
               <?php endforeach; ?>
               <div class="form-group col-md-3">
-                <label>Jabatan Peserta</label>
+                <label>Jabatan Peserta <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jabatan/jenis pekerjaan peserta"></i></label>
                 <textarea name="jabatan_peserta" class="form-control" rows="1"><?= $detail_pelatihan->jabatan_peserta; ?></textarea>
               </div>
             </div>
@@ -136,11 +136,11 @@
             <div class="box-header with-border"><h4 class="box-title">Informasi Anggaran</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-6">
-                <label>RAB (Rp)</label>
+                <label>RAB (Rp) <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Rencana Anggaran Biaya kegiatan"></i></label>
                 <input type="number" name="rab" class="form-control" step="0.01" min="0" value="<?= $detail_pelatihan->rab; ?>">
               </div>
               <div class="form-group col-md-6">
-                <label>Realisasi (Rp)</label>
+                <label>Realisasi (Rp) <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Realisasi anggaran yang digunakan"></i></label>
                 <input type="number" name="realisasi" class="form-control" step="0.01" min="0" value="<?= $detail_pelatihan->realisasi; ?>">
               </div>
             </div>
@@ -158,3 +158,14 @@
     </form>
   </section>
 </div>
+
+<script>
+// Initialize tooltips
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip({
+        trigger: 'hover',
+        placement: 'right',
+        container: 'body'
+    }); 
+});
+</script>
