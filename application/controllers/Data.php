@@ -1166,6 +1166,78 @@ public function detailpelatihan()
 
 	public function listdokumenpelatihan($id_pelatihan)
 	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+
+		$cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+			'id_pelatihan' => $id_pelatihan,
+			'deleted_at' => NULL
+		])->row();
+
+		if (!$cek_pelatihan) {
+			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+			return;
+		}
+
+		$this->data['pelatihan'] = $cek_pelatihan;
+		$this->data['dokumen_pelatihan'] = $this->db->query("
+			SELECT pd.*, d.nama_dokumen, d.deskripsi 
+			FROM tbl_pelatihan_dokumen pd
+			JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
+			WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
+			ORDER BY pd.id_pelatihan_dokumen DESC
+		", [$id_pelatihan]);
+
+		// Ambil dokumen yang sudah dipakai di tbl_pelatihan_dokumen untuk pelatihan ini
+		$used_doc_ids = $this->db->select('id_dokumen')
+			->from('tbl_pelatihan_dokumen')
+			->where('id_pelatihan', $id_pelatihan)
+			->where('deleted_at', NULL)
+			->get()
+			->result_array();
+
+		$used_ids = array_column($used_doc_ids, 'id_dokumen');
+
+		// Ambil dokumen yang belum digunakan
+		if (!empty($used_ids)) {
+			$this->data['dokumen_all'] = $this->db
+				->where_not_in('id_dokumen', $used_ids)
+				->where('deleted_at', NULL)
+				->order_by('id_dokumen', 'DESC')
+				->get('tbl_dokumen')
+				->result();
+		} else {
+			$this->data['dokumen_all'] = $this->db
+				->where('deleted_at', NULL)
+				->order_by('id_dokumen', 'DESC')
+				->get('tbl_dokumen')
+				->result();
+		}
+
+		if (!empty($used_ids)) {
+		// INI AKAN DIPAKAI UNTUK EDIT, MAKA AMBIL SEMUA, TERMASUK YANG SUDAH DIPILIH
+		$this->data['dokumen_all_raw'] = $this->db
+			->where('deleted_at', NULL)
+			->order_by('id_dokumen', 'DESC')
+			->get('tbl_dokumen')
+			->result();
+	} else {
+		$this->data['dokumen_all_raw'] = $this->db
+			->where('deleted_at', NULL)
+			->order_by('id_dokumen', 'DESC')
+			->get('tbl_dokumen')
+			->result();
+}
+
+		$this->data['id_pelatihan'] = $id_pelatihan;
+		$this->data['title_web'] = 'Lampiran Dokumen - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+		$this->load->view('header_view', $this->data);
+		$this->load->view('sidebar_view', $this->data);
+		$this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
+		$this->load->view('footer_view', $this->data);
+	}
+
+	public function generateLaporan($id_pelatihan)
+	{
 		// $this->data['idbo'] = $this->session->userdata('ses_id');
 		$sess = $this->session->userdata('ses_id');
 		$this->load->helper('date');

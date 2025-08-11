@@ -48,13 +48,13 @@
                     <td><?= htmlentities($isi['tahun']); ?></td>
                    <td>
                     <?php if($this->session->userdata('level') == 'Petugas'){ ?>
-                        <a href="<?= base_url('data/listdokumenpelatihan/'.$isi['id_pelatihan']); ?>">
+                        <a href="<?= base_url('data/generateLaporan/'.$isi['id_pelatihan']); ?>">
                         <button class="btn btn-primary">
                             <i class="fa fa-file"></i> Cetak Laporan
                         </button>
                         </a>
                     <?php } else { ?>
-                        <a href="<?= base_url('data/listdokumenpelatihan/'.$isi['id_pelatihan']); ?>">
+                        <a href="<?= base_url('data/generateLaporan/'.$isi['id_pelatihan']); ?>">
                         <button class="btn btn-primary">
                             <i class="fa fa-file"></i> Cetak Laporan
                         </button>
