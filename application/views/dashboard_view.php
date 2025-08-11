@@ -18,7 +18,7 @@
           <div class="small-box bg-aqua">
             <div class="inner">
               <h3><?= $count_pelatihan; ?></h3>
-              <p>Jumlah Pelatihan</p>
+              <p>Buat Pelatihan</p>
             </div>
             <div class="icon"><i class="fa fa-graduation-cap"></i></div>
             <a class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
@@ -30,7 +30,7 @@
           <div class="small-box bg-green">
             <div class="inner">
               <h3><?= $count_peserta; ?></h3>
-              <p>Jumlah Peserta</p>
+              <p>Laporan Pelatihan PJJ</p>
             </div>
             <div class="icon"><i class="fa fa-users"></i></div>
             <a class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
@@ -42,7 +42,7 @@
           <div class="small-box bg-yellow">
             <div class="inner">
               <h3><?= $count_pegawai; ?></h3>
-              <p>Jumlah Pegawai</p>
+              <p>Laporan Pelatihan PDWK</p>
             </div>
             <div class="icon"><i class="fa fa-user"></i></div>
             <a class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>

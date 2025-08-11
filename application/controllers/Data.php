@@ -1164,7 +1164,7 @@ public function detailpelatihan()
         $this->load->view('footer_view',$this->data);
 	}
 
-	public function listdokumenpelatihan($id_pelatihan)
+	public function generateLaporan($id_pelatihan)
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
 
