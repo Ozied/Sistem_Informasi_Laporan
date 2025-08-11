@@ -82,11 +82,6 @@
                             <span class="fa fa-book"></span> Materi Pelatihan 
                         </a>
                     </li>
-                    <li class="">
-					<a href="<?php echo base_url('user/detail/'.$this->session->userdata('ses_id'));?>" target="_blank" class="cursor">
-						<i class="fa fa-print"></i> <span>Cetak Laporan Pelatihan</span>
-					</a>
-				</li>
                 </ul>
             </li>
 
@@ -128,7 +123,7 @@
 				<?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
 				<?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
                 <a href="#">
-                    <i class="fa fa-picture-o"></i>
+                    <i class="fa fa-camera"></i>
                     <span>Dokumentasi Pelatihan</span>
                     <span class="pull-right-container">
                     <i class="fa fa-angle-left pull-right"></i>
@@ -167,6 +162,12 @@
                     <?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
                             <a href="<?php echo base_url("data/cetaklaporan");?>" class="cursor">
                             <span class="fa fa-tasks"></span> Laporan Pelatihan PJJ
+                            
+                        </a>
+                    </li>
+                    <li class=" <?php if($this->uri->uri_string() == 'data/cetaklampiranlaporan'){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data/cetaklampiranlaporan");?>" class="cursor">
+                            <span class="fa fa-list"></span> Lampiran Dokumen PJJ
                             
                         </a>
                     </li>

@@ -18,13 +18,17 @@
             <div class="box-header with-border"><h4 class="box-title">Informasi Pelatihan</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-6">
-                <label>Nama Kegiatan Pelatihan</label>
+                <label>Nama Kegiatan Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih kegiatan pelatihan yang akan ditambahkan materi pelatihannya, jika pelatihan tidak tersedia silahkan tambahkan pelatihan pada menu Data Pelatihan terlebih dahulu"></i></label>
                 <select class="form-control select2" name="id_pelatihan" required>
                   <option disabled selected>-- Pilih Pelatihan --</option>
                   <?php foreach($pelatihans as $isi): ?>
                     <option value="<?= $isi['id_pelatihan']; ?>"><?= $isi['nama_kegiatan']; ?></option>
                   <?php endforeach; ?>
                 </select>
+              </div>
+                <div class="form-group col-md-6">
+                <label>Jumlah Jam Pelajaran (JP) <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Total jam pelatihan seluruhnya"></i></label>
+                <input type="number" name="jumlah_jp" class="form-control" value="0" min="0">
               </div>
             </div>
           </div>
@@ -33,20 +37,16 @@
           <div class="box box-info">
             <div class="box-header with-border"><h4 class="box-title">Jumlah Jam Pelatihan (JP)</h4></div>
             <div class="box-body row">
-              <div class="form-group col-md-3">
-                <label>Total JP</label>
-                <input type="number" name="jumlah_jp" class="form-control" value="0" min="0">
-              </div>
-              <div class="form-group col-md-3">
-                <label>JP Kel. Dasar</label>
+              <div class="form-group col-md-4">
+                <label>JP Kelompok Dasar <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam pelatihan untuk kelompok dasar"></i></label>
                 <input type="number" name="jp_kel_dasar" class="form-control" value="0" min="0">
               </div>
-              <div class="form-group col-md-3">
-                <label>JP Kel. Inti</label>
+              <div class="form-group col-md-4">
+                <label>JP Kelompok Inti <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam pelatihan untuk kelompok inti"></i></label>
                 <input type="number" name="jp_kel_inti" class="form-control" value="0" min="0">
               </div>
-              <div class="form-group col-md-3">
-                <label>JP Kel. Penunjang</label>
+              <div class="form-group col-md-4">
+                <label>JP Kelompok Penunjang <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jam pelatihan untuk kelompok penunjang"></i></label>
                 <input type="number" name="jp_kel_penunjang" class="form-control" value="0" min="0">
               </div>
             </div>
@@ -57,15 +57,15 @@
             <div class="box-header with-border"><h4 class="box-title">Nama Mata Pelatihan</h4></div>
             <div class="box-body row">
               <div class="form-group col-md-4">
-                <label>Kel. Dasar</label>
+                <label>Mata Pelatihan Kel. Dasar <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Daftar mata pelatihan kelompok dasar (pisahkan dengan enter)"></i></label>
                 <textarea name="nama_mata_pelatihan_kel_dasar" class="form-control" rows="2"></textarea>
               </div>
               <div class="form-group col-md-4">
-                <label>Kel. Inti</label>
+                <label>Mata Pelatihan Kel. Inti <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Daftar mata pelatihan kelompok inti (pisahkan dengan enter)"></i></label>
                 <textarea name="nama_mata_pelatihan_kel_inti" class="form-control" rows="2"></textarea>
               </div>
               <div class="form-group col-md-4">
-                <label>Kel. Penunjang</label>
+                <label>Mata Pelatihan Kel. Penunjang <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Daftar mata pelatihan kelompok penunjang (pisahkan dengan enter)"></i></label>
                 <textarea name="nama_mata_pelatihan_kel_penunjang" class="form-control" rows="2"></textarea>
               </div>
             </div>
@@ -75,20 +75,20 @@
           <div class="box box-success">
             <div class="box-header with-border"><h4 class="box-title">Latar Belakang & Tujuan</h4></div>
             <div class="box-body row">
-              <div class="form-group col-md-12">
-                <label>Latar Belakang</label>
+              <div class="form-group col-md-6">
+                <label>Latar Belakang <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Penjelasan latar belakang penyelenggaraan pelatihan"></i></label>
                 <textarea name="latar_belakang" class="form-control" rows="3"></textarea>
               </div>
               <div class="form-group col-md-6">
-                <label>Tujuan Pelatihan</label>
+                <label>Tujuan Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tujuan umum penyelenggaraan pelatihan"></i></label>
                 <textarea name="tujuan_pelatihan" class="form-control" rows="3"></textarea>
               </div>
               <div class="form-group col-md-6">
-                <label>Tujuan Kursil</label>
+                <label>Tujuan Kurikulum Silabus <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tujuan khusus dari kurikulum silabus"></i></label>
                 <textarea name="tujuan_kursil" class="form-control" rows="3"></textarea>
               </div>
-              <div class="form-group col-md-12">
-                <label>Asal Kursil</label>
+              <div class="form-group col-md-6">
+                <label>Asal Kurikulum Silabus <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Sumber/referensi kurikulum silabus"></i></label>
                 <textarea name="asal_kursil" class="form-control" rows="2"></textarea>
               </div>
             </div>
@@ -106,3 +106,14 @@
     </form>
   </section>
 </div>
+
+<script>
+// Initialize tooltips
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip({
+        trigger: 'hover',
+        placement: 'right',
+        container: 'body'
+    }); 
+});
+</script>

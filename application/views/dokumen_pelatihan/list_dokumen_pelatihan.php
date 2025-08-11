@@ -67,48 +67,53 @@
                       </td>
                     </tr>
                     <!-- Modal Edit Dokumen Pelatihan -->
-                    <div class="modal fade" id="modalEditDokumenPelatihan<?= $dokumen['id_pelatihan_dokumen']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalEditDokumenPelatihanLabel<?= $dokumen['id_pelatihan_dokumen']; ?>">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                        <form action="<?= base_url('data/prosesdokumenpelatihan'); ?>" method="POST" enctype="multipart/form-data">
-                            <div class="modal-header bg-green">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            <h4 class="modal-title" id="modalEditDokumenPelatihanLabel<?= $dokumen['id_pelatihan_dokumen']; ?>">
-                                <i class="fa fa-edit" style="color:white;"></i> Edit Dokumen Pelatihan
-                            </h4>
-                            </div>
+<div class="modal fade" id="modalEditDokumenPelatihan<?= $dokumen['id_pelatihan_dokumen']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalEditDokumenPelatihanLabel<?= $dokumen['id_pelatihan_dokumen']; ?>">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form action="<?= base_url('data/prosesdokumenpelatihan'); ?>" method="POST" enctype="multipart/form-data">
+          <div class="modal-header bg-green">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="modalEditDokumenPelatihanLabel<?= $dokumen['id_pelatihan_dokumen']; ?>">
+              <i class="fa fa-edit" style="color:white;"></i> Edit Dokumen Pelatihan
+            </h4>
+          </div>
 
-                            <div class="modal-body">
-                            <input type="hidden" name="edit" value="<?= $dokumen['id_pelatihan_dokumen']; ?>">
-                            <input type="hidden" name="id_pelatihan" value="<?= $id_pelatihan; ?>">
- 
-                            <div class="form-group">
-                                <label for="id_dokumen_<?= $dokumen['id_pelatihan_dokumen']; ?>">Pilih Dokumen</label>
-                                <select name="id_dokumen" id="id_dokumen_<?= $dokumen['id_pelatihan_dokumen']; ?>" class="form-control" required>
-                                <?php
-                                foreach ($dokumen_all_raw as $dok) {
-                                    $selected = ($dokumen['id_dokumen'] == $dok->id_dokumen) ? 'selected' : '';
-                                    echo '<option value="' . $dok->id_dokumen . '" ' . $selected . '>' . htmlentities($dok->nama_dokumen) . '</option>';
-                                }
-                                ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                            <label for="file_upload_edit_<?= $dokumen['id_pelatihan_dokumen']; ?>">Upload File (kosongkan jika tidak diubah) Format File : .pdf</label>
-                            <input type="file" name="file_upload" class="form-control">
-                            </div>
-                            </div>
+          <div class="modal-body">
+            <input type="hidden" name="edit" value="<?= $dokumen['id_pelatihan_dokumen']; ?>">
+            <input type="hidden" name="id_pelatihan" value="<?= $id_pelatihan; ?>">
 
-                            <div class="modal-footer">
-                            <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Simpan Perubahan</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Batal</button>
-                            </div>
-                        </form>
-                        </div>
-                    </div>
-                    </div>
+            <div class="form-group">
+              <label for="id_dokumen_<?= $dokumen['id_pelatihan_dokumen']; ?>">
+                Pilih Dokumen <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih jenis dokumen yang sesuai"></i>
+              </label>
+              <select name="id_dokumen" id="id_dokumen_<?= $dokumen['id_pelatihan_dokumen']; ?>" class="form-control" required>
+                <?php foreach ($dokumen_all_raw as $dok) : ?>
+                  <option value="<?= $dok->id_dokumen ?>" <?= ($dokumen['id_dokumen'] == $dok->id_dokumen) ? 'selected' : '' ?>>
+                    <?= htmlentities($dok->nama_dokumen) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="file_upload_edit_<?= $dokumen['id_pelatihan_dokumen']; ?>">
+                Upload File <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Upload file PDF baru (kosongkan jika tidak ingin mengubah file) - Maks. 2MB"></i>
+              </label>
+              <input type="file" name="file_upload" id="file_upload_edit_<?= $dokumen['id_pelatihan_dokumen']; ?>" class="form-control">
+              <p class="help-block">Format File: .pdf (kosongkan jika tidak diubah)</p>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Simpan Perubahan</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
                   <?php $no++; } ?>
                 </tbody>
@@ -138,18 +143,19 @@
           <input type="hidden" name="id_pelatihan" value="<?= $id_pelatihan; ?>">
 
           <div class="form-group">
-            <label for="id_dokumen">Pilih Dokumen</label>
+            <label for="id_dokumen">Pilih Dokumen <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih jenis dokumen yang akan diupload"></i></label>
             <select name="id_dokumen" id="id_dokumen" class="form-control" required>
-            <option value="">-- Pilih Dokumen --</option>
-            <?php foreach ($dokumen_all as $dok) : ?>
+              <option value="">-- Pilih Dokumen --</option>
+              <?php foreach ($dokumen_all as $dok) : ?>
                 <option value="<?= $dok->id_dokumen ?>"><?= htmlentities($dok->nama_dokumen) ?></option>
-            <?php endforeach; ?>
+              <?php endforeach; ?>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="file_path">Upload File Format File : .pdf</label>
+            <label for="file_path">Upload File <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Upload file dokumen dalam format PDF (maks. 2MB)"></i></label>
             <input type="file" name="file_upload" class="form-control" required>
+            <p class="help-block">Format File: .pdf</p>
           </div>
         </div>
 
@@ -161,4 +167,27 @@
     </div>
   </div>
 </div>
+
+<script>
+// Initialize tooltips for all modals
+$(document).ready(function(){
+    // Function to initialize tooltips
+    function initTooltips() {
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger: 'hover',
+            placement: 'right',
+            container: 'body'
+        });
+    }
+    
+    // Initialize for tambah modal
+    $('#modalTambahDokumenPelatihan').on('shown.bs.modal', initTooltips);
+    
+    // Initialize for all edit modals
+    $('[id^="modalEditDokumenPelatihan"]').on('shown.bs.modal', initTooltips);
+    
+    // Initialize tooltips on page load
+    initTooltips();
+});
+</script>
 
