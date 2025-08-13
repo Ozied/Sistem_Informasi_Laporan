@@ -188,11 +188,18 @@ class wordGenerator{
             $section->addText("Tenaga Fasilitator/Widyaiswara pengajar pelatihan ini berasal dari :", $fontstyle, $paragraphstyle);
 
             $style = generate_list_style($phpword, 'decimal');
+            if (isset($pelatihan->wi_1)) {
+                $section->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style);
+            }
 
-            $section->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style);
-            $section->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style);
-            $section->addListItem("{$pelatihan->wi_3->nama}, berasal {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style);
-            
+            if (isset($pelatihan->wi_2)) {
+                $section->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style);
+            }
+
+            if (isset($pelatihan->wi_3)) {
+                $section->addListItem("{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style);
+            }
+
             $section->addListItem("Pengajar/Fasilitator", 0, $fontstyle, $alphaStyle);
 
             $style = generate_list_style($phpword, 'decimal');
@@ -214,11 +221,27 @@ class wordGenerator{
                     new Tab('left', 3000)
                     ]
             ]);
-            $section->addText("Penanggung Jawab\t:{$pelatihan->penanggung_jawab->nama}", $fontstyle, $paragraphstyle);
-            $section->addText("Ketua\t:{$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
-            $section->addText("Bidang Akademis\t:{$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
-            $section->addText("Bidang Administrasi\t:{$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
-            $section->addText("Bidang Keuangan\t:{$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
+            
+            if (isset($pelatihan->penanggung_jawab)) {
+                $section->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}", $fontstyle, $paragraphstyle);
+            }
+
+            if (isset($pelatihan->ketua_panitia)) {
+                $section->addText("Ketua\t: {$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
+            }
+
+            if (isset($pelatihan->akademis)) {
+                $section->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
+            }
+
+            if (isset($pelatihan->administrasi)) {
+                $section->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            }
+
+            if (isset($pelatihan->keuangan)) {
+                $section->addText("Bidang Keuangan\t: {$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
+            }
+
 
             $section->addListItem("Lama (Durasi Waktu) Pelatihan", 0, $fontstyle, $alphaStyle);
             $section->addText("Pelatihan ini dilaksanakan selama $durasi hari, mulai dari tanggal " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ", dengan jumlah jam pelatihan sebanyak $materi->jumlah_jp Jam Pelatihan (JP).", $fontstyle, $paragraphstyle);
@@ -337,10 +360,23 @@ class wordGenerator{
             
             $section->addTitle("F. Susunan Panitia", 2);
             $section->addText("Adapun susunan panitia penyelenggara $pelatihan->nama_kegiatan Wilayah Kerja Kementerian Agama $pelatihan->provinsi Tahun $pelatihan->tahun adalah sebegai berikut:", $fontstyle, $paragraphstyle);
-            $section->addText("Ketua\t:{$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
-            $section->addText("Seketaris/Akademis\t:{$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
-            $section->addText("Anggota/Keuangan\t:{$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
-            $section->addText("Anggota/Keuangan\t:{$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
+
+            if (isset($pelatihan->ketua_panitia)) {
+                $section->addText("Ketua\t: {$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
+            }
+
+            if (isset($pelatihan->akademis)) {
+                $section->addText("Seketaris/Akademis\t: {$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
+            }
+
+            if (isset($pelatihan->administrasi)) {
+                $section->addText("Anggota/Keuangan\t: {$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            }
+
+            if (isset($pelatihan->keuangan)) {
+                $section->addText("Anggota/Keuangan\t: {$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
+            }
+
 
             $section->addTitle("G. Alamat Penyelenggara", 2);
             $section->addText("Alamat penyelenggara Pelatihan Jarak Jauh $pelatihan->nama_pelatihan Wilayah Kerja Kementerian Agama Provinsi $pelatihan->tempat Tahun $pelatihan->tahun ini adalah Loka Diklat Keagamaan Pekanbaru, Jl. Yos Sudarso, Rumbai, Pekanbaru. Email: loka_pekanbaru@kemenag.go.id.", $fontstyle, $paragraphstyle);
@@ -502,17 +538,59 @@ class wordGenerator{
             
             $style = generate_list_style($phpword, 'decimal');
             
-            $section->addListItem("{$pelatihan->wi_1->nama} Berasal dari berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->wi_2->nama} Berasal dari berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->wi_3->nama} berasal {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+            if (isset($pelatihan->wi_1)) {
+                $section->addListItem(
+                    "{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
+            if (isset($pelatihan->wi_2)) {
+                $section->addListItem(
+                    "{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
+            if (isset($pelatihan->wi_3)) {
+                $section->addListItem(
+                    "{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
             
             $section->addText("Widyaiswara/Tenaga Pengajar berjumlah 2 orang, yakni :", $fontstyle, $paragraphstyle);
             
             $style = generate_list_style($phpword, 'decimal');
-            
-            $section->addListItem("{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+
+            if (isset($pelatihan->pengajar_1)) {
+                $section->addListItem(
+                    "{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
+            if (isset($pelatihan->pengajar_2)) {
+                $section->addListItem(
+                    "{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
+            if (isset($pelatihan->pengajar_3)) {
+                $section->addListItem(
+                    "{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
 
             $section->addTitle("G. Jenjang Akademik/Kualifikasi Widyaiswara/Tenaga Pengajar", 2);
             $section->addText("Jenjang akademik/kualifikasi pendidikan Widyaiswara/Tenaga Pengajar pada Diklat ini adalah:", $fontstyle, $paragraphstyle);
@@ -598,7 +676,7 @@ class wordGenerator{
             // Kata Pengantar
             $section->addPageBreak();
             $section->addTitle("KATA PENGANTAR", 1);
-            $section->addText("Puji dan syukur kita panjatkan kehadirat Tuhan Yang Maha Esa, karena berkat rahmat serta karunia-Nya Term Of References (TOR) pelaksanaan kegiatan Pelatihan Jarak Jauh (PJJ) Manajemen Zakat Angkatan I ini dapat disusun.", $fontstyle, $paragraphstyle);
+            $section->addText("Puji dan syukur kita panjatkan kehadirat Tuhan Yang Maha Esa, karena berkat rahmat serta karunia-Nya Term Of References (TOR) pelaksanaan kegiatan $pelatihan->nama_kegiatan ini dapat disusun.", $fontstyle, $paragraphstyle);
             $section->addText("TOR pelatihan ini memuat latar belakang, dasar hukum, maksud dan tujuan, kepesertaan, metode pelaksanaan kegiatan, waktu dan tempat pelaksanaan, serta biaya kegiatan. TOR ini diharapkan dapat menjadi acuan tata kelola pelatihan dari tahap persiapan hingga pelaporan.", $fontstyle, $paragraphstyle);
             $section->addText("Akhir kata, kritik dan saran yang bersifat membangun sangat diharapkan dalam upaya pengembangan TOR ini guna peningkatan dan perbaikan kualitas pelatihan di Loka Diklat Keagamaan Pekanbaru dimasa yang akan datang", $fontstyle, $paragraphstyle);
 
@@ -611,7 +689,7 @@ class wordGenerator{
             //Term of References
             $section->addPageBreak();
             $section->addTitle("TERM OF REFERENCES", 1);
-            $section->addTitle("Pelatihan Jarak Jauh (PJJ) Manajemen Zakat Angkatan I", 1);
+            $section->addTitle("$pelatihan->nama_kegiatan", 1);
             $section->addTitle("A. Latar Belakang", 2);
             $section->addText("Peraturan Menteri Agama RI Nomor 15 Tahun 2021 Tentang Organisasi dan Tata Kerja Unit Pelaksana Teknis Pendidikan dan Pelatihan Keagamaan terkait penyelenggaraan Pendidikan dan Pelatihan Pegawai Negeri Sipil di lingkungan Kantor Kementerian Agama bahwa UPT Pendidikan dan Pelatihan Keagamaan mempunyai tugas melaksanakan pendidikan dan pelatihan tenaga administrasi dan tenaga teknis pendidikan dan keagamaan kepada ASN Kementerian Agama di wilayah kerja masing-masing dengan berpedoman kepada kebijakan Kepala Badan Litbang dan pelatihan Kementerian Agama. Pelatihan Jarak Jauh merupakan pelatihan yang dilaksanakan dalam kelas virtual melalui media online berdasarkan pertimbangan dan tujuan kebutuhan perluasan akses peserta pelatihan. Pelatihan Jarak Jauh adalah pelatihan formal berbasis lembaga yang peserta didik dan instrukturnya berada di lokasi terpisah sehingga memerlukan sistem telekomunikasi yang interaktif untuk dapat terhubung satu dengan lainnya dan berbagai sumber daya yang diperlukan didalamnya. Pada Pelatihan Jarak Jauh peran teknologi sangat dibutuhkan mengingat pembelajaran dilakukan secara daring.", $fontstyle, $paragraphstyle);
             $section->addText("Berdasarkan hasil Analisis Kebutuhan Pelatihan (AKP) Loka Pelatihan Keagamaan Pekanbaru tahun 2023, jenis pelatihan yang perlu dilaksanakan adalah $pelatihan->nama_kegiatan. Berdasarkan realita tersebut, Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru memandang perlu melaksanakan $pelatihan->nama_kegiatan.", $fontstyle, $paragraphstyle);
@@ -690,17 +768,49 @@ class wordGenerator{
             
             $section->addTitle("I. Panitia dan Tenaga Pengajar", 2);
             $section->addText("Penyelenggara pelatihan ini adalah Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru , dengan susunan panitia sebagai berikut : ", $fontstyle, $paragraphstyle);
-            $section->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}");
-            $section->addText("Ketua Panitia\t: {$pelatihan->ketua_panitia->nama}");
-            $section->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}");
-            $section->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}");
-            $section->addText("Bidang Kuangan\t: {$pelatihan->keuangan->nama}");
-            $section->addText("Widyaisuara\t: 1. {$pelatihan->wi_1->nama}");
-            $section->addText("\t: 2. {$pelatihan->wi_2->nama}");
-            $section->addText("\t: 3. {$pelatihan->wi_3->nama}");
-            $section->addText("Tenaga Pengajar\t: 1. {$pelatihan->pengajar_1->nama}");
-            $section->addText("\t: 2. {$pelatihan->pengajar_2->nama}");
-            $section->addText("\t: 3. {$pelatihan->pengajar_3->nama}");
+
+            if (isset($pelatihan->penanggung_jawab)) {
+                $section->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}");
+            }
+
+            if (isset($pelatihan->ketua_panitia)) {
+                $section->addText("Ketua Panitia\t: {$pelatihan->ketua_panitia->nama}");
+            }
+
+            if (isset($pelatihan->akademis)) {
+                $section->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}");
+            }
+
+            if (isset($pelatihan->administrasi)) {
+                $section->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}");
+            }
+
+            if (isset($pelatihan->keuangan)) {
+                $section->addText("Bidang Keuangan\t: {$pelatihan->keuangan->nama}");
+            }
+
+            // Widyaiswara
+            if (isset($pelatihan->wi_1)) {
+                $section->addText("Widyaiswara\t: 1. {$pelatihan->wi_1->nama}");
+            }
+            if (isset($pelatihan->wi_2)) {
+                $section->addText("\t: 2. {$pelatihan->wi_2->nama}");
+            }
+            if (isset($pelatihan->wi_3)) {
+                $section->addText("\t: 3. {$pelatihan->wi_3->nama}");
+            }
+
+            // Tenaga Pengajar
+            if (isset($pelatihan->pengajar_1)) {
+                $section->addText("Tenaga Pengajar\t: 1. {$pelatihan->pengajar_1->nama}");
+            }
+            if (isset($pelatihan->pengajar_2)) {
+                $section->addText("\t: 2. {$pelatihan->pengajar_2->nama}");
+            }
+            if (isset($pelatihan->pengajar_3)) {
+                $section->addText("\t: 3. {$pelatihan->pengajar_3->nama}");
+            }
+
 
             $section->addText("Tenaga pengajar dalam pelatihan ini berjumlah orang dengan persyaratan:", $fontstyle, $paragraphstyle);
 
