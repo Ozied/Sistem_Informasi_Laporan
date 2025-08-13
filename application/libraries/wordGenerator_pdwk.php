@@ -37,23 +37,6 @@ class wordGenerator_pdwk{
             $phpword->addTitleStyle(2, ['size'=>12, 'bold'=>true]);
             $phpword->setDefaultFontName('Times New Roman');
             $phpword->setDefaultFontSize(12);
-            $phpword->addNumberingStyle(
-            'alphaList',  // Your custom style name
-            array(
-                'type' => 'multilevel',
-                'levels' => array(
-                    array(
-                        'format' => 'lowerLetter',  // Use 'lowerLetter' for a, b, c
-                        'text' => '%1.',
-                        'alignment' => 'left',
-                        'left' => 720,
-                        'hanging' => 360,
-                        'font' => 'Arial',
-                        'hint' => 'default'
-                    )
-                )
-            )
-        );
             
             $fontstyle=['name' => 'Times New Roman', 'size' => 12];
             $paragraphstyle = [
@@ -74,7 +57,7 @@ class wordGenerator_pdwk{
            //LAPORAN PENYELENGGARAAN//
             // Kata Pengantar
             $section = $phpword->addSection();
-            $section->addPageBreak();
+            $section->addTitle("KATA PENGANTAR");
             // $section->setStyle(['tabs' => []]);
             $section->addText("Puji dan syukur kehadirat Allah SWT, berkat rahmat serta karunianya, laporan " . $pelatihan->nama_kegiatan . " di Wilayah Kerja Kantor Kementerian Agama" . $pelatihan->kab_kota . "ini telah dapat disusun.", $fontstyle, $paragraphstyle);
             $section->addText("Laporan pelatihan ini terdiri dari tiga bab. Bab I Pendahuluan, memuat organisasi diklat, nama unit/satuan kerja, nama diklat yang diselenggarakan, dasar hukum, sumber pembiayaan, susunan panitia, dan alamat penyelenggara. Bab II berisi tentang pelaksanaan " . $pelatihan->nama_kegiatan . "yang mencakup tujuan dan sasaran, kurikulum, peserta, widyaiswara/narasumber, evaluasi, penyelenggaraan, keuangan, penjaminan mutu, dan lain-lain. Bab III sebagai penutup terdiri dari Laporan Keuangan / SPJ Akhir Pelatihan ini. Laporan ini juga dilengkapi dengan lampiran-lampiran sebagai bukti fisik.", $fontstyle, $paragraphstyle);
@@ -129,10 +112,10 @@ class wordGenerator_pdwk{
             
             $section->addTitle("F. Susunan Panitia", 2);
             $section->addText("Adapun susunan panitia penyelenggara $pelatihan->nama_kegiatan adalah sebegai berikut:", $fontstyle, $paragraphstyle);
-            $section->addListItem("Ketua\t:{$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
-            $section->addListItem("Seketaris/Akademis\t:{$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
-            $section->addListItem("Anggota/Keuangan\t:{$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
-            $section->addListItem("Anggota\t:{$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            $section->addListItem("Ketua\t:{$pelatihan->ketua_panitia->nama}", 0, $fontstyle, $paragraphstyle);
+            $section->addListItem("Seketaris/Akademis\t:{$pelatihan->akademis->nama}", 0, $fontstyle, $paragraphstyle);
+            $section->addListItem("Anggota/Keuangan\t:{$pelatihan->keuangan->nama}", 0, $fontstyle, $paragraphstyle);
+            $section->addListItem("Anggota\t:{$pelatihan->administrasi->nama}", 0, $fontstyle, $paragraphstyle);
 
             $section->addTitle("G. Alamat Penyelenggara", 2);
             $section->addText("Alamat Pelaksanaan $pelatihan->nama_pelatihan dilaksanakan di $pelatihan->alamat", $fontstyle, $paragraphstyle);
@@ -155,7 +138,7 @@ class wordGenerator_pdwk{
             $section->addListItem("Tujuan", 0, array_merge($fontstyle, ['size' => 12]), $style);
             $section->addText("Secara umum Diklat ini bertujuan untuk : ", $fontstyle, $paragraphstyle);
             
-            $style = 'alphaList';
+             $style = generate_list_style($phpword, 'lowerLetter');
 
             $section->addListItem("Meningkatkan pengetahuan, keahlian, keterampilan dan sikap untuk dapat melaksanakan tugas jabatan secara profesional dengan dilandasi kepribadian dan kode etik pegawai sesuai dengan kebutuhan Kementerian Agama.", 0, $fontstyle, $style);
             $section->addListItem("Menciptakan aparatur yang mampu berperan sebagai pembaharu dan perekat persatuan dan kesatuan bangsa.", 0, $fontstyle, $style);
@@ -183,20 +166,36 @@ class wordGenerator_pdwk{
             $section->addText("Adapun sasaran Pelatihan $pelatihan->nama_kegiatan Tahun $pelatihan->tahun adalah tersedianya $pelatihan->jumlah_peserta orang alumni pelatihan yang cakap dan kompeten dalam menjalankan tugas dan fungsi sesuai jabatan yang di emban", $fontstyle, $paragraphstyle);
             
             $section->addTitle("B. Implementasi Kurikulum", 2);
-            $section->addText("Kurikulum Pelatihan ini disesuaikan dengan kurikulum $materi->asal_kursil Badan Litbang dan Diklat Kementerian Agama Republik Indonesia.", $fontstyle, $paragraphstyle);
-            
-            $style = generate_list_style($phpword, 'decimal');
+            // Get first materi object
+            $materi = !empty($pelatihan->materi) ? $pelatihan->materi[0] : null;
 
-            $section->addListItem("Mata Diklat dan Jumlah Jam Pelajaran", 0, $fontstyle, $style);
-            $section->addListItem("Jadwal Diklat (Terlampir)", 0, $fontstyle, $style);
+            if ($materi) {
+                $section->addText(
+                    "Kurikulum Pelatihan ini disesuaikan dengan kurikulum $materi->asal_kursil Badan Litbang dan Diklat Kementerian Agama Republik Indonesia.",
+                    $fontstyle,
+                    $paragraphstyle
+                );
+            } else {
+                $section->addText(
+                    "Kurikulum Pelatihan ini disesuaikan dengan kurikulum Badan Litbang dan Diklat Kementerian Agama Republik Indonesia.",
+                    $fontstyle,
+                    $paragraphstyle
+                );
+            }
+            
+            $style1 = generate_list_style($phpword, 'decimal');
+
+            $section->addListItem("Mata Diklat dan Jumlah Jam Pelajaran", 0, $fontstyle, $style1);
+            $section->addListItem("Jadwal Diklat (Terlampir)", 0, $fontstyle, $style1);
 
             $section->addTitle("C. Rencana dan Realisasi Peserta", 2);
             $section->addText("Jumlah, asal daerah, status kepegawaian, dan jenis kelamin peserta Pelatihan sebagai berikut :", $fontstyle, $paragraphstyle);
             
-            $section->addListItem("Jumlah dan Asal Peserta", 0, $fontstyle, $style);
+            $style2 = generate_list_style($phpword, 'decimal');
+            $section->addListItem("Jumlah dan Asal Peserta", 0, $fontstyle, $style2);
             $section->addText("Peserta terdiri dari $pelatihan->jumlah_peserta orang $pelatihan->jabatan_peserta yang ada di wilayah kerja Kantor Kementerian Agama $pelatihan->kab_kota", $fontstyle, $paragraphstyle);
 
-            $section->addListItem("Status Kepegawaian dan Jenis Kelamin", 0, $fontstyle, $style);
+            $section->addListItem("Status Kepegawaian dan Jenis Kelamin", 0, $fontstyle, $style2);
             $section->addText("Peserta terdiri dari ASN sebanyak $pelatihan->jumlah_peserta_asn orang dan non ASN sebanyak $pelatihan->jumlah_peserta_non_asn orang dengan rincian $pelatihan->jumlah_peserta_laki orang laki-laki dan $pelatihan->jumlah_peserta_wanita orang perempuan. Pendidikan terakhir dari peserta adalah sebagai berikut:", $fontstyle, $paragraphstyle);
 
             $section->addText("SMA/MA\t: $pelatihan->jumlah_pendidikan_peserta_sma", $fontstyle, $paragraphstyle);
@@ -208,25 +207,73 @@ class wordGenerator_pdwk{
             $section->addTitle("D. Rencana dan Realisasi Widyaiswara/Tenaga Pengajar", 2);
             $section->addText("Jumlah, asal daerah, dan jenjang akademik Widyaiswara/Tenaga Pengajar Pelatihan ini adalah adalah sebagai berikut :", $fontstyle, $paragraphstyle);
 
-            $section->addListItem("Jumlah dan Asal Widyaiswara/Tenaga Pengajar", 0, $fontstyle, $style);
+            $style3 = generate_list_style($phpword, 'decimal');
+            $section->addListItem("Jumlah dan Asal Widyaiswara/Tenaga Pengajar", 0, $fontstyle, $style3);
             $section->addText("Jumlah widyaiswara dan tenaga pengajar adalah $pelatihan->jumlah_wi_pengajar orang Widyaiswara terdiri dari : ", $fontstyle, $paragraphstyle);
 
             $style = generate_list_style($phpword, 'decimal');
-            
-            $section->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->wi_4->nama} berasal dari {$pelatihan->wi_4->asal_satker}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            
+
+            if (isset($pelatihan->wi_1)) {
+            $section->addListItem(
+                "{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}",
+                0, $fontstyle, $style,
+                ['indentation' => ['left' => 720, 'hanging' => 360]]
+            );
+        }
+
+        if (isset($pelatihan->wi_2)) {
+            $section->addListItem(
+                "{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}",
+                0, $fontstyle, $style,
+                ['indentation' => ['left' => 720, 'hanging' => 360]]
+            );
+        }
+
+        if (isset($pelatihan->wi_3)) {
+            $section->addListItem(
+                "{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}",
+                0, $fontstyle, $style,
+                ['indentation' => ['left' => 720, 'hanging' => 360]]
+            );
+        }
+
+        if (isset($pelatihan->wi_4)) {
+            $section->addListItem(
+                "{$pelatihan->wi_4->nama} berasal dari {$pelatihan->wi_4->asal_satker}",
+                0, $fontstyle, $style,
+                ['indentation' => ['left' => 720, 'hanging' => 360]]
+            );
+        }
             $section->addText("Tenaga Pengajar terdiri dari :", $fontstyle, $paragraphstyle);
             
             $style = generate_list_style($phpword, 'decimal');
             
-            $section->addListItem("{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->jabatan}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->jabatan}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            $section->addListItem("{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->jabatan}", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+           if (isset($pelatihan->pengajar_1)) {
+                $section->addListItem(
+                    "{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->jabatan}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
 
-            $section->addListItem("Jenjang Akademik/Kualifikasi Widyaiswara/Tenaga Pengajar", 0, $fontstyle, $style);
+            if (isset($pelatihan->pengajar_2)) {
+                $section->addListItem(
+                    "{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->jabatan}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
+            if (isset($pelatihan->pengajar_3)) {
+                $section->addListItem(
+                    "{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->jabatan}",
+                    0, $fontstyle, $style,
+                    ['indentation' => ['left' => 720, 'hanging' => 360]]
+                );
+            }
+
+
+            $section->addListItem("Jenjang Akademik/Kualifikasi Widyaiswara/Tenaga Pengajar", 0, $fontstyle, $style3);
             $section->addText("Jenjang akademik/kualifikasi pendidikan widyaiswara/tenaga pengajar pada pelatihan ini adalah :", $fontstyle, $paragraphstyle);
 
             $section->addText("Setara D2/D3\t: $pelatihan->jumlah_pendidikan_wi_d2 orang", $fontstyle, $paragraphstyle);
@@ -235,7 +282,7 @@ class wordGenerator_pdwk{
             $section->addText("S3\t: $pelatihan->jumlah_pendidikan_wi_s3 orang", $fontstyle, $paragraphstyle);
             $section->addText("(curriculum vitae/biodata terlampir).", $fontstyle, $paragraphstyle);
 
-            $section->addListItem("Daftar hadir Narasumber (Terlampir)", 0, $fontstyle, $style);
+            $section->addListItem("Daftar hadir Narasumber (Terlampir)", 0, $fontstyle, $style3);
             
             $section->addTitle("E. Hasil Evaluasi Pelatihan", 2);
             $section->addText("Evaluasi dilakukan terhadap penyelenggara, widyaiswara/Tenaga Pengajar, dan peserta sebagai berikut :", $fontstyle, $paragraphstyle);
@@ -248,13 +295,13 @@ class wordGenerator_pdwk{
 
             $section->addTitle("F. Realisasi Konsumsi dan Akomodasi", 2);
 
-            $style = 'alphaList';
+            $style = generate_list_style($phpword, 'lowerLetter');
 
             $section->addListItem("Konsumsi", 0, $fontstyle, $style);
             $section->addText("Terdapat pada Lampiran RAB", $fontstyle, $paragraphstyle);
             
             $section->addListItem("Akomodasi", 0, $fontstyle, $style);
-            $section->addText("Asrama			: -", $fontstyle, $paragraphstyle);
+            $section->addText("Asrama		: -", $fontstyle, $paragraphstyle);
             $section->addText("Ruang Belajar		: Memadai tersedia sesuai kapasitas", $fontstyle, $paragraphstyle);
             $section->addText("Alat bantu belajar	: Tersedia", $fontstyle, $paragraphstyle);
             $section->addText("Ruang Makan		: -", $fontstyle, $paragraphstyle);
@@ -543,16 +590,19 @@ class wordGenerator_pdwk{
            
             $style = generate_list_style($phpword, 'bullet');
 
-            $section->addListItem("Tanya jawab", 0, $fontstyle, $style);
-            $section->addListItem("Pemberian tugas", 0, $fontstyle, $style);
-            $section->addListItem("Upload video / bahan tayang / bahan ajar", 0, $fontstyle, $style);
-            $section->addListItem("Eksplorasi pengalaman peserta", 0, $fontstyle, $style);
-            $section->addListItem("Ekplorasi kebutuhan peserta", 0, $fontstyle, $style);
-            $section->addListItem("Ceramah", 0, $fontstyle, $style);
-            $section->addListItem("Latihan", 0, $fontstyle, $style);
-            $section->addListItem("Studi kasus", 0, $fontstyle, $style);
-            $section->addListItem("Demonstrasi", 0, $fontstyle, $style);
-            $section->addListItem("Diskusi", 0, $fontstyle, $style);
+            // Common indentation array
+            $indentation = ['indentation' => ['left' => 720, 'hanging' => 360]];
+
+            $section->addListItem("Tanya jawab", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Pemberian tugas", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Upload video / bahan tayang / bahan ajar", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Eksplorasi pengalaman peserta", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Ekplorasi kebutuhan peserta", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Ceramah", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Latihan", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Studi kasus", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Demonstrasi", 0, $fontstyle, $style, $indentation);
+            $section->addListItem("Diskusi", 0, $fontstyle, $style, $indentation);
 
             // $section->addTitle("G. Tahap Pelaksanaan Pelatihan", 2);
             // $section->addText("Peserta diberikan username dan password Learning Management System (LMS).", $fontstyle, $paragraphstyle);
@@ -562,21 +612,57 @@ class wordGenerator_pdwk{
             // $section->addText("Penyampaian Surat Pengembalian Peserta yang telah selesai melakukan kegiatan. Memberikan fasilitas bagi alumni pelatihan berupa media untuk berdiskusi.", $fontstyle, $paragraphstyle);
 
             $section->addTitle("G. Tempat dan Waktu Pelaksanaan", 2);
-            $section->addText("Pelatihan ini dilaksanakan di $pelatihan->tempat " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . " dengan jumlah $materi->jumlah_jp Jam Pelajaran(JP).", $fontstyle, $paragraphstyle);
+            $section->addText("Pelatihan ini dilaksanakan di $pelatihan->tempat " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . " dengan jumlah $materi->jumlah_jp Jam Pelajaran (JP).", $fontstyle, $paragraphstyle);
             
             $section->addTitle("I. Panitia dan Tenaga Pengajar", 2);
             $section->addText("Penyelenggara pelatihan ini adalah Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru , dengan susunan panitia sebagai berikut : ", $fontstyle, $paragraphstyle);
-            $section->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}");
-            $section->addText("Ketua Panitia\t: {$pelatihan->ketua_panitia->nama}");
-            $section->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}");
-            $section->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}");
-            $section->addText("Bidang Kuangan\t: {$pelatihan->keuangan->nama}");
-            $section->addText("Widyaisuara\t: 1. {$pelatihan->wi_1->nama}");
-            $section->addText("\t: 2. {$pelatihan->wi_2->nama}");
-            $section->addText("\t: 3. {$pelatihan->wi_3->nama}");
-            $section->addText("Tenaga Pengajar\t: 1. {$pelatihan->pengajar_1->nama}");
-            $section->addText("\t: 2. {$pelatihan->pengajar_2->nama}");
-            $section->addText("\t: 3. {$pelatihan->pengajar_3->nama}");
+            $phpword->setDefaultParagraphStyle([
+                'tabs' => [
+                    new Tab('left', 3000)
+                    ]
+            ]);
+            if (isset($pelatihan->penanggung_jawab)) {
+                $section->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}");
+            }
+
+            if (isset($pelatihan->ketua_panitia)) {
+                $section->addText("Ketua Panitia\t: {$pelatihan->ketua_panitia->nama}");
+            }
+
+            if (isset($pelatihan->akademis)) {
+                $section->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}");
+            }
+
+            if (isset($pelatihan->administrasi)) {
+                $section->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}");
+            }
+
+            if (isset($pelatihan->keuangan)) {
+                $section->addText("Bidang Keuangan\t: {$pelatihan->keuangan->nama}");
+            }
+
+            // Widyaiswara
+            if (isset($pelatihan->wi_1)) {
+                $section->addText("Widyaiswara\t: 1. {$pelatihan->wi_1->nama}");
+            }
+            if (isset($pelatihan->wi_2)) {
+                $section->addText("\t: 2. {$pelatihan->wi_2->nama}");
+            }
+            if (isset($pelatihan->wi_3)) {
+                $section->addText("\t: 3. {$pelatihan->wi_3->nama}");
+            }
+
+            // Tenaga Pengajar
+            if (isset($pelatihan->pengajar_1)) {
+                $section->addText("Tenaga Pengajar\t: 1. {$pelatihan->pengajar_1->nama}");
+            }
+            if (isset($pelatihan->pengajar_2)) {
+                $section->addText("\t: 2. {$pelatihan->pengajar_2->nama}");
+            }
+            if (isset($pelatihan->pengajar_3)) {
+                $section->addText("\t: 3. {$pelatihan->pengajar_3->nama}");
+            }
+
 
             $section->addText("Tenaga pengajar dalam pelatihan ini berjumlah orang dengan persyaratan:", $fontstyle, $paragraphstyle);
 
@@ -606,23 +692,23 @@ class wordGenerator_pdwk{
             $section->addText("$ketua_loka->nama", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section->addText("NIP. $ketua_loka->NIP", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
-            //Berita Acara
-            $section->addPageBreak();
-            $section->addText("BERITA ACARA", ['bold' => true], ['alignment' => Jc::CENTER]);
-            $section->addText("Evaluasi Kelulusan Peserta", ['bold' => true], ['alignment' => Jc::CENTER]);
-            $section->addText("Pelatihan $pelatihan->nama_pelatihan", ['bold' => true], ['alignment' => Jc::CENTER]);
-            $section->addText("Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru", ['bold' => true], ['alignment' => Jc::CENTER]);
-            $section->addText("Tahun 2024", ['bold' => true], ['alignment' => Jc::CENTER]);
+            // //Berita Acara
+            // $section->addPageBreak();
+            // $section->addText("BERITA ACARA", ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $section->addText("Evaluasi Kelulusan Peserta", ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $section->addText("Pelatihan $pelatihan->nama_pelatihan", ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $section->addText("Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru", ['bold' => true], ['alignment' => Jc::CENTER]);
+            // $section->addText("Tahun 2024", ['bold' => true], ['alignment' => Jc::CENTER]);
 
-            $section->addText("Pada hari ini " . $data['tanggal_selesai'] . " pukul 13.30 s.d 14.00 WIB bertempat di $pelatihan->tempat serta Widyaiswara secara dalam jaringan telah diadakan Rapat Evaluasi Kelulusan Peserta $pelatihan->nama_pelatihan yang diselenggarakan dari tanggal  " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ".", $fontstyle, $paragraphstyle);
-            $section->addText("Berdasarkan Rapat Evaluasi Kelulusan maka hasil akhir nilai peserta pelatihan adalah dari 30 orang, peserta dinyatakan lulus sebanyak 22 orang dan tidak lulus 8 orang dengan rekapitulasi kualifikasi nilai peserta sebagaimana terlampir.", $fontstyle, $paragraphstyle);
-            $section->addText("Demikian berita acara ini dibuat sebagaimana mestinya.", $fontstyle, $paragraphstyle);
+            // $section->addText("Pada hari ini " . $data['tanggal_selesai'] . " pukul 13.30 s.d 14.00 WIB bertempat di $pelatihan->tempat serta Widyaiswara secara dalam jaringan telah diadakan Rapat Evaluasi Kelulusan Peserta $pelatihan->nama_pelatihan yang diselenggarakan dari tanggal  " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ".", $fontstyle, $paragraphstyle);
+            // $section->addText("Berdasarkan Rapat Evaluasi Kelulusan maka hasil akhir nilai peserta pelatihan adalah dari 30 orang, peserta dinyatakan lulus sebanyak 22 orang dan tidak lulus 8 orang dengan rekapitulasi kualifikasi nilai peserta sebagaimana terlampir.", $fontstyle, $paragraphstyle);
+            // $section->addText("Demikian berita acara ini dibuat sebagaimana mestinya.", $fontstyle, $paragraphstyle);
 
-            $section->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section->addText('Diterima Kepala LDK Pekanbaru', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
-            $section->addTextBreak(3);
-            $section->addText("{$pelatihan->ketua_panitia->nama}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section->addText("NIP. {$pelatihan->ketua_panitia->NIP}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            // $section->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            // $section->addText('Diterima Kepala LDK Pekanbaru', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
+            // $section->addTextBreak(3);
+            // $section->addText("{$pelatihan->ketua_panitia->nama}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            // $section->addText("NIP. {$pelatihan->ketua_panitia->NIP}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
             //Buku Panduan//
             // Kata Pengantar
@@ -683,7 +769,7 @@ class wordGenerator_pdwk{
 
             $section->addListItem("Sasaran", 0, $fontstyle, $style);
 
-            $style = 'alphaList';
+            $style = generate_list_style($phpword, 'lowerLetter');
 
             $section->addListItem("Terwujudnya $pelatihan->jumlah_peserta peserta $pelatihan->nama_pelatihan dalam memenuhi kecakapan untuk mengelola dan mengembangkan penilaian Kinerja ASN", 0, $fontstyle, $style);
             $section->addListItem("Terwujudnya peserta $pelatihan->nama_pelatihan yang memiliki komptensi dalam melaksanakan tugas dan fungsinya sebagaimana dipersyaratkan dalam jabatannya dan yang memiliki integritas yang tinggi untuk meningkatkan kemampuannya.", 0, $fontstyle, $style);
@@ -706,7 +792,7 @@ class wordGenerator_pdwk{
             
             $section->addListItem("Alamat dan Akun resmi :", 0, $fontstyle, $style);
             
-            $style = 'alphaList';
+            $style = generate_list_style($phpword, 'lowerLetter');
 
             $section->addListItem("Penilaian terhadap Widyaiswara, Panitia dan peserta secara kuantitatif melalui simdiklat.kemenag.go.id", 0, $fontstyle, $style);
             $section->addListItem("Evaluasi Penyelenggaraan pelatihan melalui : simdiklat.kemenag.go.id", 0, $fontstyle, $style);
@@ -717,7 +803,7 @@ class wordGenerator_pdwk{
             $decimalStyle = generate_list_style($phpword, 'decimal');
 
             // Second level: alpha list (a., b., c.)
-            $alphaStyle = 'alphaList';
+            $alphaStyle = generate_list_style($phpword, 'lowerLetter');
 
             // Third level: bullet points
             $bulletStyle = generate_list_style($phpword, 'bullet');
@@ -813,42 +899,47 @@ class wordGenerator_pdwk{
             $section->addTitle("C. Kualifikasi, Hak, Kewajiban dan Alokasi Peserta", 2);
 
             // 1. Kualifikasi Peserta
-            $section->addListItem("Kualifikasi Peserta", 0, $fontstyle, $decimalStyle);
+            $style4 = generate_list_style($phpword, 'decimal');
+            $section->addListItem("Kualifikasi Peserta", 0, $fontstyle, $style4);
             $section->addText("Persyaratan Umum :", $fontstyle, $paragraphstyle);
 
             // a. Persyaratan Umum
-            $section->addListItem("Sehat jasmani dan rohani, dibuktikan dengan surat keterangan sehat dari dokter, puskesmas atau rumah sakit pemerintah", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Siap dan mampu mengikuti seluruh kegiatan pelatihan dari awal hingga akhir, dibuktikan surat pernyataan kesiapan/kesanggupan", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Kebijakan internal Loka Diklat Keagmaan Pekanbaru, peserta tidak diperkenankan mengikuti Pelatihan lebih dari satu kali untuk jenis yang sama dalam setahun yang diselenggarakan oleh Loka Diklat Keagamaan Pekanbaru", 0, $fontstyle, $alphaStyle);
+            $style5 = generate_list_style($phpword, 'lowerLetter');
+            $section->addListItem("Sehat jasmani dan rohani, dibuktikan dengan surat keterangan sehat dari dokter, puskesmas atau rumah sakit pemerintah", 0, $fontstyle, $style5);
+            $section->addListItem("Siap dan mampu mengikuti seluruh kegiatan pelatihan dari awal hingga akhir, dibuktikan surat pernyataan kesiapan/kesanggupan", 0, $fontstyle, $style5);
+            $section->addListItem("Kebijakan internal Loka Diklat Keagmaan Pekanbaru, peserta tidak diperkenankan mengikuti Pelatihan lebih dari satu kali untuk jenis yang sama dalam setahun yang diselenggarakan oleh Loka Diklat Keagamaan Pekanbaru", 0, $fontstyle, $style5);
 
             $section->addText("Persyaratan Khusus :", $fontstyle, $paragraphstyle);
 
             // a. Persyaratan Khusus
-            $section->addListItem("Calon Peserta $pelatihan->nama_kegiatan adalah $pelatihan->jabatan_peserta di Wilayah kerja Kantor Kementerian Agama $pelatihan->kab_kota, Penetapan peserta pelatihan bersifat selektif dan merupakan penugasan dari instansi yang bersangkutan yang dibuktikan dengan surat tugas", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Menyerahkan print out Biodata dari aplikasi Simdiklat yang datanya telah direvisi", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Menyerahkan Surat Tugas dari Kantor Kementerian Agama Kabupaten/ Kota", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Menyerahkan foto copy SK terakhir, foto copy NPWP dan foto copy rekening buku tabungan yang masih aktif (disarankan BRI)", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Menyerahkan 2 lembar pas foto berlatar belakang merah ukuran 4 x 6", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Menyerahkan foto copy kartu ASKES/BPJS (bila ada)", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Membawa peralatan belajar yang dibutuhkan (Laptop, terminal kabel dll)", 0, $fontstyle, $alphaStyle);
+            $style6 = generate_list_style($phpword, 'lowerLetter');
+            $section->addListItem("Calon Peserta $pelatihan->nama_kegiatan adalah $pelatihan->jabatan_peserta di Wilayah kerja Kantor Kementerian Agama $pelatihan->kab_kota, Penetapan peserta pelatihan bersifat selektif dan merupakan penugasan dari instansi yang bersangkutan yang dibuktikan dengan surat tugas", 0, $fontstyle, $style6);
+            $section->addListItem("Menyerahkan print out Biodata dari aplikasi Simdiklat yang datanya telah direvisi", 0, $fontstyle, $style6);
+            $section->addListItem("Menyerahkan Surat Tugas dari Kantor Kementerian Agama Kabupaten/ Kota", 0, $fontstyle, $style6);
+            $section->addListItem("Menyerahkan foto copy SK terakhir, foto copy NPWP dan foto copy rekening buku tabungan yang masih aktif (disarankan BRI)", 0, $fontstyle, $style6);
+            $section->addListItem("Menyerahkan 2 lembar pas foto berlatar belakang merah ukuran 4 x 6", 0, $fontstyle, $style6);
+            $section->addListItem("Menyerahkan foto copy kartu ASKES/BPJS (bila ada)", 0, $fontstyle, $style6);
+            $section->addListItem("Membawa peralatan belajar yang dibutuhkan (Laptop, terminal kabel dll)", 0, $fontstyle, $style6);
 
             // 2. Hak Peserta
-            $section->addListItem("Hak Peserta", 0, $fontstyle, $decimalStyle);
+            $section->addListItem("Hak Peserta", 0, $fontstyle, $style4);
             // a. Hak Peserta
-            $section->addListItem("Peserta berhak mendapatkan pelayanan dalam proses pendidikan dan pelatihan", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Peserta berhak mendapatkan konsumsi sesuai ketentuan yang berlaku", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Peserta memperoleh uang saku sesuai ketentuan yang berlaku", 0, $fontstyle, $alphaStyle);
+            $style7 = generate_list_style($phpword, 'lowerLetter');
+            $section->addListItem("Peserta berhak mendapatkan pelayanan dalam proses pendidikan dan pelatihan", 0, $fontstyle, $style7);
+            $section->addListItem("Peserta berhak mendapatkan konsumsi sesuai ketentuan yang berlaku", 0, $fontstyle, $style7);
+            $section->addListItem("Peserta memperoleh uang saku sesuai ketentuan yang berlaku", 0, $fontstyle, $style7);
 
             // 3. Kewajiban Peserta
-            $section->addListItem("Kewajiban Peserta", 0, $fontstyle, $decimalStyle);
+            $section->addListItem("Kewajiban Peserta", 0, $fontstyle, $style4);
             // a. Kewajiban Peserta
-            $section->addListItem("Setiap peserta wajib mentaati segala tata tertib, peraturan dan ketentuan yang dikeluarkan oleh panitia pelaksana", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Setiap peserta wajib mengikuti program pelatihan sesuai dengan jadwal yang ditentukan", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Setiap peserta wajib mengembangkan keilmuan/ketrampilan di tempat tugas", 0, $fontstyle, $alphaStyle);
-            $section->addListItem("Pakaian peserta selama mengikuti pelatihan (baik tatap muka maupun daring) adalah baju atas berwarna putih, bawah berwarna hitam, peserta laki-laki mengenakan dasi", 0, $fontstyle, $alphaStyle);
+            $style8 = generate_list_style($phpword, 'lowerLetter');
+            $section->addListItem("Setiap peserta wajib mentaati segala tata tertib, peraturan dan ketentuan yang dikeluarkan oleh panitia pelaksana", 0, $fontstyle, $style8);
+            $section->addListItem("Setiap peserta wajib mengikuti program pelatihan sesuai dengan jadwal yang ditentukan", 0, $fontstyle, $style8);
+            $section->addListItem("Setiap peserta wajib mengembangkan keilmuan/ketrampilan di tempat tugas", 0, $fontstyle, $style8);
+            $section->addListItem("Pakaian peserta selama mengikuti pelatihan (baik tatap muka maupun daring) adalah baju atas berwarna putih, bawah berwarna hitam, peserta laki-laki mengenakan dasi", 0, $fontstyle, $style8);
 
             // 4. Alokasi Peserta Pelatihan
-            $section->addListItem("Alokasi Peserta Pelatihan", 0, $fontstyle, $decimalStyle);
+            $section->addListItem("Alokasi Peserta Pelatihan", 0, $fontstyle, $style4);
             $section->addText("Peserta berjumlah $pelatihan->jumlah_peserta orang berasal dari Wilayah Kerja Kantor Kementerian Agama $pelatihan->kab_kota, dialokasikan ke dalam ruangan yang representatif.", $fontstyle, $paragraphstyle);
 
 
@@ -975,11 +1066,11 @@ class wordGenerator_pdwk{
                 $table->addCell(8000)->addText('Tidak ada materi pelatihan');
             }
 
-            
-
+            $section->addPageBreak();
             $section->addTitle("B. Metode  Pelatihan dan Tenaga Pengajar", 2);
             // Define styles
-            $alphaStyle = 'alphaList';
+            $alphaStyle = generate_list_style($phpword, 'lowerLetter');
+            
             $decimalStyle = generate_list_style($phpword, 'decimal'); // 1., 2., 3.
             $bulletStyle = generate_list_style($phpword, 'bullet'); // bullet points
 
@@ -1013,27 +1104,30 @@ class wordGenerator_pdwk{
             $section->addListItem("Kelulusan", 0, $fontstyle, $alphaStyle);
 
             // Add decimal list for graduation
-            $section->addListItem("Kelulusan peserta pelatihan ditentukan dengan prosedur berikut:", 0, $fontstyle, $decimalStyle);
+            $decimalStyle1 = generate_list_style($phpword, 'decimal'); // 1., 2., 3.
+            $section->addListItem("Kelulusan peserta pelatihan ditentukan dengan prosedur berikut:", 0, $fontstyle, $decimalStyle1);
 
             // Add nested bullet points for graduation requirements
-            $section->addListItem("Setiap peserta pelatihan dinyatakan LULUS dan berhak mendapatkan STTP jika memenuhi persyaratan:", 1, $fontstyle, $bulletStyle);
-            $section->addListItem("Mengikuti seluruh kegiatan pelatihan dengan memenuhi syarat kehadiran > 85%.", 2, $fontstyle, $bulletStyle);
-            $section->addListItem("Mendapatkan nilai sikap minimal kualifikasi 'BAIK'.", 2, $fontstyle, $bulletStyle);
-            $section->addListItem("Memperoleh nilai hasil pelatihan (NHP) minimal 76,00.", 2, $fontstyle, $bulletStyle);
+            $bulletStyle1 = generate_list_style($phpword, 'bullet'); // bullet points
+            $section->addListItem("Setiap peserta pelatihan dinyatakan LULUS dan berhak mendapatkan STTP jika memenuhi persyaratan:", 1, $fontstyle, $bulletStyle1);
+            $section->addListItem("Mengikuti seluruh kegiatan pelatihan dengan memenuhi syarat kehadiran > 85%.", 2, $fontstyle, $bulletStyle1);
+            $section->addListItem("Mendapatkan nilai sikap minimal kualifikasi 'BAIK'.", 2, $fontstyle, $bulletStyle1);
+            $section->addListItem("Memperoleh nilai hasil pelatihan (NHP) minimal 76,00.", 2, $fontstyle, $bulletStyle1);
 
-            $section->addListItem("Peserta pelatihan yang tidak memenuhi persyaratan sebagaimana disebutkan pada butir a, dinyatakan tidak lulus.", 0, $fontstyle, $decimalStyle);
+            $section->addListItem("Peserta pelatihan yang tidak memenuhi persyaratan sebagaimana disebutkan pada butir a, dinyatakan tidak lulus.", 0, $fontstyle, $decimalStyle1);
 
             // D. Evaluasi Pelatihan
             $section->addListItem("Evaluasi Pelatihan", 0, $fontstyle, $alphaStyle);
             $section->addText("Evaluasi yang akan dilaksanakan pada kegiatan ini adalah sebagai berikut:", $fontstyle, $paragraphstyle);
 
             // Add decimal list for evaluation points
-            $section->addListItem("Evaluasi terhadap peserta pelatihan, meliputi tiga ranah yaitu Pengetahuan, Keterampilan dan sikap perilaku.", 0, $fontstyle, $decimalStyle);
-            $section->addListItem("Instrumen Evaluasi dalam ranah pengetahuan diimplementasikan melalui Pre test dan post test yang akan dilaksanakan secara online serta melalui penugasan penugasan dari widyaiswara;", 0, $fontstyle, $decimalStyle);
-            $section->addListItem("Instrumen penilaian keterampilan adalah observasi proses dan observasi produk;", 0, $fontstyle, $decimalStyle);
-            $section->addListItem("Instrumen penilaian sikap didapatkan dari observasi proses kegiatan oleh panitia pelaksana, yang indikatornya diturunkan dari Lima Nilai Kementerian Agama;", 0, $fontstyle, $decimalStyle);
-            $section->addListItem("Nilai akhir peserta diperoleh dari penilaian sikap, pengetahuan, ketrampilan dan Rencana Tindak Lanjut;", 0, $fontstyle, $decimalStyle);
-            $section->addListItem("Evaluasi Penyelenggaraan Pelatihan berupa penilaian terhadap WI dan panitia penyelenggara akan dilaksanakan melalui penilaian online di Simdiklat -Single Sign On (simdiklat-kemenag.id)", 0, $fontstyle, $decimalStyle);
+            $decimalStyle2 = generate_list_style($phpword, 'decimal'); // 1., 2., 3.
+            $section->addListItem("Evaluasi terhadap peserta pelatihan, meliputi tiga ranah yaitu Pengetahuan, Keterampilan dan sikap perilaku.", 0, $fontstyle, $decimalStyle2);
+            $section->addListItem("Instrumen Evaluasi dalam ranah pengetahuan diimplementasikan melalui Pre test dan post test yang akan dilaksanakan secara online serta melalui penugasan penugasan dari widyaiswara;", 0, $fontstyle, $decimalStyle2);
+            $section->addListItem("Instrumen penilaian keterampilan adalah observasi proses dan observasi produk;", 0, $fontstyle, $decimalStyle2);
+            $section->addListItem("Instrumen penilaian sikap didapatkan dari observasi proses kegiatan oleh panitia pelaksana, yang indikatornya diturunkan dari Lima Nilai Kementerian Agama;", 0, $fontstyle, $decimalStyle2);
+            $section->addListItem("Nilai akhir peserta diperoleh dari penilaian sikap, pengetahuan, ketrampilan dan Rencana Tindak Lanjut;", 0, $fontstyle, $decimalStyle2);
+            $section->addListItem("Evaluasi Penyelenggaraan Pelatihan berupa penilaian terhadap WI dan panitia penyelenggara akan dilaksanakan melalui penilaian online di Simdiklat -Single Sign On (simdiklat-kemenag.id)", 0, $fontstyle, $decimalStyle2);
 
             // E. Sertifikat Pelatihan
             $section->addListItem("Sertifikat Pelatihan", 0, $fontstyle, $alphaStyle);
@@ -1055,6 +1149,9 @@ class wordGenerator_pdwk{
             $section->addListItem("Laporan Persiapan Penyelenggaraan Pelatihan (panitia)", 0, $fontstyle, $style);
             $section->addListItem("Laporan Akhir Kegiatan (Panitia)", 0, $fontstyle, $style);
 
+
+             //BAB V
+            $section->addPageBreak();
             $section->addTitle("BAB V", 1);
             $section->addTitle("PENUTUP", 1);
 
