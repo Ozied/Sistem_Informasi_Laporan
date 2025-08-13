@@ -84,6 +84,10 @@ function get_nama_role($roles, $id) {
                 <td><?= $pelatihan->nama_pelatihan; ?></td>
               </tr>
               <tr>
+                <th>Jenis Pelatihan</th>
+                <td><?= $jenis_pelatihan->nama_jenis_pelatihan; ?></td>
+              </tr>
+              <tr>
                 <th>Provinsi</th>
                 <td><span class="badge badge-custom"><?= $pelatihan->provinsi; ?></span></td>
               </tr>

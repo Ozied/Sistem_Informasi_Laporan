@@ -43,9 +43,25 @@ class Data extends CI_Controller {
 	public function index()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
-		// Ambil semua role yang belum dihapus (deleted_at IS NULL)
-    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
-        $this->data['title_web'] = 'Data Pelatihan';
+
+		$jenis = $this->input->get('jenis');
+		
+		$id_jenis = null;
+		if ($jenis == 'PJJ'){
+			$id_jenis = 1;
+			$this->data['title_web'] = 'Data Pelatihan PJJ';
+		} elseif ($jenis == 'PDWK'){
+			$id_jenis = 2;
+			$this->data['title_web'] = 'Data Pelatihan PDWK';
+		}
+
+		$this->load->model('M_Admin');
+		
+		$this->data['pelatihan'] = $this->M_Admin->get_pelatihan_by_jenis($id_jenis);
+
+		$this->data['jenis_pelatihan'] = $jenis;
+				
+        
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
         $this->load->view('pelatihan/pelatihan_view',$this->data);
@@ -59,7 +75,20 @@ class Data extends CI_Controller {
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
 
+		// Ambil parameter jenis dari URL
+		$jenis = $this->input->get('jenis');
 		
+		// Set default jenis pelatihan
+		$this->data['default_jenis'] = '';
+		
+		// Jika ada parameter jenis, set default
+		if ($jenis == 'PJJ') {
+			$this->data['default_jenis'] = 1; // ID untuk PJJ
+		} elseif ($jenis == 'PDWK') {
+			$this->data['default_jenis'] = 2; // ID untuk PDWK
+		}
+
+		$this->data['jenis_pelatihan_options'] = $this->db->get('tbl_jenis_pelatihan')->result();
 		$this->data['pegawais'] =  $this->db->query("SELECT * FROM tbl_pegawai ORDER BY id_pegawai DESC")->result_array();
 		$this->data['roles'] =  $this->db->query("SELECT * FROM tbl_role ORDER BY id_role DESC")->result_array();
 
@@ -74,10 +103,18 @@ class Data extends CI_Controller {
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
 		$count = $this->M_Admin->CountTableId('tbl_pelatihan','id_pelatihan',$this->uri->segment('3'));
+		
 
 		if($count > 0)
 		{
 			$this->data['pelatihan'] = $this->M_Admin->get_tableid_edit('tbl_pelatihan','id_pelatihan',$this->uri->segment('3'));
+
+			//Ambil data jenis pelatihan
+			$this->data['jenis_pelatihan'] = $this->M_Admin->get_tableid_edit(
+				'tbl_jenis_pelatihan', 
+				'id_jenis_pelatihan', 
+				$this->data['pelatihan']->id_jenis_pelatihan
+			);
 
 			// ✅ Tambahkan ini
 			$this->data['pegawais'] = $this->db->query("SELECT * FROM tbl_pegawai ORDER BY id_pegawai DESC")->result_array();
@@ -105,6 +142,13 @@ class Data extends CI_Controller {
     if ($count > 0) {
         // Ambil data pelatihan
         $this->data['pelatihan'] = $this->M_Admin->get_tableid_edit('tbl_pelatihan', 'id_pelatihan', $this->uri->segment('3'));
+
+		//Ambil data jenis pelatihan
+		$this->data['jenis_pelatihan'] = $this->M_Admin->get_tableid_edit(
+			'tbl_jenis_pelatihan', 
+			'id_jenis_pelatihan', 
+			$this->data['pelatihan']->id_jenis_pelatihan
+		);
 
         // Ambil data pegawai & role sebagai referensi detail pejabat pembuka/penutup
         $this->data['pegawais'] = $this->db->query("SELECT * FROM tbl_pegawai ORDER BY id_pegawai DESC")->result_array();
@@ -162,11 +206,13 @@ class Data extends CI_Controller {
 		// }
 
 			$data = array(
+				'id_jenis_pelatihan' => htmlentities($post['id_jenis_pelatihan']),
 				'nama_kegiatan' => htmlentities($post['nama_kegiatan']),
 				'nama_pelatihan' => htmlentities($post['nama_pelatihan']),
 				'provinsi' => htmlentities($post['provinsi']),
 				'kab_kota' => htmlentities($post['kab_kota']),
 				'tempat' => htmlentities($post['tempat']),
+				'alamat' => htmlentities($post['alamat']),
 				'tanggal_mulai_pelatihan' => $post['tanggal_mulai'],
 				'tanggal_selesai_pelatihan' => $post['tanggal_selesai'],
 				'bulan_ttd_lap' => htmlentities($post['bulan_ttd']),
@@ -188,7 +234,8 @@ class Data extends CI_Controller {
 			$this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
 				<p>Tambah Data Pelatihan Berhasil!</p>
 			</div></div>');
-			redirect(base_url('data'));
+			$jenis = $this->input->post('id_jenis_pelatihan') == 1 ? 'PJJ' : 'PDWK';
+			redirect(base_url('data?jenis=' . $jenis));
 		}
 
 		// === EDIT PELATIHAN ===
@@ -196,6 +243,7 @@ class Data extends CI_Controller {
 			$post = $this->input->post();
 
 			$data = array(
+				'id_jenis_pelatihan' => htmlentities($post['id_jenis_pelatihan']),
 				'nama_kegiatan' => htmlentities($post['nama_kegiatan']),
 				'nama_pelatihan' => htmlentities($post['nama_pelatihan']),
 				'provinsi' => htmlentities($post['provinsi']),
@@ -229,25 +277,106 @@ class Data extends CI_Controller {
 
 	// Code LDK Pekanbaru Detail Pelatihan
 
+	// public function detailpelatihan()
+	// {
+	// 	// Ambil ID user yang login
+	// 	$this->data['idbo'] = $this->session->userdata('ses_id');
+
+	// 	$jenis = $this->input->get('jenis');
+
+	// 	$id_jenis = null;
+	// 	if ($jenis == 'PJJ'){
+	// 		$id_jenis = 1;
+	// 		$this->data['title_web'] = 'Data Pelatihan PJJ';
+	// 	} elseif ($jenis == 'PDWK'){
+	// 		$id_jenis = 2;
+	// 		$this->data['title_web'] = 'Data Pelatihan PDWK';
+	// 	}
+		
+		
+
+	// 	// Ambil semua data detail pelatihan + join dengan nama pelatihan dan pegawai
+	// 	$this->data['detail_pelatihan'] = $this->db->query("
+	// 		SELECT 
+	// 			dp.*, 
+	// 			p.nama_kegiatan,
+	// 			pj.nama AS nama_penanggung_jawab,
+	// 			kp.nama AS nama_ketua_panitia
+	// 		FROM tbl_detail_pelatihan dp
+	// 		LEFT JOIN tbl_pelatihan p ON dp.id_pelatihan = p.id_pelatihan
+	// 		LEFT JOIN tbl_pegawai pj ON dp.id_penanggung_jawab = pj.id_pegawai
+	// 		LEFT JOIN tbl_pegawai kp ON dp.id_ketua_panitia = kp.id_pegawai
+	// 		WHERE dp.deleted_at IS NULL
+	// 		ORDER BY dp.id_detail_pelatihan DESC
+	// 	")->result();
+
+	// 	$this->data['pelatihan'] = $this->M_Admin->get_pelatihan_by_jenis($id_jenis);
+
+	// 	// Jika ada parameter ID, ambil data spesifik untuk diedit
+	// 	if (!empty($this->input->get('id'))) {
+	// 		$id = $this->input->get('id');
+	// 		$count = $this->M_Admin->CountTableId('tbl_detail_pelatihan', 'id_detail_pelatihan', $id);
+
+	// 		if ($count > 0) {
+	// 			$this->data['detail_pelatihans'] = $this->db->query("
+	// 				SELECT 
+	// 					dp.*, 
+	// 					p.nama_kegiatan,
+	// 					pj.nama AS nama_penanggung_jawab,
+	// 					kp.nama AS nama_ketua_panitia
+	// 				FROM tbl_detail_pelatihan dp
+	// 				LEFT JOIN tbl_pelatihan p ON dp.id_pelatihan = p.id_pelatihan
+	// 				LEFT JOIN tbl_pegawai pj ON dp.id_penanggung_jawab = pj.id_pegawai
+	// 				LEFT JOIN tbl_pegawai kp ON dp.id_ketua_panitia = kp.id_pegawai
+	// 				WHERE dp.id_detail_pelatihan = '$id'
+	// 			")->row();
+	// 		} else {
+	// 			echo '<script>alert("KATEGORI TIDAK DITEMUKAN");window.location="' . base_url('data/detailpelatihan') . '"</script>';
+	// 		}
+	// 	}
+
+	// 	// Set judul dan tampilkan view
+	// 	$this->data['title_web'] = 'Data Detail Pelatihan';
+	// 	$this->load->view('header_view', $this->data);
+	// 	$this->load->view('sidebar_view', $this->data);
+	// 	$this->load->view('detail_pelatihan/detail_pelatihan_view', $this->data);
+	// 	$this->load->view('footer_view', $this->data);
+	// }
+
 	public function detailpelatihan()
 	{
-		// Ambil ID user yang login
 		$this->data['idbo'] = $this->session->userdata('ses_id');
+		
+		// Ambil parameter jenis pelatihan dari URL
+		$jenis = $this->input->get('jenis');
+		$id_jenis = null;
+		
+		// Konversi ke ID jenis jika parameter ada
+		if ($jenis == 'PJJ') {
+			$id_jenis = 1;
+			$this->data['title_web'] = 'Detail Pelatihan PJJ';
+		} elseif ($jenis == 'PDWK') {
+			$id_jenis = 2;
+			$this->data['title_web'] = 'Detail Pelatihan PDWK';
+		} else {
+			$this->data['title_web'] = 'Data Detail Pelatihan';
+		}
 
-		// Ambil semua data detail pelatihan + join dengan nama pelatihan dan pegawai
-		$this->data['detail_pelatihan'] = $this->db->query("
-			SELECT 
-				dp.*, 
-				p.nama_kegiatan,
-				pj.nama AS nama_penanggung_jawab,
-				kp.nama AS nama_ketua_panitia
-			FROM tbl_detail_pelatihan dp
-			LEFT JOIN tbl_pelatihan p ON dp.id_pelatihan = p.id_pelatihan
-			LEFT JOIN tbl_pegawai pj ON dp.id_penanggung_jawab = pj.id_pegawai
-			LEFT JOIN tbl_pegawai kp ON dp.id_ketua_panitia = kp.id_pegawai
-			WHERE dp.deleted_at IS NULL
-			ORDER BY dp.id_detail_pelatihan DESC
-		")->result();
+		// Query dasar dengan JOIN
+		$this->db->select('dp.*, p.nama_kegiatan, p.id_jenis_pelatihan, pj.nama AS nama_penanggung_jawab, kp.nama AS nama_ketua_panitia');
+		$this->db->from('tbl_detail_pelatihan dp');
+		$this->db->join('tbl_pelatihan p', 'dp.id_pelatihan = p.id_pelatihan', 'left');
+		$this->db->join('tbl_pegawai pj', 'dp.id_penanggung_jawab = pj.id_pegawai', 'left');
+		$this->db->join('tbl_pegawai kp', 'dp.id_ketua_panitia = kp.id_pegawai', 'left');
+		$this->db->where('dp.deleted_at IS NULL', null, false);
+		
+		// Tambahkan filter jenis pelatihan jika ada
+		if ($id_jenis !== null) {
+			$this->db->where('p.id_jenis_pelatihan', $id_jenis);
+		}
+		
+		$this->db->order_by('dp.id_detail_pelatihan', 'DESC');
+		$this->data['detail_pelatihan'] = $this->db->get()->result();
 
 		// Jika ada parameter ID, ambil data spesifik untuk diedit
 		if (!empty($this->input->get('id'))) {
@@ -259,6 +388,7 @@ class Data extends CI_Controller {
 					SELECT 
 						dp.*, 
 						p.nama_kegiatan,
+						p.id_jenis_pelatihan,
 						pj.nama AS nama_penanggung_jawab,
 						kp.nama AS nama_ketua_panitia
 					FROM tbl_detail_pelatihan dp
@@ -268,12 +398,11 @@ class Data extends CI_Controller {
 					WHERE dp.id_detail_pelatihan = '$id'
 				")->row();
 			} else {
-				echo '<script>alert("KATEGORI TIDAK DITEMUKAN");window.location="' . base_url('data/detailpelatihan') . '"</script>';
+				echo '<script>alert("DETAIL PELATIHAN TIDAK DITEMUKAN");window.location="' . base_url('data/detailpelatihan') . '"</script>';
 			}
 		}
 
-		// Set judul dan tampilkan view
-		$this->data['title_web'] = 'Data Detail Pelatihan';
+
 		$this->load->view('header_view', $this->data);
 		$this->load->view('sidebar_view', $this->data);
 		$this->load->view('detail_pelatihan/detail_pelatihan_view', $this->data);
@@ -530,19 +659,36 @@ class Data extends CI_Controller {
 
 	public function materipelatihan()
 	{
-		// Ambil ID user yang login
 		$this->data['idbo'] = $this->session->userdata('ses_id');
+		
+		// Ambil parameter jenis pelatihan dari URL
+		$jenis = $this->input->get('jenis');
+		$id_jenis = null;
+		
+		// Konversi ke ID jenis jika parameter ada
+		if ($jenis == 'PJJ') {
+			$id_jenis = 1;
+			$this->data['title_web'] = 'Materi Pelatihan PJJ';
+		} elseif ($jenis == 'PDWK') {
+			$id_jenis = 2;
+			$this->data['title_web'] = 'Materi Pelatihan PDWK';
+		} else {
+			$this->data['title_web'] = 'Data Materi Pelatihan';
+		}
 
-		// Ambil semua data detail pelatihan + join dengan nama pelatihan dan pegawai
-		$this->data['materi_pelatihan'] = $this->db->query("
-			SELECT 
-				mp.*, 
-				p.nama_kegiatan
-			FROM tbl_materi_pelatihan mp
-			LEFT JOIN tbl_pelatihan p ON mp.id_pelatihan = p.id_pelatihan
-			WHERE mp.deleted_at IS NULL
-			ORDER BY mp.id_materi_pelatihan DESC
-		")->result();
+		// Query dasar dengan JOIN menggunakan Query Builder
+		$this->db->select('mp.*, p.nama_kegiatan, p.id_jenis_pelatihan');
+		$this->db->from('tbl_materi_pelatihan mp');
+		$this->db->join('tbl_pelatihan p', 'mp.id_pelatihan = p.id_pelatihan', 'left');
+		$this->db->where('mp.deleted_at IS NULL', null, false);
+		
+		// Tambahkan filter jenis pelatihan jika ada
+		if ($id_jenis !== null) {
+			$this->db->where('p.id_jenis_pelatihan', $id_jenis);
+		}
+		
+		$this->db->order_by('mp.id_materi_pelatihan', 'DESC');
+		$this->data['materi_pelatihan'] = $this->db->get()->result();
 
 		// Jika ada parameter ID, ambil data spesifik untuk diedit
 		if (!empty($this->input->get('id'))) {
@@ -553,18 +699,18 @@ class Data extends CI_Controller {
 				$this->data['materi_pelatihans'] = $this->db->query("
 					SELECT 
 						mp.*, 
-						p.nama_kegiatan
+						p.nama_kegiatan,
+						p.id_jenis_pelatihan
 					FROM tbl_materi_pelatihan mp
 					LEFT JOIN tbl_pelatihan p ON mp.id_pelatihan = p.id_pelatihan
 					WHERE mp.id_materi_pelatihan = '$id'
 				")->row();
 			} else {
-				echo '<script>alert("MATERI PELATIHAN TIDAK DITEMUKAN");window.location="' . base_url('data/materipelatihan') . '"</script>';
+				$this->session->set_flashdata('error', 'Materi pelatihan tidak ditemukan');
+				redirect('data/materipelatihan');
 			}
 		}
 
-		// Set judul dan tampilkan view
-		$this->data['title_web'] = 'Data Materi Pelatihan';
 		$this->load->view('header_view', $this->data);
 		$this->load->view('sidebar_view', $this->data);
 		$this->load->view('materi_pelatihan/materi_pelatihan_view', $this->data);

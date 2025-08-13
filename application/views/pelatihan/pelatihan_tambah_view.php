@@ -17,6 +17,7 @@
           <div class="box-header with-border"></div>
           <div class="box-body">
             <form action="<?= base_url('data/prosespelatihan'); ?>" method="POST">
+              <input type="hidden" name="id_jenis_pelatihan" value="<?= $default_jenis ?>">
               <div class="row">
                 <div class="col-sm-6">
                   
@@ -28,6 +29,25 @@
                   <div class="form-group">
                     <label>Nama Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Nama resmi pelatihan sesuai dokumen"></i></label>
                     <input type="text" name="nama_pelatihan" class="form-control" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>Jenis Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jenis pelatihan sesuai dokumen"></i></label>
+                    <?php if (!empty($default_jenis)): ?>
+                        <?php 
+                            $jenis = $this->db->get_where('tbl_jenis_pelatihan', ['id_jenis_pelatihan' => $default_jenis])->row();
+                        ?>
+                        <input type="text" class="form-control" value="<?= $jenis->nama_jenis_pelatihan ?>" readonly>
+                    <?php else: ?>
+                        <select name="id_jenis_pelatihan" class="form-control" required>
+                            <option value="">- Pilih Jenis -</option>
+                            <?php foreach($jenis_pelatihan_options as $jenis): ?>
+                                <option value="<?= $jenis->id_jenis_pelatihan ?>">
+                                    <?= $jenis->nama_jenis_pelatihan ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
                   </div>
 
                   <div class="form-group">
@@ -44,6 +64,13 @@
                     <label>Tempat <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Nama lokasi pelatihan"></i></label>
                     <input type="text" name="tempat" class="form-control" required>
                   </div>
+                  
+                  <?php if ($default_jenis == 2): ?>
+                    <div class="form-group">
+                      <label>Alamat <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Alamat lengkap tempat pelatihan"></i></label>
+                      <input type="text" name="alamat" class="form-control" required>
+                    </div>
+                  <?php endif; ?>
 
                   <div class="form-group">
                     <label>Tanggal Mulai Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tanggal pertama kegiatan pelatihan"></i></label>
@@ -58,16 +85,14 @@
                   <div class="form-group">
                     <label>Bulan TTD Laporan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Bulan yang tercantum pada dokumen laporan"></i></label>
                     <input type="text" name="bulan_ttd" class="form-control" required placeholder="Contoh: Juli">
-                  </div>
-
+                  </div>                  
+                </div>
+                
+                <div class="col-sm-6">
                   <div class="form-group">
                     <label>Tahun <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tahun pelaksanaan pelatihan"></i></label>
                     <input type="number" name="tahun" class="form-control" required placeholder="Contoh: 2025">
                   </div>
-
-                </div>
-
-                <div class="col-sm-6">
 
                   <div class="form-group">
                     <label>Tanggal Pembukaan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Tanggal acara pembukaan pelatihan"></i></label>

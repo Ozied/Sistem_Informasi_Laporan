@@ -149,6 +149,24 @@ class M_Admin extends CI_Model
       ->result_array();
   }
 
+  function get_pelatihan_by_jenis($id_jenis = null) {
+    // $id_jenis = ($jenis == 'PJJ') ? 1 : 2;
+    // Ambil semua role yang belum dihapus (deleted_at IS NULL)
+    $this->db->select('p.*, j.nama_jenis_pelatihan as nama_jenis_pelatihan');
+    $this->db->from('tbl_pelatihan p');
+    $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
+    $this->db->where('p.deleted_at IS NULL', null, false);
+
+    if ($id_jenis !== NULL) {
+      $this->db->where('p.id_jenis_pelatihan', $id_jenis);
+    }
+
+    $this->db->order_by('p.id_pelatihan', 'DESC');
+
+    return $this->db->get();
+
+  }
+
   function tambahJenisPelatihan($data)
    {
      $this->db->insert('tbl_jenis_pelatihan',$data)->result_array();
