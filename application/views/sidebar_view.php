@@ -46,14 +46,9 @@
 			</li>
 
             
-            <!-- Code LDK Pekanbaru Menu Laporan -->
+            <!-- Code LDK Pekanbaru Menu Laporan PJJ-->
 
-            <li class="treeview <?php if($this->uri->uri_string() == 'data/detailpelatihan'){ echo 'active';}?>
-				<?php if($this->uri->uri_string() == 'data/materipelatihan'){ echo 'active';}?>
-				<?php if($this->uri->uri_string() == 'data'){ echo 'active';}?>
-				<?php if($this->uri->uri_string() == 'data/'){ echo 'active';}?>
-				<?php if($this->uri->uri_string() == 'data/pelatihandetail/'.$this->uri->segment('3')){ echo 'active';}?>
-				<?php if($this->uri->uri_string() == 'data/pelatihanedit/'.$this->uri->segment('3')){ echo 'active';}?>">
+            <li class="treeview <?= ($this->uri->segment(1) == 'data' && $this->input->get('jenis') == 'PJJ') ? 'active' : '' ?>">
                 <a href="#">
                     <i class="fa fa-folder-open"></i>
                     <span>Pelatihan PJJ</span>
@@ -62,23 +57,50 @@
                     </span>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="<?php if($this->uri->uri_string() == 'data'){ echo 'active';}?>
-                        <?php if($this->uri->uri_string() == 'data/pelatihantambah'){ echo 'active';}?>
-                        <?php if($this->uri->uri_string() == 'data/pelatihandetail/'.$this->uri->segment('3')){ echo 'active';}?>
-                        <?php if($this->uri->uri_string() == 'data/pelatihanedit/'.$this->uri->segment('3')){ echo 'active';}?>">
-                        <a href="<?php echo base_url("data");?>" class="cursor">
+                    <li class="<?php if($this->uri->uri_string() == 'data' && $this->input->get('jenis') == 'PJJ'){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data?jenis=PJJ");?>" class="cursor">
                             <span class="fa fa-file"></span> Data Pelatihan
                             
                         </a>
                     </li>
-                    <li class=" <?php if($this->uri->uri_string() == 'data/detailpelatihan'){ echo 'active';}?>">
-                        <a href="<?php echo base_url("data/detailpelatihan");?>" class="cursor">
+                    <li class="<?= ($this->uri->uri_string() == 'data/detailpelatihan' && $this->input->get('jenis') == 'PJJ') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/detailpelatihan?jenis=PJJ");?>" class="cursor">
                             <span class="fa fa-list"></span> Detail Pelatihan
                             
                         </a>
                     </li>
-                    <li class=" <?php if($this->uri->uri_string() == 'data/materipelatihan'){ echo 'active';}?>">
-                        <a href="<?php echo base_url("data/materipelatihan");?>" class="cursor">
+                    <li class=" <?= ($this->uri->uri_string() == 'data/materipelatihan' && $this->input->get('jenis') == 'PJJ') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/materipelatihan?jenis=PJJ");?>" class="cursor">
+                            <span class="fa fa-book"></span> Materi Pelatihan 
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Code LDK Pekanbaru Menu Laporan PDWK-->
+            <li class="treeview <?= ($this->uri->segment(1) == 'data' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
+                <a href="#">
+                    <i class="fa fa-folder-open"></i>
+                    <span>Pelatihan PDWK</span>
+                    <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="<?= ($this->uri->uri_string() == 'data' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data?jenis=PDWK");?>" class="cursor">
+                            <span class="fa fa-file"></span> Data Pelatihan
+                            
+                        </a>
+                    </li>
+                    <li class=" <?= ($this->uri->uri_string() == 'data/detailpelatihan' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/detailpelatihan?jenis=PDWK");?>" class="cursor">
+                            <span class="fa fa-list"></span> Detail Pelatihan
+                            
+                        </a>
+                    </li>
+                    <li class=" <?= ($this->uri->uri_string() == 'data/materipelatihan' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/materipelatihan?jenis=PDWK");?>" class="cursor">
                             <span class="fa fa-book"></span> Materi Pelatihan 
                         </a>
                     </li>
@@ -259,7 +281,18 @@
                     </li>
                 </ul>
             </li>
+
+            <!-- Code LDK Menu Jenis Pelatihan -->
+
+            <li class="<?php if($this->uri->uri_string() == 'data/jenispelatihan'){ echo 'active';}?>
+                <?php if($this->uri->uri_string() == 'data/tambahjenispelatihan'){ echo 'active';}?>
+                <?php if($this->uri->uri_string() == 'data/editjenispelatihan/'.$this->uri->segment('3')){ echo 'active';}?>">
+                <a href="<?php echo base_url('data/jenispelatihan');?>" class="cursor">
+                    <i class="fa fa-book"></i> <span>Jenis Pelatihan</span></a>
+			</li>
             
+
+            <!-- ====================================================================================================================== -->
 			<?php }?>
 			<?php if($this->session->userdata('level') == 'Anggota'){?>
 				<li class="<?php if($this->uri->uri_string() == 'transaksi'){ echo 'active';}?>">

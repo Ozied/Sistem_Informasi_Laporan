@@ -16,8 +16,15 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if($this->session->userdata('level') == 'Petugas'){?>
-              <a href="<?= base_url('data/pelatihantambah'); ?>"><button class="btn btn-primary">
+            <?php if($this->session->userdata('level') == 'Petugas'){
+                $current_jenis = $this->input->get('jenis');
+                $tambah_url = base_url('data/pelatihantambah');
+
+                if ($current_jenis) {
+                  $tambah_url .= '?jenis=' . $current_jenis;
+                }
+              ?>
+              <a href="<?= $tambah_url?>"><button class="btn btn-primary">
                 <i class="fa fa-plus"> </i> Tambah Pelatihan</button></a>
             <?php } ?>
           </div>
@@ -30,6 +37,7 @@
                   <tr>
                     <th>No</th>
                     <th>Nama Pelatihan</th>
+                    <th>Jenis Pelatihan</th>
                     <th>Provinsi</th>
                     <th>Kab/Kota</th>
                     <th>Tempat</th>
@@ -40,10 +48,12 @@
                   </tr>
                 </thead>
                 <tbody>
+                 
                   <?php $no = 1; foreach($pelatihan->result_array() as $isi){ ?>
                   <tr>
                     <td><?= $no; ?></td>
                     <td><?= htmlentities($isi['nama_pelatihan']); ?></td>
+                    <td><?= htmlentities($isi['nama_jenis_pelatihan'] ?? 'Belum ada jenis') ?></td>
                     <td><?= htmlentities($isi['provinsi']); ?></td>
                     <td><?= htmlentities($isi['kab_kota']); ?></td>
                     <td><?= htmlentities($isi['tempat']); ?></td>

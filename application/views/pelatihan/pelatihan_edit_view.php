@@ -29,6 +29,11 @@
                     <label>Nama Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Nama resmi pelatihan sesuai dokumen"></i></label>
                     <input type="text" name="nama_pelatihan" class="form-control" required value="<?= $pelatihan->nama_pelatihan; ?>">
                   </div>
+                  
+                  <div class="form-group">
+                    <label>Jenis Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jenis pelatihan sesuai dokumen"></i></label>
+                    <input type="text" name="nama_pelatihan" class="form-control" required value="<?= $jenis_pelatihan->nama_jenis_pelatihan; ?>">
+                  </div>
 
                   <div class="form-group">
                     <label>Provinsi <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Provinsi tempat pelatihan dilaksanakan"></i></label>

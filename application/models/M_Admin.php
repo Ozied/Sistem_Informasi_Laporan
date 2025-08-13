@@ -8,6 +8,7 @@ class M_Admin extends CI_Model
 	 //validasi jika user belum login
 	 }
 
+  //  Get Data Pelatihan
    function dataPelatihan($id_pelatihan){
     $this->db->select('p.*, d.*');
     $this->db->from('tbl_pelatihan p');
@@ -81,7 +82,7 @@ class M_Admin extends CI_Model
      $pelatihan->materi = $materi;
 
       return $pelatihan;
-   }
+    }
   }
 
   private function _parse_materi($text){
@@ -137,6 +138,39 @@ class M_Admin extends CI_Model
 
     //Return jumlah hari + 1
     return $interval->days;
+   }
+
+  //  Get Jenis Pelatihan
+  function getJenisPelatihan() {
+    return $this->db
+      ->where('deleted_at IS NULL', null, false)
+      ->order_by('id_jenis_pelatihan', 'DESC')
+      ->get('tbl_jenis_pelatihan')
+      ->result_array();
+  }
+
+  function get_pelatihan_by_jenis($id_jenis = null) {
+    // $id_jenis = ($jenis == 'PJJ') ? 1 : 2;
+    // Ambil semua role yang belum dihapus (deleted_at IS NULL)
+    $this->db->select('p.*, j.nama_jenis_pelatihan as nama_jenis_pelatihan');
+    $this->db->from('tbl_pelatihan p');
+    $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
+    $this->db->where('p.deleted_at IS NULL', null, false);
+
+    if ($id_jenis !== NULL) {
+      $this->db->where('p.id_jenis_pelatihan', $id_jenis);
+    }
+
+    $this->db->order_by('p.id_pelatihan', 'DESC');
+
+    return $this->db->get();
+
+  }
+
+  function tambahJenisPelatihan($data)
+   {
+     $this->db->insert('tbl_jenis_pelatihan',$data)->result_array();
+     return $this->db->insert_id();
    }
 
    function get_table($table_name)
