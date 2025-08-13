@@ -34,12 +34,12 @@ class User extends CI_Controller {
     $all_users = $this->M_Admin->get_table('tbl_login');
 
     // Filter only users who are NOT soft-deleted (deleted_at IS NULL)
-    $filtered_users = array_filter($all_users, function($user) {
-        return $user['deleted_at'] === NULL;
-    });
+    // $filtered_users = array_filter($all_users, function($user) {
+    //     return $user['deleted_at'] === NULL;
+    // });
 
     // Reset array keys (important for view)
-    $this->data['user'] = array_values($filtered_users);
+    $this->data['user'] = $all_users;
 
     $this->data['title_web'] = 'Data User';
     $this->load->view('header_view', $this->data);

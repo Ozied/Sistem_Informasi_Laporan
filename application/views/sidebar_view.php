@@ -226,7 +226,18 @@
                     </li>
                 </ul>
             </li>
+
+            <!-- Code LDK Menu Jenis Pelatihan -->
+
+            <li class="<?php if($this->uri->uri_string() == 'data/jenispelatihan'){ echo 'active';}?>
+                <?php if($this->uri->uri_string() == 'data/tambahjenispelatihan'){ echo 'active';}?>
+                <?php if($this->uri->uri_string() == 'data/editjenispelatihan/'.$this->uri->segment('3')){ echo 'active';}?>">
+                <a href="<?php echo base_url('data/jenispelatihan');?>" class="cursor">
+                    <i class="fa fa-book"></i> <span>Jenis Pelatihan</span></a>
+			</li>
             
+
+            <!-- ====================================================================================================================== -->
 			<?php }?>
 			<?php if($this->session->userdata('level') == 'Anggota'){?>
 				<li class="<?php if($this->uri->uri_string() == 'transaksi'){ echo 'active';}?>">

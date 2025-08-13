@@ -8,6 +8,7 @@ class M_Admin extends CI_Model
 	 //validasi jika user belum login
 	 }
 
+  //  Get Data Pelatihan
    function dataPelatihan($id_pelatihan){
     $this->db->select('p.*, d.*');
     $this->db->from('tbl_pelatihan p');
@@ -81,7 +82,7 @@ class M_Admin extends CI_Model
      $pelatihan->materi = $materi;
 
       return $pelatihan;
-   }
+    }
   }
 
   private function _parse_materi($text){
@@ -137,6 +138,21 @@ class M_Admin extends CI_Model
 
     //Return jumlah hari + 1
     return $interval->days;
+   }
+
+  //  Get Jenis Pelatihan
+  function getJenisPelatihan() {
+    return $this->db
+      ->where('deleted_at IS NULL', null, false)
+      ->order_by('id_jenis_pelatihan', 'DESC')
+      ->get('tbl_jenis_pelatihan')
+      ->result_array();
+  }
+
+  function tambahJenisPelatihan($data)
+   {
+     $this->db->insert('tbl_jenis_pelatihan',$data)->result_array();
+     return $this->db->insert_id();
    }
 
    function get_table($table_name)
