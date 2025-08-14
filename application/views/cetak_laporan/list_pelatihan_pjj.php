@@ -16,8 +16,19 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Jenis Pelatihan:</label>                  
+                  <select class="form-control" id="filterJenis">
+                    <option value="">Semua Jenis</option>
+                    <option value="1">PJJ</option>
+                    <option value="2">PDWK</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
-
           <div class="box-body">
             <br/>
             <div class="table-responsive">
@@ -26,7 +37,7 @@
                   <tr>
                     <th>No</th>
                     <th>Nama Pelatihan</th>
-                    <th>Provinsi</th>
+                    <th>Jenis Pelatihan</th>
                     <th>Kab/Kota</th>
                     <th>Tempat</th>
                     <th>Tanggal Mulai</th>
@@ -37,10 +48,10 @@
                 </thead>
                 <tbody>
                   <?php $no = 1; foreach($pelatihan->result_array() as $isi){ ?>
-                  <tr>
+                  <tr data-jenis="<?= $isi['id_jenis_pelatihan'] ?>">
                     <td><?= $no; ?></td>
                     <td><?= htmlentities($isi['nama_pelatihan']); ?></td>
-                    <td><?= htmlentities($isi['provinsi']); ?></td>
+                    <td><?= ($isi['id_jenis_pelatihan'] == 1) ? 'PJJ' : 'PDWK' ?></td>
                     <td><?= htmlentities($isi['kab_kota']); ?></td>
                     <td><?= htmlentities($isi['tempat']); ?></td>
                     <td><?= htmlentities($isi['tanggal_mulai_pelatihan']); ?></td>
@@ -72,3 +83,37 @@
     </div>
   </section>
 </div>
+
+<script>
+$(document).ready(function() {
+    // Inisialisasi tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Filter berdasarkan jenis pelatihan
+    $('#filterJenis').change(function() {
+        var jenis = $(this).val();
+        
+        if (jenis === '') {
+            // Tampilkan semua baris
+            $('tbody tr').show();
+        } else {
+            // Sembunyikan semua baris terlebih dahulu
+            $('tbody tr').hide();
+            
+            // Tampilkan hanya yang sesuai filter
+            $('tbody tr[data-jenis="' + jenis + '"]').show();
+        }
+        
+        // Perbarui nomor urut
+        updateRowNumbers();
+    });
+    
+    // Fungsi untuk memperbarui nomor urut
+    function updateRowNumbers() {
+        var visibleRows = $('tbody tr:visible');
+        visibleRows.each(function(index) {
+            $(this).find('td:first').text(index + 1);
+        });
+    }
+});
+</script>

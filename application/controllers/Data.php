@@ -1574,7 +1574,20 @@ public function proseskegiatanpelatihan()
 	public function cetaklaporan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
-    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+
+		$jenis = $this->input->get('jenis');
+
+		$this->db->select('*')->from('tbl_pelatihan')->where('deleted_at IS NULL', null, false);
+
+		if ($jenis == 'PJJ') {
+			$this->db->where('id_jenis_pelatihan', 1); // Asumsi 1 = PJJ
+		} elseif ($jenis == 'PDWK') {
+			$this->db->where('id_jenis_pelatihan', 2); // Asumsi 2 = PDWK
+		}
+
+		$this->data['pelatihan'] = $this->db->order_by('id_pelatihan', 'DESC')->get();
+
+    	// $this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
         $this->data['title_web'] = 'Cetak Laporan Pelatihan';
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);

@@ -18,10 +18,10 @@
           <div class="small-box bg-aqua">
             <div class="inner">
               <h3><?= $count_pelatihan; ?></h3>
-              <p>Buat Pelatihan</p>
+              <p>Cetak Laporan</p>
             </div>
             <div class="icon"><i class="fa fa-graduation-cap"></i></div>
-            <a class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a class="small-box-footer" href="<?php echo base_url("data/cetaklaporan");?>">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
 
@@ -29,11 +29,11 @@
         <div class="col-lg-4 col-xs-12">
           <div class="small-box bg-green">
             <div class="inner">
-              <h3><?= $count_peserta; ?></h3>
+              <h3><?= $count_pelatihan_pjj; ?></h3>
               <p>Laporan Pelatihan PJJ</p>
             </div>
             <div class="icon"><i class="fa fa-users"></i></div>
-            <a class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a class="small-box-footer" href="<?php echo base_url("data?jenis=PJJ");?>">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
 
@@ -41,11 +41,11 @@
         <div class="col-lg-4 col-xs-12">
           <div class="small-box bg-yellow">
             <div class="inner">
-              <h3><?= $count_pegawai; ?></h3>
+              <h3><?= $count_pelatihan_pdwk; ?></h3>
               <p>Laporan Pelatihan PDWK</p>
             </div>
             <div class="icon"><i class="fa fa-user"></i></div>
-            <a class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a class="small-box-footer" href="<?php echo base_url("data?jenis=PDWK");?>">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
 
