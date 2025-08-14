@@ -1707,7 +1707,7 @@ public function proseskegiatanpelatihan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
 
-			$jenis = $this->input->get('jenis');
+		$jenis = $this->input->get('jenis');
 
 		$this->db->select('*')->from('tbl_pelatihan')->where('deleted_at IS NULL', null, false);
 
@@ -1726,7 +1726,7 @@ public function proseskegiatanpelatihan()
         $this->load->view('cetak_laporan/list_pelatihan_pjj',$this->data);
         $this->load->view('footer_view',$this->data);
 	}
-	}
+	
 
 	public function cetaklaporanpdwk()
 	{
