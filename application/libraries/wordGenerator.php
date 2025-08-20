@@ -256,10 +256,18 @@ class wordGenerator{
 
             $style = generate_list_style($phpword, 'decimal');
 
-            $section1->addListItem("{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $style);
-            $section1->addListItem("{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $style);
-            $section1->addListItem("{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $style);
-            
+            if (isset($pelatihan->pengajar_1)) {
+                $section1->addListItem("{$pelatihan->pengajar_1->nama} berasal dari {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $style);
+            }
+
+            if (isset($pelatihan->pengajar_2)) {
+                $section1->addListItem("{$pelatihan->pengajar_2->nama} berasal dari {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $style);
+            }
+
+            if (isset($pelatihan->pengajar_3)) {
+                $section1->addListItem("{$pelatihan->pengajar_3->nama} berasal dari {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $style);
+            }
+                        
             //PENYELENGGARAAN PELATIHAN
             $section1->addPageBreak();
             $section1->addTitle("PENYELENGGARAAN PELATIHAN");                                                        
