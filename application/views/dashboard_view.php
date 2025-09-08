@@ -38,7 +38,7 @@
         </div>
 
         <!-- Pegawai -->
-        <div class="col-lg-4 col-xs-12">
+        <!-- <div class="col-lg-4 col-xs-12">
           <div class="small-box bg-yellow">
             <div class="inner">
               <h3><?= $count_pelatihan_pdwk; ?></h3>
@@ -47,7 +47,7 @@
             <div class="icon"><i class="fa fa-user"></i></div>
             <a class="small-box-footer" href="<?php echo base_url("data?jenis=PDWK");?>">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
-        </div>
+        </div> -->
 
       </div>
     </div>

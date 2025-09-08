@@ -78,7 +78,7 @@
             </li>
             
             <!-- Code LDK Pekanbaru Menu Laporan PDWK-->
-            <li class="treeview <?= ($this->uri->segment(1) == 'data' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
+            <!-- <li class="treeview <?= ($this->uri->segment(1) == 'data' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
                 <a href="#">
                     <i class="fa fa-folder-open"></i>
                     <span>Pelatihan PDWK</span>
@@ -105,7 +105,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
 
             <!-- Code LDK Pekanbaru Menu Dokumen -->
              <li class="treeview <?php if($this->uri->uri_string() == 'data/dokumenpelatihan'){ echo 'active';}?>
@@ -197,7 +197,7 @@
             </li>
 
             <!-- Code LDK Pekanbaru Menu Cetak Laporan PDWK-->
-              <li class="treeview 
+              <!-- <li class="treeview 
                 <?php if($this->uri->uri_string() == 'data/cetaklaporanpdwk'){ echo 'active';}?>
                 <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
 				<?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
@@ -226,7 +226,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
 
 
             <!-- Code LDK Pekanbaru Menu Pegawai-->
