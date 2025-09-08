@@ -1562,6 +1562,20 @@ class Data extends CI_Controller {
     $this->load->view('footer_view', $this->data);
 }
 
+// Function helper untuk menghitung JP
+private function calculate_jp($jam_mulai, $jam_selesai) {
+    $start = new DateTime($jam_mulai);
+    $end   = new DateTime($jam_selesai);
+    $diff  = $start->diff($end);
+
+    // Total menit
+    $minutes = ($diff->h * 60) + $diff->i;
+
+    // Misalnya: 1 JP = 45 menit
+    return ceil($minutes / 45);
+}
+
+
 public function proseskegiatanpelatihan()
 {
     if ($this->session->userdata('masuk_perpus') != TRUE) {
@@ -1612,51 +1626,108 @@ public function proseskegiatanpelatihan()
 		redirect(base_url('data/listkegiatanpelatihan/' . $id_pelatihan));
 	}
 
-    // Handle Tambah
-    if (!empty($this->input->post('tambah'))) {
-        $post = $this->input->post();
+    // Handle Tambah Backup
+    // if (!empty($this->input->post('tambah'))) {
+    //     $post = $this->input->post();
 
-        $data = [
-            'id_pelatihan'      => htmlentities($post['id_pelatihan']),
-            'sesi_ke'           => htmlentities($post['sesi_ke']),
-            'day_ke'            => htmlentities($post['day_ke']),
-            'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
-            'id_narasumber'     => htmlentities($post['id_narasumber']),
-            'activity_desc'     => htmlentities($post['activity_desc']),
-            'tanggal_activity'  => htmlentities($post['tanggal_activity']),
-            'jam_mulai'         => htmlentities($post['jam_mulai']),
-            'jam_selesai'       => htmlentities($post['jam_selesai']),
-            'created_at'        => date('Y-m-d H:i:s'),
-            'updated_at'        => date('Y-m-d H:i:s'),
-            'deleted_at'        => NULL
-        ];
+    //     $data = [
+    //         'id_pelatihan'      => htmlentities($post['id_pelatihan']),
+    //         'sesi_ke'           => htmlentities($post['sesi_ke']),
+    //         'day_ke'            => htmlentities($post['day_ke']),
+    //         'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+    //         'id_narasumber'     => htmlentities($post['id_narasumber']),
+    //         'activity_desc'     => htmlentities($post['activity_desc']),
+    //         'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+    //         'jam_mulai'         => htmlentities($post['jam_mulai']),
+    //         'jam_selesai'       => htmlentities($post['jam_selesai']),
+    //         'created_at'        => date('Y-m-d H:i:s'),
+    //         'updated_at'        => date('Y-m-d H:i:s'),
+    //         'deleted_at'        => NULL
+    //     ];
 
-        $this->db->insert('tbl_pelatihan_activity', $data);
-        $this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil ditambahkan!</div>');
-        redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
-    }
+    //     $this->db->insert('tbl_pelatihan_activity', $data);
+    //     $this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil ditambahkan!</div>');
+    //     redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+    // }
 
-    // Handle Edit
-    if (!empty($this->input->post('edit'))) {
-        $post = $this->input->post();
+	// Handle Tambah
+	if (!empty($this->input->post('tambah'))) {
+    $post = $this->input->post();
 
-        $data = [
-            'sesi_ke'           => htmlentities($post['sesi_ke']),
-            'day_ke'            => htmlentities($post['day_ke']),
-            'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
-            'id_narasumber'     => htmlentities($post['id_narasumber']),
-            'activity_desc'     => htmlentities($post['activity_desc']),
-            'tanggal_activity'  => htmlentities($post['tanggal_activity']),
-            'jam_mulai'         => htmlentities($post['jam_mulai']),
-            'jam_selesai'       => htmlentities($post['jam_selesai']),
-            'updated_at'        => date('Y-m-d H:i:s'),
-        ];
+    // Hitung JP otomatis
+    $jp_counts = $this->calculate_jp($post['jam_mulai'], $post['jam_selesai']);
 
-        $this->db->where('id_activity', htmlentities($post['edit']));
-        $this->db->update('tbl_pelatihan_activity', $data);
-        $this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil diperbarui!</div>');
-        redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
-    }
+    $data = [
+        'id_pelatihan'      => htmlentities($post['id_pelatihan']),
+        'sesi_ke'           => htmlentities($post['sesi_ke']),
+        'day_ke'            => htmlentities($post['day_ke']),
+        'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+        'id_narasumber'     => htmlentities($post['id_narasumber']),
+        'activity_desc'     => htmlentities($post['activity_desc']),
+        'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+        'jam_mulai'         => htmlentities($post['jam_mulai']),
+        'jam_selesai'       => htmlentities($post['jam_selesai']),
+        'jp_counts'         => $jp_counts,
+        'jp_type'           => htmlentities($post['jp_type']),
+        'created_at'        => date('Y-m-d H:i:s'),
+        'updated_at'        => date('Y-m-d H:i:s'),
+        'deleted_at'        => NULL
+    ];
+
+    $this->db->insert('tbl_pelatihan_activity', $data);
+    $this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil ditambahkan!</div>');
+    redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+}
+
+    // Handle Edit Backup
+    // if (!empty($this->input->post('edit'))) {
+    //     $post = $this->input->post();
+
+    //     $data = [
+    //         'sesi_ke'           => htmlentities($post['sesi_ke']),
+    //         'day_ke'            => htmlentities($post['day_ke']),
+    //         'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+    //         'id_narasumber'     => htmlentities($post['id_narasumber']),
+    //         'activity_desc'     => htmlentities($post['activity_desc']),
+    //         'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+    //         'jam_mulai'         => htmlentities($post['jam_mulai']),
+    //         'jam_selesai'       => htmlentities($post['jam_selesai']),
+    //         'updated_at'        => date('Y-m-d H:i:s'),
+    //     ];
+
+    //     $this->db->where('id_activity', htmlentities($post['edit']));
+    //     $this->db->update('tbl_pelatihan_activity', $data);
+    //     $this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil diperbarui!</div>');
+    //     redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+    // }
+
+	// Handle Edit
+	if (!empty($this->input->post('edit'))) {
+		$post = $this->input->post();
+
+		// Hitung ulang JP otomatis
+		$jp_counts = $this->calculate_jp($post['jam_mulai'], $post['jam_selesai']);
+
+		$data = [
+			'sesi_ke'           => htmlentities($post['sesi_ke']),
+			'day_ke'            => htmlentities($post['day_ke']),
+			'nama_kegiatan'     => htmlentities($post['nama_kegiatan']),
+			'id_narasumber'     => htmlentities($post['id_narasumber']),
+			'activity_desc'     => htmlentities($post['activity_desc']),
+			'tanggal_activity'  => htmlentities($post['tanggal_activity']),
+			'jam_mulai'         => htmlentities($post['jam_mulai']),
+			'jam_selesai'       => htmlentities($post['jam_selesai']),
+			'jp_counts'         => $jp_counts,
+			'jp_type'           => htmlentities($post['jp_type']),
+			'updated_at'        => date('Y-m-d H:i:s'),
+		];
+
+		$this->db->where('id_activity', htmlentities($post['edit']));
+		$this->db->update('tbl_pelatihan_activity', $data);
+		$this->session->set_flashdata('pesan', '<div class="alert alert-success">Kegiatan berhasil diperbarui!</div>');
+		redirect(base_url('data/listkegiatanpelatihan/' . $post['id_pelatihan']));
+	}
+
 
 	// Handle Delete Foto (soft delete)
 	if (!empty($this->input->get('delete_foto'))) {

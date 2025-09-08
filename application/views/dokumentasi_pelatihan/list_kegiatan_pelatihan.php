@@ -132,6 +132,18 @@
                             <label for="jam_selesai">Jam Selesai <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Waktu selesai kegiatan (format 24 jam)"></i></label>
                             <input type="time" name="jam_selesai" class="form-control" value="<?= date('H:i', strtotime($kegiatan['jam_selesai'])); ?>" required>
                           </div>
+                          <div class="form-group">
+                          <label for="jp_type">Jenis JP</label>
+                          <select name="jp_type" class="form-control" required>
+                            <option value="">-- Pilih Jenis JP --</option>
+                            <option value="Synchronous" <?= isset($kegiatan) && $kegiatan['jp_type'] == 'Synchronous' ? 'selected' : ''; ?>>Synchronous</option>
+                            <option value="Asynchronous" <?= isset($kegiatan) && $kegiatan['jp_type'] == 'Asynchronous' ? 'selected' : ''; ?>>Asynchronous</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="jp_counts">Jumlah JP</label>
+                          <input type="number" id="jp_counts" name="jp_counts" class="form-control" value="<?= isset($kegiatan) ? $kegiatan['jp_counts'] : ''; ?>" readonly>
                         </div>
 
                         <div class="modal-footer">
@@ -298,8 +310,22 @@
             <label for="jam_selesai">Jam Selesai <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Waktu selesai kegiatan (format 24 jam)"></i></label>
             <input type="time" name="jam_selesai" class="form-control" required>
           </div>
-        </div>
+          
+          <div class="form-group">
+        <label for="jp_type">Jenis JP</label>
+        <select name="jp_type" class="form-control" required>
+          <option value="">-- Pilih Jenis JP --</option>
+          <option value="Synchronous" <?= isset($kegiatan) && $kegiatan['jp_type'] == 'Synchronous' ? 'selected' : ''; ?>>Synchronous</option>
+          <option value="Asynchronous" <?= isset($kegiatan) && $kegiatan['jp_type'] == 'Asynchronous' ? 'selected' : ''; ?>>Asynchronous</option>
+        </select>
+      </div>
 
+      <div class="form-group">
+        <label for="jp_counts">Jumlah JP</label>
+        <input type="number" id="jp_counts" name="jp_counts" class="form-control" value="<?= isset($kegiatan) ? $kegiatan['jp_counts'] : ''; ?>" readonly>
+      </div>
+
+        </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Simpan</button>
           <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
@@ -340,4 +366,33 @@ function deletePhoto(id_foto, id_pelatihan) {
         window.location.href = '<?= base_url('data/proseskegiatanpelatihan?delete_foto='); ?>' + id_foto + '&id_pelatihan=' + id_pelatihan;
     }
 }
+
+function calculateJP() {
+    let jamMulai = document.querySelector('input[name="jam_mulai"]').value;
+    let jamSelesai = document.querySelector('input[name="jam_selesai"]').value;
+
+    if (jamMulai && jamSelesai) {
+        let start = new Date("1970-01-01T" + jamMulai + ":00");
+        let end   = new Date("1970-01-01T" + jamSelesai + ":00");
+
+        // Hitung total menit
+        let diffMs = end - start;
+        if (diffMs < 0) {
+            // Kalau jam selesai < jam mulai (misal lewat tengah malam)
+            end.setDate(end.getDate() + 1);
+            diffMs = end - start;
+        }
+        let minutes = diffMs / 1000 / 60;
+
+        // Aturan JP = 45 menit (ubah ke 45 kalau perlu)
+        let jp = Math.ceil(minutes / 45);
+
+        document.getElementById('jp_counts').value = jp;
+    }
+}
+
+// Pasang listener ke input waktu
+document.querySelector('input[name="jam_mulai"]').addEventListener("change", calculateJP);
+document.querySelector('input[name="jam_selesai"]').addEventListener("change", calculateJP);
+
 </script>

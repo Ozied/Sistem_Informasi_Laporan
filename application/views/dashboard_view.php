@@ -47,7 +47,7 @@
             <div class="icon"><i class="fa fa-user"></i></div>
             <a class="small-box-footer" href="<?php echo base_url("data?jenis=PDWK");?>">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
-        </div> -->
+        </div>
 
       </div>
     </div>
