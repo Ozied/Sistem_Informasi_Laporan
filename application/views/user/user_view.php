@@ -63,8 +63,8 @@
                                     <a href="<?= base_url('user/edit/'.$isi['id_login']);?>"><button class="btn btn-success"><i class="fa fa-edit"></i></button></a>
                                     <a href="<?= base_url('user/del/'.$isi['id_login']);?>" onclick="return confirm('Anda yakin user akan dihapus ?');">
 									<button class="btn btn-danger"><i class="fa fa-trash"></i></button></a>
-									<a href="<?= base_url('user/detail/'.$isi['id_login']);?>" target="_blank"><button class="btn btn-primary">
-										<i class="fa fa-print"></i> Cetak Kartu</button></a>
+									<!-- <a href="<?= base_url('user/detail/'.$isi['id_login']);?>" target="_blank"><button class="btn btn-primary">
+										<i class="fa fa-print"></i> Cetak Kartu</button></a> -->
                                 </td>
                             </tr>
                         <?php $no++;}?>

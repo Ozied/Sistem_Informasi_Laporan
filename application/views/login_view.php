@@ -47,7 +47,7 @@
 <div class="login-box">
 	<br/>
   <div class="login-logo">
-    <a href="index.php" style="color: black;">Sistem Informasi <br/><b>Laporan PJJ</b></a>
+    <a href="index.php" style="color: black;">Sistem Informasi <br/><b>Laporan PDWK</b></a>
   </div>
   <div id="tampilalert"></div>
   <!-- /.login-logo -->

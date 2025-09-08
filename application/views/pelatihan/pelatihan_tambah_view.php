@@ -164,7 +164,7 @@
               <div class="pull-right">
                 <input type="hidden" name="tambah" value="tambah">
                 <button type="submit" class="btn btn-primary btn-md">Submit</button>
-                <a href="<?= base_url('data'); ?>" class="btn btn-danger btn-md">Kembali</a>
+                <a href="<?= base_url('data?jenis=PDWK'); ?>" class="btn btn-danger btn-md">Kembali</a>
               </div>
 
             </form>

@@ -304,7 +304,9 @@ class wordGenerator{
 
 
             $section1->addListItem("Lama (Durasi Waktu) Pelatihan", 0, $fontstyle, $alphaStyle);
-            $section1->addText("Pelatihan ini dilaksanakan selama $durasi hari, mulai dari tanggal " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ", dengan jumlah jam pelatihan sebanyak $materi->jumlah_jp Jam Pelatihan (JP).", $fontstyle, $paragraphstyle);
+             if (isset($pelatihan->materi)){
+                 $section1->addText("Pelatihan ini dilaksanakan selama $durasi hari, mulai dari tanggal " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ", dengan jumlah jam pelatihan sebanyak $materi->jumlah_jp Jam Pelatihan (JP).", $fontstyle, $paragraphstyle);
+             }
 
             $section1->addListItem("Tempat Pelatihan", 0, $fontstyle, $alphaStyle);
             $section1->addText("Pelatihan ini dilaksanakan secara virtual melalui whatsapp group, zoom meeting, dan LMS PJJ Kementerian Agama.", $fontstyle, $paragraphstyle);

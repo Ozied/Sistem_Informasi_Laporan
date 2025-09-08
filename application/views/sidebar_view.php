@@ -172,7 +172,7 @@
 				<?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
                 <a href="#">
                     <i class="fa fa-file"></i>
-                    <span>Cetak Laporan PJJ</span>
+                    <span>Cetak Laporan</span>
                     <span class="pull-right-container">
                     <i class="fa fa-angle-left pull-right"></i>
                     </span>
@@ -183,13 +183,13 @@
                     <?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
                     <?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
                             <a href="<?php echo base_url("data/cetaklaporan");?>" class="cursor">
-                            <span class="fa fa-tasks"></span> Laporan Pelatihan PJJ
+                            <span class="fa fa-tasks"></span> Laporan Pelatihan
                             
                         </a>
                     </li>
                     <li class=" <?php if($this->uri->uri_string() == 'data/cetaklampiranlaporan'){ echo 'active';}?>">
                         <a href="<?php echo base_url("data/cetaklampiranlaporan");?>" class="cursor">
-                            <span class="fa fa-list"></span> Lampiran Dokumen PJJ
+                            <span class="fa fa-list"></span> Lampiran Dokumen
                             
                         </a>
                     </li>
@@ -197,7 +197,7 @@
             </li>
 
             <!-- Code LDK Pekanbaru Menu Cetak Laporan PDWK-->
-              <li class="treeview 
+              <!-- <li class="treeview 
                 <?php if($this->uri->uri_string() == 'data/cetaklaporanpdwk'){ echo 'active';}?>
                 <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
 				<?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
@@ -226,7 +226,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
 
 
             <!-- Code LDK Pekanbaru Menu Pegawai-->
