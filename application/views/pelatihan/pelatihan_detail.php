@@ -168,7 +168,7 @@ function get_nama_role($roles, $id) {
             </table>
 
             <div class="text-right">
-              <a href="<?= base_url('data'); ?>" class="btn btn-danger btn-md">
+              <a href="<?= base_url('data?jenis=PDWK'); ?>" class="btn btn-danger btn-md">
                 <i class="fa fa-arrow-left"></i> Kembali
               </a>
             </div>

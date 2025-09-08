@@ -100,7 +100,7 @@
           <div class="box-footer text-right">
             <input type="hidden" name="edit" value="<?= $materi_pelatihan->id_materi_pelatihan; ?>">
             <button type="submit" class="btn btn-primary">Submit</button>
-            <a href="<?= base_url('data/materipelatihan'); ?>" class="btn btn-danger">Kembali</a>
+            <a href="<?= base_url('data/materipelatihan?jenis=PDWk'); ?>" class="btn btn-danger">Kembali</a>
           </div>
 
         </div>

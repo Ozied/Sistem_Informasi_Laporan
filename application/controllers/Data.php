@@ -193,7 +193,7 @@ class Data extends CI_Controller {
 			$this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-warning">
 				<p> Berhasil Hapus Data Pelatihan!</p>
 			</div></div>');
-			redirect(base_url('data'));
+			redirect(base_url('data?jenis=PDWK'));
 		}
 
 		// === TAMBAH PELATIHAN ===
@@ -201,7 +201,7 @@ class Data extends CI_Controller {
 			$post = $this->input->post();
 
 		// 	if (!isset($post['id_pejabat_pembuka']) || !isset($post['id_role_pembuka']) || 
-		// 	!isset($post['id_pejabat_penutup']) || !isset($post['id_role_penutup'])) {
+		// !isset($post['id_pejabat_penutup']) || !isset($post['id_role_penutup'])) {
 		// 	$this->session->set_flashdata('pesan', '<div class="alert alert-danger">Data pejabat dan jabatan belum lengkap.</div>');
 		// 	redirect(base_url('data/pelatihantambah'));
 		// }
@@ -708,7 +708,7 @@ class Data extends CI_Controller {
 				")->row();
 			} else {
 				$this->session->set_flashdata('error', 'Materi pelatihan tidak ditemukan');
-				redirect('data/materipelatihan');
+				redirect('data/materipelatihan?jenis=PDWK');
 			}
 		}
 
