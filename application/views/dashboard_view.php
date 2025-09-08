@@ -13,7 +13,7 @@
   <section class="content">
     <div class="row">
       <div class="col-sm-12">
-        <!-- Pelatihan -->
+        <!-- Cetak Laporan -->
         <div class="col-lg-4 col-xs-12">
           <div class="small-box bg-aqua">
             <div class="inner">
@@ -21,11 +21,11 @@
               <p>Cetak Laporan</p>
             </div>
             <div class="icon"><i class="fa fa-graduation-cap"></i></div>
-            <a class="small-box-footer" href="<?php echo base_url("data/cetaklaporan");?>">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a class="small-box-footer" href="<?php echo base_url("data/cetaklaporanpdwk");?>">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
 
-        <!-- Peserta -->
+        <!-- Laporan PJJ -->
         <div class="col-lg-4 col-xs-12">
           <div class="small-box bg-green">
             <div class="inner">
@@ -37,8 +37,8 @@
           </div>
         </div>
 
-        <!-- Pegawai -->
-        <!-- <div class="col-lg-4 col-xs-12">
+        <!-- Laporan PDWK -->
+        <div class="col-lg-4 col-xs-12">
           <div class="small-box bg-yellow">
             <div class="inner">
               <h3><?= $count_pelatihan_pdwk; ?></h3>

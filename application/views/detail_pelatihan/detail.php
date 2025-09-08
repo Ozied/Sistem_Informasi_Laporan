@@ -112,7 +112,7 @@ function get_nama_pegawai($pegawais, $id) {
             </table>
 
             <div class="text-right">
-              <a href="<?= base_url('data/detailpelatihan'); ?>" class="btn btn-danger btn-md">
+              <a href="<?= base_url('data/detailpelatihan?jenis=PDWK'); ?>" class="btn btn-danger btn-md">
                 <i class="fa fa-arrow-left"></i> Kembali
               </a>
             </div>

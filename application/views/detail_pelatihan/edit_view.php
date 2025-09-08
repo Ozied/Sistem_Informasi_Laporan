@@ -152,7 +152,7 @@
           <div class="box-footer text-right">
             <input type="hidden" name="edit" value="<?= $detail_pelatihan->id_detail_pelatihan; ?>">
             <button type="submit" class="btn btn-primary">Submit</button>
-            <a href="<?= base_url('data/detailpelatihan'); ?>" class="btn btn-danger">Kembali</a>
+            <a href="<?= base_url('data/detailpelatihan?jenis=PDWK'); ?>" class="btn btn-danger">Kembali</a>
           </div>
 
         </div>
