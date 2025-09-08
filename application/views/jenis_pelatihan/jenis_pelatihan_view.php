@@ -42,7 +42,7 @@
                       <td>
 
                           <?php if($this->session->userdata('level') == 'Petugas'){ ?>
-                              <a href="<?= base_url('data/jenispelatihanedit/'.$isi['id_jenis_pelatihan']); ?>"><button class="btn btn-success"><i class="fa fa-edit"></i></button></a>
+                              <!-- <a href="<?= base_url('data/jenispelatihanedit/'.$isi['id_jenis_pelatihan']); ?>"><button class="btn btn-success"><i class="fa fa-edit"></i></button></a> -->
                               <!-- <a href="<?= base_url('data/jenispelatihandetail/'.$isi['id_jenis_pelatihan']); ?>"><button class="btn btn-primary"><i class="fa fa-sign-in"></i> Detail</button></a> -->
                               <a href="<?= base_url('data/hapusjenispelatihan/'.$isi['id_jenis_pelatihan']); ?>" onclick="return confirm('Anda yakin pelatihan ini akan dihapus?');">
                                   <button class="btn btn-danger"><i class="fa fa-trash"></i></button>

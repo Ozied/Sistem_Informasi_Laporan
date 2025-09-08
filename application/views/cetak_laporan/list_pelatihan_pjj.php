@@ -23,7 +23,6 @@
                   <select class="form-control" id="filterJenis">
                     <option value="">Semua Jenis</option>
                     <option value="1">PJJ</option>
-                    <option value="2">PDWK</option>
                   </select>
                 </div>
               </div>
