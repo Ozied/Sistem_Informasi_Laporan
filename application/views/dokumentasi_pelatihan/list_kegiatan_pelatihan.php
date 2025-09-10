@@ -126,11 +126,11 @@
                           </div>
                           <div class="form-group">
                             <label for="jam_mulai">Jam Mulai <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Waktu mulai kegiatan (format 24 jam)"></i></label>
-                            <input type="time" name="jam_mulai" class="form-control" value="<?= date('H:i', strtotime($kegiatan['jam_mulai'])); ?>" required>
+                            <input type="time" class="jam_mulai form-control" name="jam_mulai" value="<?= date('H:i', strtotime($kegiatan['jam_mulai'])); ?>" required>
                           </div>
                           <div class="form-group">
                             <label for="jam_selesai">Jam Selesai <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Waktu selesai kegiatan (format 24 jam)"></i></label>
-                            <input type="time" name="jam_selesai" class="form-control" value="<?= date('H:i', strtotime($kegiatan['jam_selesai'])); ?>" required>
+                            <input type="time" class="jam_selesai form-control" name="jam_selesai" value="<?= date('H:i', strtotime($kegiatan['jam_selesai'])); ?>" required>
                           </div>
                           <div class="form-group">
                           <label for="jp_type">Jenis JP</label>
@@ -143,7 +143,7 @@
 
                         <div class="form-group">
                           <label for="jp_counts">Jumlah JP</label>
-                          <input type="number" id="jp_counts" name="jp_counts" class="form-control" value="<?= isset($kegiatan) ? $kegiatan['jp_counts'] : ''; ?>" readonly>
+                          <input type="number" id="jp_counts" name="jp_counts" class="form-control jp_counts" value="<?= isset($kegiatan) ? $kegiatan['jp_counts'] : ''; ?>" readonly>
                         </div>
 
                         <div class="modal-footer">
@@ -304,25 +304,25 @@
           </div>
           <div class="form-group">
             <label for="jam_mulai">Jam Mulai <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Waktu mulai kegiatan (format 24 jam)"></i></label>
-            <input type="time" name="jam_mulai" class="form-control" required>
+            <input type="time" class="jam_mulai form-control" name="jam_mulai" required>
           </div>
           <div class="form-group">
             <label for="jam_selesai">Jam Selesai <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Waktu selesai kegiatan (format 24 jam)"></i></label>
-            <input type="time" name="jam_selesai" class="form-control" required>
+            <input type="time" class="jam_selesai form-control" name="jam_selesai" required>
           </div>
           
           <div class="form-group">
         <label for="jp_type">Jenis JP</label>
         <select name="jp_type" class="form-control" required>
           <option value="">-- Pilih Jenis JP --</option>
-          <option value="Synchronous" <?= isset($kegiatan) && $kegiatan['jp_type'] == 'Synchronous' ? 'selected' : ''; ?>>Synchronous</option>
-          <option value="Asynchronous" <?= isset($kegiatan) && $kegiatan['jp_type'] == 'Asynchronous' ? 'selected' : ''; ?>>Asynchronous</option>
+          <option value="Synchronous">Synchronous</option>
+          <option value="Asynchronous">Asynchronous</option>
         </select>
       </div>
 
       <div class="form-group">
         <label for="jp_counts">Jumlah JP</label>
-        <input type="number" id="jp_counts" name="jp_counts" class="form-control" value="<?= isset($kegiatan) ? $kegiatan['jp_counts'] : ''; ?>" readonly>
+        <input type="number" class="jp_counts form-control" name="jp_counts" value="" readonly>
       </div>
 
         </div>
@@ -336,7 +336,6 @@
 </div>
 
 <script>
-
 // Initialize tooltips for all modals
 $(document).ready(function(){
     // Function to initialize tooltips
@@ -367,32 +366,52 @@ function deletePhoto(id_foto, id_pelatihan) {
     }
 }
 
-function calculateJP() {
-    let jamMulai = document.querySelector('input[name="jam_mulai"]').value;
-    let jamSelesai = document.querySelector('input[name="jam_selesai"]').value;
-
+// Function to calculate JP based on time inputs
+function calculateJP(jamMulai, jamSelesai) {
     if (jamMulai && jamSelesai) {
         let start = new Date("1970-01-01T" + jamMulai + ":00");
         let end   = new Date("1970-01-01T" + jamSelesai + ":00");
 
-        // Hitung total menit
         let diffMs = end - start;
         if (diffMs < 0) {
-            // Kalau jam selesai < jam mulai (misal lewat tengah malam)
-            end.setDate(end.getDate() + 1);
+            end.setDate(end.getDate() + 1); // kalau lewat tengah malam
             diffMs = end - start;
         }
         let minutes = diffMs / 1000 / 60;
+        let jp = Math.ceil(minutes / 45); // aturan 1 JP = 45 menit
 
-        // Aturan JP = 45 menit (ubah ke 45 kalau perlu)
-        let jp = Math.ceil(minutes / 45);
-
-        document.getElementById('jp_counts').value = jp;
+        return jp;
     }
+    return 0;
 }
 
-// Pasang listener ke input waktu
-document.querySelector('input[name="jam_mulai"]').addEventListener("change", calculateJP);
-document.querySelector('input[name="jam_selesai"]').addEventListener("change", calculateJP);
-
+// Initialize JP calculation for all modals
+$(document).ready(function() {
+    // Event delegation for time input changes in any modal
+    $(document).on('change', '.jam_mulai, .jam_selesai', function() {
+        // Find the parent modal of the changed input
+        const modal = $(this).closest('.modal');
+        
+        // Get the time values
+        const jamMulai = modal.find('.jam_mulai').val();
+        const jamSelesai = modal.find('.jam_selesai').val();
+        
+        // Calculate JP
+        const jpCount = calculateJP(jamMulai, jamSelesai);
+        
+        // Update the JP count field in the same modal
+        modal.find('.jp_counts').val(jpCount);
+    });
+    
+    // Initialize JP counts when modals are shown
+    $('.modal').on('shown.bs.modal', function() {
+        const jamMulai = $(this).find('.jam_mulai').val();
+        const jamSelesai = $(this).find('.jam_selesai').val();
+        
+        if (jamMulai && jamSelesai) {
+            const jpCount = calculateJP(jamMulai, jamSelesai);
+            $(this).find('.jp_counts').val(jpCount);
+        }
+    });
+});
 </script>
