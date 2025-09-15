@@ -1772,6 +1772,296 @@ public function proseskegiatanpelatihan()
     }
 }
 
+	// Code LDK Pekanbaru Controller Menu Peserta Pelatihan
+
+	public function pesertapelatihan()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+        $this->data['title_web'] = 'Data Peserta Pelatihan';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('peserta_pelatihan/list_pelatihan',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+
+	public function listpesertapelatihan($id_pelatihan)
+	{
+		if ($this->session->userdata('masuk_perpus') != TRUE) {
+			$url = base_url('login');
+			redirect($url);
+		}
+
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+
+		// Cek apakah pelatihan exists
+		$cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+			'id_pelatihan' => $id_pelatihan,
+			'deleted_at' => NULL
+		])->row();
+
+		if (!$cek_pelatihan) {
+			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data') . '"</script>';
+			return;
+		}
+
+		$this->data['pelatihan'] = $cek_pelatihan;
+		
+		// Get all peserta for this pelatihan
+		$this->data['peserta_pelatihan'] = $this->db->query("
+			SELECT * FROM tbl_peserta_pelatihan 
+			WHERE id_pelatihan = ? AND deleted_at IS NULL 
+			ORDER BY nama_peserta ASC
+		", [$id_pelatihan])->result();
+
+		$this->data['id_pelatihan'] = $id_pelatihan;
+		$this->data['title_web'] = 'Data Peserta - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+		$this->load->view('header_view', $this->data);
+		$this->load->view('sidebar_view', $this->data);
+		$this->load->view('peserta_pelatihan/list_peserta_pelatihan', $this->data);
+		$this->load->view('footer_view', $this->data);
+	}
+
+	public function prosespesertapelatihan()
+{
+    if ($this->session->userdata('masuk_perpus') != TRUE) {
+        $url = base_url('login');
+        redirect($url);
+    }
+
+    // === DELETE PESERTA ===
+    if (!empty($this->input->get('id_peserta'))) {
+        $id_peserta = htmlentities($this->input->get('id_peserta'));
+        $id_pelatihan = htmlentities($this->input->get('id_pelatihan'));
+
+        $this->db->set('deleted_at', date('Y-m-d H:i:s'));
+        $this->db->where('id_peserta', $id_peserta);
+        $this->db->update('tbl_peserta_pelatihan');
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-warning">
+            <p>Berhasil Hapus Data Peserta!</p>
+        </div></div>');
+        redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+    }
+
+    // === TAMBAH PESERTA (SINGLE) ===
+    if (!empty($this->input->post('tambah'))) {
+        $post = $this->input->post();
+        $id_pelatihan = htmlentities($post['id_pelatihan']);
+
+        // Validasi NIP unik untuk pelatihan ini
+        $cek_nip = $this->db->get_where('tbl_peserta_pelatihan', [
+            'id_pelatihan' => $id_pelatihan,
+            'nip' => htmlentities($post['nip']),
+            'deleted_at' => NULL
+        ])->row();
+
+        if ($cek_nip) {
+            $this->session->set_flashdata('pesan', '<div class="alert alert-danger">
+                <p>NIP ' . htmlentities($post['nip']) . ' sudah terdaftar pada pelatihan ini!</p>
+            </div>');
+            redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+        }
+
+        $data = array(
+            'id_pelatihan' => $id_pelatihan,
+            'nama_peserta' => htmlentities($post['nama_peserta']),
+            'jenis_kelamin' => htmlentities($post['jenis_kelamin']),
+            'nip' => htmlentities($post['nip']),
+            'pangkatgol' => htmlentities($post['pangkatgol']),
+            'jabatan' => htmlentities($post['jabatan']),
+            'unit_kerja' => htmlentities($post['unit_kerja']),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        );
+
+        $this->db->insert('tbl_peserta_pelatihan', $data);
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+            <p>Tambah Data Peserta Berhasil!</p>
+        </div></div>');
+        redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+    }
+
+    // === EDIT PESERTA ===
+    if (!empty($this->input->post('edit'))) {
+        $post = $this->input->post();
+        $id_peserta = htmlentities($post['edit']);
+        $id_pelatihan = htmlentities($post['id_pelatihan']);
+
+        // Validasi NIP unik (kecuali untuk data yang sedang diedit)
+        $cek_nip = $this->db->get_where('tbl_peserta_pelatihan', [
+            'id_pelatihan' => $id_pelatihan,
+            'nip' => htmlentities($post['nip']),
+            'id_peserta !=' => $id_peserta,
+            'deleted_at' => NULL
+        ])->row();
+
+        if ($cek_nip) {
+            $this->session->set_flashdata('pesan', '<div class="alert alert-danger">
+                <p>NIP ' . htmlentities($post['nip']) . ' sudah terdaftar pada pelatihan ini!</p>
+            </div>');
+            redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+        }
+
+        $data = array(
+            'nama_peserta' => htmlentities($post['nama_peserta']),
+            'jenis_kelamin' => htmlentities($post['jenis_kelamin']),
+            'nip' => htmlentities($post['nip']),
+            'pangkatgol' => htmlentities($post['pangkatgol']),
+            'jabatan' => htmlentities($post['jabatan']),
+            'unit_kerja' => htmlentities($post['unit_kerja']),
+            'updated_at' => date('Y-m-d H:i:s'),
+        );
+
+        $this->db->where('id_peserta', $id_peserta);
+        $this->db->update('tbl_peserta_pelatihan', $data);
+
+        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+            <p>Edit Data Peserta Berhasil!</p>
+        </div></div>');
+        redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+    }
+
+   // === IMPORT EXCEL BATCH ===
+if (!empty($this->input->post('import_excel'))) {
+    $id_pelatihan = htmlentities($this->input->post('id_pelatihan'));
+    
+    $config['upload_path'] = './assets/excel/';
+    $config['allowed_types'] = 'xlsx|xls|csv';
+    $config['max_size'] = 2048;
+    $config['encrypt_name'] = TRUE;
+
+    $this->load->library('upload', $config);
+
+    if (!$this->upload->do_upload('file_excel')) {
+        $error = $this->upload->display_errors();
+        $this->session->set_flashdata('pesan', '<div class="alert alert-danger">
+            <p>Error upload file: ' . $error . '</p>
+        </div>');
+        redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+    }
+
+    $upload_data = $this->upload->data();
+    $file_path = $upload_data['full_path'];
+
+    // Load the helper
+    $this->load->helper('excel_helper');
+    
+    // Convert Excel to CSV if needed
+    $csv_file_path = convert_excel_to_csv($file_path);
+    
+    if (!$csv_file_path) {
+        $this->session->set_flashdata('pesan', '<div class="alert alert-danger">
+            <p>Gagal mengkonversi file Excel ke CSV. Pastikan file formatnya benar.</p>
+        </div>');
+        @unlink($file_path);
+        redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+    }
+
+    $success_count = 0;
+    $error_count = 0;
+    $error_messages = [];
+
+    // Read CSV file
+    if (($handle = fopen($csv_file_path, "r")) !== FALSE) {
+        $row_number = 0;
+        
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            $row_number++;
+            
+            // Skip header row (row 1)
+            if ($row_number == 1) {
+                continue;
+            }
+
+            // Skip empty rows
+            if (empty($data[0]) || trim($data[0]) === '') {
+                continue;
+            }
+
+            // Map CSV columns to data
+            $nama_peserta = isset($data[0]) ? trim($data[0]) : '';
+            $jenis_kelamin = isset($data[1]) ? trim($data[1]) : '';
+            $nip = isset($data[2]) ? trim($data[2]) : '';
+            $pangkatgol = isset($data[3]) ? trim($data[3]) : '';
+            $jabatan = isset($data[4]) ? trim($data[4]) : '';
+            $unit_kerja = isset($data[5]) ? trim($data[5]) : '';
+
+            // Validasi required fields
+            if (empty($nama_peserta) || empty($nip)) {
+                $error_count++;
+                $error_messages[] = "Baris $row_number: Nama dan NIP wajib diisi";
+                continue;
+            }
+
+            // Handle jenis_kelamin
+            $jk = 'L'; // default value
+            if (!empty($jenis_kelamin)) {
+                $first_char = strtoupper(substr($jenis_kelamin, 0, 1));
+                $jk = ($first_char == 'L' || $first_char == 'P') ? $first_char : 'L';
+            }
+
+            // Validasi NIP unik
+            $cek_nip = $this->db->get_where('tbl_peserta_pelatihan', [
+                'id_pelatihan' => $id_pelatihan,
+                'nip' => $nip,
+                'deleted_at' => NULL
+            ])->row();
+
+            if ($cek_nip) {
+                $error_count++;
+                $error_messages[] = "Baris $row_number: NIP $nip sudah terdaftar";
+                continue;
+            }
+
+            $data_insert = array(
+                'id_pelatihan' => $id_pelatihan,
+                'nama_peserta' => $nama_peserta,
+                'jenis_kelamin' => $jk,
+                'nip' => $nip,
+                'pangkatgol' => $pangkatgol,
+                'jabatan' => $jabatan,
+                'unit_kerja' => $unit_kerja,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            );
+
+            if ($this->db->insert('tbl_peserta_pelatihan', $data_insert)) {
+                $success_count++;
+            } else {
+                $error_count++;
+                $db_error = $this->db->error();
+                $error_messages[] = "Baris $row_number: Gagal menyimpan data - " . $db_error['message'];
+            }
+        }
+        fclose($handle);
+    }
+
+    // Clean up files
+    @unlink($file_path);
+    if ($csv_file_path != $file_path) {
+        @unlink($csv_file_path);
+    }
+
+    // Prepare flash message
+    $message = "<div class='alert alert-success'>
+        <p>Import selesai! Berhasil: $success_count data, Gagal: $error_count data</p>";
+
+    if (!empty($error_messages)) {
+        $message .= "<br>Detail error:<br>" . implode('<br>', array_slice($error_messages, 0, 10));
+        if (count($error_messages) > 10) {
+            $message .= "<br>... dan " . (count($error_messages) - 10) . " error lainnya";
+        }
+    }
+
+    $message .= "</div>";
+
+    $this->session->set_flashdata('pesan', $message);
+    redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+}
+}
+
 	// Code LDK Pekanbaru Controller Cetak Laporan
 
 	public function cetaklaporan()

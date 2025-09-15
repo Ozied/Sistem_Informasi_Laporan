@@ -78,7 +78,7 @@
             </li>
             
             <!-- Code LDK Pekanbaru Menu Laporan PDWK-->
-            <!-- <li class="treeview <?= ($this->uri->segment(1) == 'data' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
+            <li class="treeview <?= ($this->uri->segment(1) == 'data' && $this->input->get('jenis') == 'PDWK') ? 'active' : '' ?>">
                 <a href="#">
                     <i class="fa fa-folder-open"></i>
                     <span>Pelatihan PDWK</span>
@@ -105,7 +105,7 @@
                         </a>
                     </li>
                 </ul>
-            </li> -->
+            </li>
 
             <!-- Code LDK Pekanbaru Menu Dokumen -->
              <li class="treeview <?php if($this->uri->uri_string() == 'data/dokumenpelatihan'){ echo 'active';}?>
@@ -164,6 +164,33 @@
                 </ul>
             </li>
 
+            
+            <!-- Code LDK Pekanbaru Menu Peserta Pelatihan-->
+              <li class="treeview 
+                <?php if($this->uri->uri_string() == 'data/pesertapelatihan'){ echo 'active';}?>
+                <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
+				<?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
+				<?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
+                <a href="#">
+                    <i class="fa fa-users"></i>
+                    <span>Peserta Pelatihan</span>
+                    <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="<?php if($this->uri->uri_string() == 'data/pesertapelatihan'){ echo 'active';}?>
+                    <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
+                    <?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
+                    <?php if($this->uri->uri_string() == 'data/pegawaiedit/'.$this->uri->segment('3')){ echo 'active';}?>">
+                            <a href="<?php echo base_url("data/pesertapelatihan");?>" class="cursor">
+                            <span class="fa fa-tasks"></span> List Peserta Pelatihan
+                            
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
                         <!-- Code LDK Pekanbaru Menu Cetak Laporan PJJ-->
               <li class="treeview 
                 <?php if($this->uri->uri_string() == 'data/cetaklaporan'){ echo 'active';}?>
@@ -197,7 +224,7 @@
             </li>
 
             <!-- Code LDK Pekanbaru Menu Cetak Laporan PDWK-->
-              <!-- <li class="treeview 
+              <li class="treeview 
                 <?php if($this->uri->uri_string() == 'data/cetaklaporanpdwk'){ echo 'active';}?>
                 <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
 				<?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
@@ -226,7 +253,7 @@
                         </a>
                     </li>
                 </ul>
-            </li> -->
+            </li>
 
 
             <!-- Code LDK Pekanbaru Menu Pegawai-->
