@@ -16,6 +16,7 @@ class Data extends CI_Controller {
 
 		$this->load->library('wordGenerator');
 		$this->load->library('wordGenerator_pdwk');
+		$this->load->library('wordGenerator_latsar');
 		$this->load->model('M_Admin');
 		$this->load->library('form_validation');
 		$this->load->helper('date');
@@ -1399,6 +1400,26 @@ class Data extends CI_Controller {
 		// $this->load->view('sidebar_view', $this->data);
 		// $this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
 		// $this->load->view('footer_view', $this->data);
+	}
+
+	public function generateLaporanLatsar(){
+		$filename = $this->wordgenerator_latsar->generate();
+		
+		if (!$filename){
+			show_error('Gagal generate dokumen');
+		}
+		
+		$filepath = FCPATH . 'downloads/' . $filename;
+		
+		if(file_exists($filepath)){
+			// Berikan link download ke user
+			echo '<h2>Laporan Berhasil Digenerate</h2>';
+			echo '<p>Klik link berikut untuk mengunduh: ';
+			echo '<a href="' . base_url('downloads/' . $filename) . '" download>Download Laporan</a></p>';
+			echo '<p>Atau <a href="' . site_url(uri_string()) . '">generate ulang</a></p>';
+		} else {
+			show_error('File tidak ditemukan: ' . $filepath);
+		}
 	}
 
 	public function prosesdokumenpelatihan()
