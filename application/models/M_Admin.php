@@ -141,22 +141,22 @@ class M_Admin extends CI_Model
    }
 
   //  Get Jenis Pelatihan
-  // function getJenisPelatihan() {
-  //   return $this->db
-  //     ->where('deleted_at IS NULL', null, false)
-  //     ->order_by('id_jenis_pelatihan', 'DESC')
-  //     ->get('tbl_jenis_pelatihan')
-  //     ->result_array();
-  // }
-
-function getJenisPelatihan() {
+  function getJenisPelatihan() {
     return $this->db
-        ->where('deleted_at IS NULL', null, false) // existing condition
-        ->where('id_jenis_pelatihan', 1)          // new condition
-        ->order_by('id_jenis_pelatihan', 'DESC')
-        ->get('tbl_jenis_pelatihan')
-        ->result_array();
-}
+      ->where('deleted_at IS NULL', null, false)
+      ->order_by('id_jenis_pelatihan', 'DESC')
+      ->get('tbl_jenis_pelatihan')
+      ->result_array();
+  }
+
+// function getJenisPelatihan() {
+//     return $this->db
+//         ->where('deleted_at IS NULL', null, false) // existing condition
+//         ->where('id_jenis_pelatihan', 1)          // new condition
+//         ->order_by('id_jenis_pelatihan', 'DESC')
+//         ->get('tbl_jenis_pelatihan')
+//         ->result_array();
+// }
 
 
   function get_pelatihan_by_jenis($id_jenis = null) {

@@ -107,6 +107,42 @@
                 </ul>
             </li>
 
+            <!-- Code LDK Pekanbaru Menu Laporan Latsar CPNS-->
+            <li class="treeview <?= ($this->uri->segment(1) == 'data' && $this->input->get('jenis') == 'Latsar') ? 'active' : '' ?>">
+                <a href="#">
+                    <i class="fa fa-folder-open"></i>
+                    <span>Pelatihan Dasar CPNS</span>
+                    <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="<?= ($this->uri->uri_string() == 'data' && $this->input->get('jenis') == 'Latsar') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data?jenis=Latsar");?>" class="cursor">
+                            <span class="fa fa-file"></span> Data Pelatihan
+                            
+                        </a>
+                    </li>
+                    <li class=" <?= ($this->uri->uri_string() == 'data/pesertapelatihanjenis' && $this->input->get('jenis') == 'Latsar') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/pesertapelatihanjenis?jenis=Latsar");?>" class="cursor">
+                            <span class="fa fa-list"></span> Peserta Pelatihan
+                            
+                        </a>
+                    </li>
+                    <li class=" <?= ($this->uri->uri_string() == 'data/detailpelatihan' && $this->input->get('jenis') == 'Latsar') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/detailpelatihan?jenis=Latsar");?>" class="cursor">
+                            <span class="fa fa-list"></span> Detail Pelatihan
+                            
+                        </a>
+                    </li>
+                    <li class=" <?php if($this->uri->uri_string() == 'data/materipengajar'){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data/materipengajar");?>" class="cursor">
+                            <span class="fa fa-book"></span> Materi dan Pengajar
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
             <!-- Code LDK Pekanbaru Menu Dokumen -->
              <li class="treeview <?php if($this->uri->uri_string() == 'data/dokumenpelatihan'){ echo 'active';}?>
 				<?php if($this->uri->uri_string() == 'data/dokumen'){ echo 'active';}?>
@@ -163,7 +199,6 @@
                     </li>
                 </ul>
             </li>
-
             
             <!-- Code LDK Pekanbaru Menu Peserta Pelatihan-->
               <li class="treeview 
