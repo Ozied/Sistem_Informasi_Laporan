@@ -16,7 +16,7 @@ class Data extends CI_Controller {
 
 		$this->load->library('wordGenerator');
 		$this->load->library('wordGenerator_pdwk');
-		$this->load->library('wordGenerator_latsar');
+		$this->load->library('wordgenerator_latsar');
 		$this->load->model('M_Admin');
 		$this->load->library('form_validation');
 		$this->load->helper('date');
@@ -1142,283 +1142,270 @@ class Data extends CI_Controller {
 
 	public function generateLaporan($id_pelatihan)
 	{
-		// $this->data['idbo'] = $this->session->userdata('ses_id');
 		$sess = $this->session->userdata('ses_id');
 		$this->load->helper('date');
 
 		if ($sess == null){
 			redirect('cetak_laporan/list_pelatihan_pjj');
 			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
-		} else {
-
-			$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
-			$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
-			$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
-			$ketua_loka = $this->M_Admin->get_ketua_loka();
-
-			// echo '<pre>'; 
-			// print_r($ketua_loka ?? 'Tidak ada data'); 
-			// die();
-	
-			$data = [
-				'pelatihan' => $pelatihan,
-				// 'detail' => $pelatihan->detail,
-				// 'pegawai' => $pelatihan->pegawai,
-				'durasi' => $durasi,
-				'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
-            	'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
-				'ketua_loka' => $ketua_loka
-			];
-
-			if (!empty($pelatihan->materi)) {
-				foreach ($pelatihan->materi as $materi) {
-					$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
-				}
-			}	
-			
-			
-
-			$filename = $this->wordgenerator->generate($data);
-			if (!$filename){
-				show_error('Gagal generate dokumen');
-			}
-			$filepath = FCPATH . 'downloads/' . $filename;
-			if(file_exists($filepath)){
-				
-				header("Content-Description: File Transfer");
-				header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-				header("Content-Disposition: inline; filename= " .basename($filepath));
-				header("Content-Transfer-Encoding: binary");
-				header("Expires: 0");
-				header("Cache-Control: must-revalidate");
-				header("Pragma: public");
-				header("Content-Length: " . filesize($filepath));
-				
-				readfile($filepath);
-				exit;
-			} else {
-				show_error('File tidak ditemukan' . $filepath);
-			}
-
+			return;
 		}
 
-		// $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
-		// 	'id_pelatihan' => $id_pelatihan,
-		// 	'deleted_at' => NULL
-		// ])->row();
+		$pelatihan = $this->M_Admin->dataPelatihan($id_pelatihan);
 
-		// if (!$cek_pelatihan) {
-		// 	echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
-		// 	return;
-		// }
-
-		$this->data['pelatihan'] = $cek_pelatihan;
-		$this->data['dokumen_pelatihan'] = $this->db->query("
-			SELECT pd.*, d.nama_dokumen, d.deskripsi 
-			FROM tbl_pelatihan_dokumen pd
-			JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
-			WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
-			ORDER BY pd.id_pelatihan_dokumen DESC
-		", [$id_pelatihan]);
-
-		// Ambil dokumen yang sudah dipakai di tbl_pelatihan_dokumen untuk pelatihan ini
-		$used_doc_ids = $this->db->select('id_dokumen')
-			->from('tbl_pelatihan_dokumen')
-			->where('id_pelatihan', $id_pelatihan)
-			->where('deleted_at', NULL)
-			->get()
-			->result_array();
-
-		$used_ids = array_column($used_doc_ids, 'id_dokumen');
-
-		// Ambil dokumen yang belum digunakan
-		if (!empty($used_ids)) {
-			$this->data['dokumen_all'] = $this->db
-				->where_not_in('id_dokumen', $used_ids)
-				->where('deleted_at', NULL)
-				->order_by('id_dokumen', 'DESC')
-				->get('tbl_dokumen')
-				->result();
-		} else {
-			$this->data['dokumen_all'] = $this->db
-				->where('deleted_at', NULL)
-				->order_by('id_dokumen', 'DESC')
-				->get('tbl_dokumen')
-				->result();
-		}
-
-		if (!empty($used_ids)) {
-		// INI AKAN DIPAKAI UNTUK EDIT, MAKA AMBIL SEMUA, TERMASUK YANG SUDAH DIPILIH
-		$this->data['dokumen_all_raw'] = $this->db
-			->where('deleted_at', NULL)
-			->order_by('id_dokumen', 'DESC')
-			->get('tbl_dokumen')
-			->result();
-			} else {
-				$this->data['dokumen_all_raw'] = $this->db
-					->where('deleted_at', NULL)
-					->order_by('id_dokumen', 'DESC')
-					->get('tbl_dokumen')
-					->result();
-		}
-
-		$this->data['id_pelatihan'] = $id_pelatihan;
-		
-		// $this->data['title_web'] = 'Lampiran Dokumen - ' . htmlentities($cek_pelatihan->nama_pelatihan);
-		// $this->load->view('header_view', $this->data);
-		// $this->load->view('sidebar_view', $this->data);
-		// $this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
-		// $this->load->view('footer_view', $this->data);
-	}
-
-	public function generateLaporanpdwk($id_pelatihan)
-	{
-		// $this->data['idbo'] = $this->session->userdata('ses_id');
-		$sess = $this->session->userdata('ses_id');
-		$this->load->helper('date');
-
-		if ($sess == null){
-			redirect('cetak_laporan/list_pelatihan_pdwk');
+		// Pastikan data pelatihan ada
+		if (!$pelatihan) {
 			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
-		} else {
-
-			$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
-			$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
-			$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
-			$ketua_loka = $this->M_Admin->get_ketua_loka();
-
-			// echo '<pre>'; 
-			// print_r($ketua_loka ?? 'Tidak ada data'); 
-			// die();
-	
-			$data = [
-				'pelatihan' => $pelatihan,
-				// 'detail' => $pelatihan->detail,
-				// 'pegawai' => $pelatihan->pegawai,
-				'durasi' => $durasi,
-				'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
-            	'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
-				'ketua_loka' => $ketua_loka
-			];
-
-			if (!empty($pelatihan->materi)) {
-				foreach ($pelatihan->materi as $materi) {
-					$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
-				}
-			}	
-			
-			
-
-			$filename = $this->wordgenerator_pdwk->generate($data);
-			if (!$filename){
-				show_error('Gagal generate dokumen');
-			}
-			$filepath = FCPATH . 'downloads/' . $filename;
-			if(file_exists($filepath)){
-				
-				header("Content-Description: File Transfer");
-				header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-				header("Content-Disposition: inline; filename= " .basename($filepath));
-				header("Content-Transfer-Encoding: binary");
-				header("Expires: 0");
-				header("Cache-Control: must-revalidate");
-				header("Pragma: public");
-				header("Content-Length: " . filesize($filepath));
-				
-				readfile($filepath);
-				exit;
-			} else {
-				show_error('File tidak ditemukan' . $filepath);
-			}
-
+			return;
 		}
 
-		// $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
-		// 	'id_pelatihan' => $id_pelatihan,
-		// 	'deleted_at' => NULL
-		// ])->row();
+		// DEBUG: Tampilkan data pelatihan
+		// Ganti bagian debug dengan ini:
+		// echo '<h3>DEBUG DATA PELATIHAN</h3>';
+		// echo 'ID Pelatihan: ' . $id_pelatihan . '<br>';
+		// echo 'Tipe data: ' . gettype($pelatihan) . '<br>';
 
-		// if (!$cek_pelatihan) {
-		// 	echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
-		// 	return;
+		// if (is_object($pelatihan)) {
+		// 	echo 'Properties object: <pre>';
+		// 	print_r(get_object_vars($pelatihan));
+		// 	echo '</pre>';
+			
+		// 	echo 'id_jenis_pelatihan: ' . $pelatihan->id_jenis_pelatihan . ' (type: ' . gettype($pelatihan->id_jenis_pelatihan) . ')<br>';
+			
+		// 	// Cek langsung dari database
+		// 	$direct_check = $this->db->select('id_jenis_pelatihan')
+		// 							->from('tbl_pelatihan')
+		// 							->where('id_pelatihan', $id_pelatihan)
+		// 							->get()
+		// 							->row();
+		// 	echo 'Nilai langsung dari DB: ' . $direct_check->id_jenis_pelatihan . '<br>';
+			
+		// } elseif (is_array($pelatihan)) {
+		// 	echo 'Array keys: <pre>';
+		// 	print_r(array_keys($pelatihan));
+		// 	echo '</pre>';
+			
+		// 	echo 'id_jenis_pelatihan: ' . $pelatihan['id_jenis_pelatihan'] . '<br>';
 		// }
 
-		$this->data['pelatihan'] = $cek_pelatihan;
-		$this->data['dokumen_pelatihan'] = $this->db->query("
-			SELECT pd.*, d.nama_dokumen, d.deskripsi 
-			FROM tbl_pelatihan_dokumen pd
-			JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
-			WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
-			ORDER BY pd.id_pelatihan_dokumen DESC
-		", [$id_pelatihan]);
+		// die();
 
-		// Ambil dokumen yang sudah dipakai di tbl_pelatihan_dokumen untuk pelatihan ini
-		$used_doc_ids = $this->db->select('id_dokumen')
-			->from('tbl_pelatihan_dokumen')
-			->where('id_pelatihan', $id_pelatihan)
-			->where('deleted_at', NULL)
-			->get()
-			->result_array();
-
-		$used_ids = array_column($used_doc_ids, 'id_dokumen');
-
-		// Ambil dokumen yang belum digunakan
-		if (!empty($used_ids)) {
-			$this->data['dokumen_all'] = $this->db
-				->where_not_in('id_dokumen', $used_ids)
-				->where('deleted_at', NULL)
-				->order_by('id_dokumen', 'DESC')
-				->get('tbl_dokumen')
-				->result();
-		} else {
-			$this->data['dokumen_all'] = $this->db
-				->where('deleted_at', NULL)
-				->order_by('id_dokumen', 'DESC')
-				->get('tbl_dokumen')
-				->result();
-		}
-
-		if (!empty($used_ids)) {
-		// INI AKAN DIPAKAI UNTUK EDIT, MAKA AMBIL SEMUA, TERMASUK YANG SUDAH DIPILIH
-		$this->data['dokumen_all_raw'] = $this->db
-			->where('deleted_at', NULL)
-			->order_by('id_dokumen', 'DESC')
-			->get('tbl_dokumen')
-			->result();
-			} else {
-				$this->data['dokumen_all_raw'] = $this->db
-					->where('deleted_at', NULL)
-					->order_by('id_dokumen', 'DESC')
-					->get('tbl_dokumen')
-					->result();
-		}
-
-		$this->data['id_pelatihan'] = $id_pelatihan;
+		// Tentukan library word generator berdasarkan jenis pelatihan
+		$jenis_pelatihan = $pelatihan->id_jenis_pelatihan;
 		
-		// $this->data['title_web'] = 'Lampiran Dokumen - ' . htmlentities($cek_pelatihan->nama_pelatihan);
-		// $this->load->view('header_view', $this->data);
-		// $this->load->view('sidebar_view', $this->data);
-		// $this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
-		// $this->load->view('footer_view', $this->data);
-	}
+		if ($jenis_pelatihan == 2) { // PDWK
+			$this->load->library('wordgenerator_pdwk');
+			$word_generator = $this->wordgenerator_pdwk;
+		} else { // PJJ (default)
+			$this->load->library('wordgenerator');
+			$word_generator = $this->wordgenerator;
+		}
 
-	public function generateLaporanLatsar(){
-		$filename = $this->wordgenerator_latsar->generate();
+		$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
+		$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
+		$ketua_loka = $this->M_Admin->get_ketua_loka();
+
+		$data = [
+			'pelatihan' => $pelatihan,
+			'durasi' => $durasi,
+			'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
+			'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
+			'ketua_loka' => $ketua_loka
+		];
+
+		if (!empty($pelatihan->materi)) {
+			foreach ($pelatihan->materi as $materi) {
+				$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
+			}
+		}	
+
+		// Generate laporan menggunakan library yang sesuai
+		$filename = $word_generator->generate($data);
 		
 		if (!$filename){
 			show_error('Gagal generate dokumen');
 		}
 		
 		$filepath = FCPATH . 'downloads/' . $filename;
-		
 		if(file_exists($filepath)){
-			// Berikan link download ke user
-			echo '<h2>Laporan Berhasil Digenerate</h2>';
-			echo '<p>Klik link berikut untuk mengunduh: ';
-			echo '<a href="' . base_url('downloads/' . $filename) . '" download>Download Laporan</a></p>';
-			echo '<p>Atau <a href="' . site_url(uri_string()) . '">generate ulang</a></p>';
+			header("Content-Description: File Transfer");
+			header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+			header("Content-Disposition: inline; filename= " . basename($filepath));
+			header("Content-Transfer-Encoding: binary");
+			header("Expires: 0");
+			header("Cache-Control: must-revalidate");
+			header("Pragma: public");
+			header("Content-Length: " . filesize($filepath));
+			
+			readfile($filepath);
+			exit;
 		} else {
 			show_error('File tidak ditemukan: ' . $filepath);
+		}
+	}
+
+	// public function generateLaporanpdwk($id_pelatihan)
+	// {
+	// 	// $this->data['idbo'] = $this->session->userdata('ses_id');
+	// 	$sess = $this->session->userdata('ses_id');
+	// 	$this->load->helper('date');
+
+	// 	if ($sess == null){
+	// 		redirect('cetak_laporan/list_pelatihan_pdwk');
+	// 		echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+	// 	} else {
+
+	// 		$pelatihan= $this->M_Admin->dataPelatihan($id_pelatihan);
+	// 		$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
+	// 		$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
+	// 		$ketua_loka = $this->M_Admin->get_ketua_loka();
+
+	// 		echo '<pre>'; 
+	// 		print_r($pelatihan ?? 'Tidak ada data'); 
+	// 		die();
+	
+	// 		$data = [
+	// 			'pelatihan' => $pelatihan,
+	// 			// 'detail' => $pelatihan->detail,
+	// 			// 'pegawai' => $pelatihan->pegawai,
+	// 			'durasi' => $durasi,
+	// 			'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
+    //         	'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
+	// 			'ketua_loka' => $ketua_loka
+	// 		];
+
+	// 		if (!empty($pelatihan->materi)) {
+	// 			foreach ($pelatihan->materi as $materi) {
+	// 				$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
+	// 			}
+	// 		}	
+			
+			
+
+	// 		$filename = $this->wordgenerator_pdwk->generate($data);
+	// 		if (!$filename){
+	// 			show_error('Gagal generate dokumen');
+	// 		}
+	// 		$filepath = FCPATH . 'downloads/' . $filename;
+	// 		if(file_exists($filepath)){
+				
+	// 			header("Content-Description: File Transfer");
+	// 			header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+	// 			header("Content-Disposition: inline; filename= " .basename($filepath));
+	// 			header("Content-Transfer-Encoding: binary");
+	// 			header("Expires: 0");
+	// 			header("Cache-Control: must-revalidate");
+	// 			header("Pragma: public");
+	// 			header("Content-Length: " . filesize($filepath));
+				
+	// 			readfile($filepath);
+	// 			exit;
+	// 		} else {
+	// 			show_error('File tidak ditemukan' . $filepath);
+	// 		}
+
+	// 	}
+
+	// 	// $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+	// 	// 	'id_pelatihan' => $id_pelatihan,
+	// 	// 	'deleted_at' => NULL
+	// 	// ])->row();
+
+	// 	// if (!$cek_pelatihan) {
+	// 	// 	echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+	// 	// 	return;
+	// 	// }
+
+	// 	$this->data['pelatihan'] = $cek_pelatihan;
+	// 	$this->data['dokumen_pelatihan'] = $this->db->query("
+	// 		SELECT pd.*, d.nama_dokumen, d.deskripsi 
+	// 		FROM tbl_pelatihan_dokumen pd
+	// 		JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
+	// 		WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
+	// 		ORDER BY pd.id_pelatihan_dokumen DESC
+	// 	", [$id_pelatihan]);
+
+	// 	// Ambil dokumen yang sudah dipakai di tbl_pelatihan_dokumen untuk pelatihan ini
+	// 	$used_doc_ids = $this->db->select('id_dokumen')
+	// 		->from('tbl_pelatihan_dokumen')
+	// 		->where('id_pelatihan', $id_pelatihan)
+	// 		->where('deleted_at', NULL)
+	// 		->get()
+	// 		->result_array();
+
+	// 	$used_ids = array_column($used_doc_ids, 'id_dokumen');
+
+	// 	// Ambil dokumen yang belum digunakan
+	// 	if (!empty($used_ids)) {
+	// 		$this->data['dokumen_all'] = $this->db
+	// 			->where_not_in('id_dokumen', $used_ids)
+	// 			->where('deleted_at', NULL)
+	// 			->order_by('id_dokumen', 'DESC')
+	// 			->get('tbl_dokumen')
+	// 			->result();
+	// 	} else {
+	// 		$this->data['dokumen_all'] = $this->db
+	// 			->where('deleted_at', NULL)
+	// 			->order_by('id_dokumen', 'DESC')
+	// 			->get('tbl_dokumen')
+	// 			->result();
+	// 	}
+
+	// 	if (!empty($used_ids)) {
+	// 	// INI AKAN DIPAKAI UNTUK EDIT, MAKA AMBIL SEMUA, TERMASUK YANG SUDAH DIPILIH
+	// 	$this->data['dokumen_all_raw'] = $this->db
+	// 		->where('deleted_at', NULL)
+	// 		->order_by('id_dokumen', 'DESC')
+	// 		->get('tbl_dokumen')
+	// 		->result();
+	// 		} else {
+	// 			$this->data['dokumen_all_raw'] = $this->db
+	// 				->where('deleted_at', NULL)
+	// 				->order_by('id_dokumen', 'DESC')
+	// 				->get('tbl_dokumen')
+	// 				->result();
+	// 	}
+
+	// 	$this->data['id_pelatihan'] = $id_pelatihan;
+		
+	// 	// $this->data['title_web'] = 'Lampiran Dokumen - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+	// 	// $this->load->view('header_view', $this->data);
+	// 	// $this->load->view('sidebar_view', $this->data);
+	// 	// $this->load->view('dokumen_pelatihan/list_dokumen_pelatihan', $this->data);
+	// 	// $this->load->view('footer_view', $this->data);
+	// }
+
+	public function generateLaporanLatsar(){
+				
+		try {
+			$filename = $this->wordgenerator_latsar->generate();
+			
+			if (!$filename){
+				// Dapatkan error terakhir
+				$error = error_get_last();
+				log_message('error', 'Gagal generate dokumen. Error: ');
+				
+				return;
+			}
+			
+			$filepath = FCPATH . 'downloads/' . $filename;
+			
+			if(file_exists($filepath)){
+				echo '<h2>Laporan Berhasil Digenerate</h2>';
+				echo '<p>Klik link berikut untuk mengunduh: ';
+				echo '<a href="' . base_url('downloads/' . $filename) . '" download>Download Laporan</a></p>';
+				echo '<p>Atau <a href="' . site_url(uri_string()) . '">generate ulang</a></p>';
+			} else {
+				echo '<h2>File Tidak Ditemukan</h2>';
+				echo '<p>Path: ' . $filepath . '</p>';
+				echo '<p><a href="' . site_url() . '">Kembali</a></p>';
+			}
+			
+		} catch (Exception $e) {
+			log_message('error', 'Exception: ' . $e->getMessage());
+			echo '<h2>Terjadi Exception</h2>';
+			echo '<p>' . $e->getMessage() . '</p>';
+			echo '<p><a href="' . site_url() . '">Kembali</a></p>';
 		}
 	}
 
@@ -2088,25 +2075,40 @@ if (!empty($this->input->post('import_excel'))) {
 	public function cetaklaporan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
-
 		$jenis = $this->input->get('jenis');
 
-		$this->db->select('*')->from('tbl_pelatihan')->where('deleted_at IS NULL', null, false);
+		// Build query dengan benar
+		$this->db->select('*');
+		$this->db->from('tbl_pelatihan');
+		$this->db->where('deleted_at IS NULL', null, false); // Hanya yang tidak dihapus
 
+		// Terapkan filter berdasarkan jenis
 		if ($jenis == 'PJJ') {
-			$this->db->where('id_jenis_pelatihan', 1); // Asumsi 1 = PJJ
+			$this->db->where('id_jenis_pelatihan', 1);
 		} elseif ($jenis == 'PDWK') {
-			$this->db->where('id_jenis_pelatihan', 2); // Asumsi 2 = PDWK
+			$this->db->where('id_jenis_pelatihan', 2);
 		}
+		// Jika tidak ada filter, tampilkan semua (tanpa where id_jenis_pelatihan)
 
 		$this->data['pelatihan'] = $this->db->order_by('id_pelatihan', 'DESC')->get();
 
-    	// $this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
-        $this->data['title_web'] = 'Cetak Laporan Pelatihan';
-        $this->load->view('header_view',$this->data);
-        $this->load->view('sidebar_view',$this->data);
-        $this->load->view('cetak_laporan/list_pelatihan_pjj',$this->data);
-        $this->load->view('footer_view',$this->data);
+		// DEBUG: Tampilkan query dan hasil untuk memastikan
+		// echo "Query: " . $this->db->last_query() . "<br>";
+		// echo "Jumlah hasil: " . $this->data['pelatihan']->num_rows() . "<br>";
+		
+		// Tampilkan beberapa data untuk debugging
+		// if ($this->data['pelatihan']->num_rows() > 0) {
+		// 	echo "Contoh data:<br>";
+		// 	$first_row = $this->data['pelatihan']->first_row('array');
+		// 	print_r($first_row);
+		// }
+		// die();
+
+		$this->data['title_web'] = 'Cetak Laporan Pelatihan';
+		$this->load->view('header_view',$this->data);
+		$this->load->view('sidebar_view',$this->data);
+		$this->load->view('cetak_laporan/list_pelatihan_pjj',$this->data);
+		$this->load->view('footer_view',$this->data);
 	}
 	
 
@@ -2118,6 +2120,17 @@ if (!empty($this->input->post('import_excel'))) {
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
         $this->load->view('cetak_laporan/list_pelatihan_pdwk',$this->data);
+        $this->load->view('footer_view',$this->data);
+	}
+	
+	public function cetaklaporanlatsar()
+	{
+		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL and id_jenis_pelatihan = 3 ORDER BY id_pelatihan DESC");
+        $this->data['title_web'] = 'Cetak Laporan Latsar';
+        $this->load->view('header_view',$this->data);
+        $this->load->view('sidebar_view',$this->data);
+        $this->load->view('cetak_laporan/list_pelatihan_latsar',$this->data);
         $this->load->view('footer_view',$this->data);
 	}
 

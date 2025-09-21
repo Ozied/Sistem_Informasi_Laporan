@@ -10,10 +10,61 @@ class M_Admin extends CI_Model
 
   //  Get Data Pelatihan
    function dataPelatihan($id_pelatihan){
-    $this->db->select('p.*, d.*');
+    // Di model M_Admin->dataPelatihan(), ganti dengan:
+    $this->db->select('
+        p.*,
+        d.id_detail_pelatihan,
+        d.id_penanggung_jawab,
+        d.id_ketua_panitia,
+        d.id_akademis,
+        d.id_keuangan,
+        d.id_administrasi,
+        d.id_wi_1,
+        d.id_wi_2,
+        d.id_wi_3,
+        d.id_wi_rapat_kelulusan,
+        d.id_wi_4,
+        d.id_pengajar_1,
+        d.id_pengajar_2,
+        d.id_pengajar_3,
+        d.jumlah_wi_pengajar,
+        d.jumlah_pendidikan_wi_s1,
+        d.jumlah_pendidikan_wi_s2,
+        d.jumlah_pendidikan_wi_s3,
+        d.jumlah_peserta,
+        d.jumlah_lulus,
+        d.jumlah_tidak_lulus,
+        d.jabatan_peserta,
+        d.jumlah_peserta_asn,
+        d.jumlah_peserta_non_asn,
+        d.jumlah_peserta_laki,
+        d.jumlah_peserta_wanita,
+        d.jumlah_pendidikan_peserta_sma,
+        d.jumlah_pendidikan_wi_d2,
+        d.jumlah_pendidikan_peserta_d3,
+        d.jumlah_pendidikan_peserta_s1,
+        d.jumlah_pendidikan_peserta_s2,
+        d.jumlah_pendidikan_peserta_s3,
+        d.rab,
+        d.realisasi,
+        j.nama_jenis_pelatihan,
+        pembuka.nama as nama_pejabat_pembuka,
+        pembuka.NIP as nip_pejabat_pembuka,
+        pembuka.jabatan as jabatan_pejabat_pembuka,
+        pembuka.asal_satker as satker_pejabat_pembuka,
+        penutup.nama as nama_pejabat_penutup,
+        penutup.NIP as nip_pejabat_penutup,
+        penutup.jabatan as jabatan_pejabat_penutup,
+        penutup.asal_satker as satker_pejabat_penutup
+    ');
+
     $this->db->from('tbl_pelatihan p');
     $this->db->join('tbl_detail_pelatihan d', 'p.id_pelatihan = d.id_pelatihan', 'left');
+    $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
+    $this->db->join('tbl_pegawai pembuka', 'p.id_pejabat_pembuka = pembuka.id_pegawai', 'left');
+    $this->db->join('tbl_pegawai penutup', 'p.id_pejabat_penutup = penutup.id_pegawai', 'left');
     $this->db->where('p.id_pelatihan', $id_pelatihan);
+
     $pelatihan = $this->db->get()->row();
 
     // $pelatihan->materi->tujuan_parsed = $this->parseTujuanKursil($pelatihan->materi->tujuan_kursil ?? '');

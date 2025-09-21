@@ -23,6 +23,8 @@
                   <select class="form-control" id="filterJenis">
                     <option value="">Semua Jenis</option>
                     <option value="1">PJJ</option>
+                    <option value="2">PDWK</option>
+                    <option value="3">Latsar</option>
                   </select>
                 </div>
               </div>
@@ -46,17 +48,21 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <?php $no = 1; foreach($pelatihan->result_array() as $isi){ ?>
+                  <?php $no = 1; foreach($pelatihan->result_array() as $isi){ 
+                    echo "<!-- DEBUG: " . print_r($isi, true) . " -->";?>
+
                   <tr data-jenis="<?= $isi['id_jenis_pelatihan'] ?>">
                     <td><?= $no; ?></td>
                     <td><?= htmlentities($isi['nama_pelatihan']); ?></td>
-                    <td><?= ($isi['id_jenis_pelatihan'] == 1) ? 'PJJ' : 'PDWK' ?></td>
+                    <td>
+                      <?= ($isi['id_jenis_pelatihan'] == 1) ? 'PJJ' : (($isi['id_jenis_pelatihan'] == 2) ? 'PDWK' : 'UNKNOWN (' . $isi['id_jenis_pelatihan'] . ')') ?>
+                    </td>
                     <td><?= htmlentities($isi['kab_kota']); ?></td>
                     <td><?= htmlentities($isi['tempat']); ?></td>
                     <td><?= htmlentities($isi['tanggal_mulai_pelatihan']); ?></td>
                     <td><?= htmlentities($isi['tanggal_selesai_pelatihan']); ?></td>
                     <td><?= htmlentities($isi['tahun']); ?></td>
-                   <td>
+                    <td>
                     <?php if($this->session->userdata('level') == 'Petugas'){ ?>
                         <a href="<?= base_url('data/generateLaporan/'.$isi['id_pelatihan']); ?>">
                         <button class="btn btn-primary">
@@ -114,5 +120,21 @@ $(document).ready(function() {
             $(this).find('td:first').text(index + 1);
         });
     }
+
+    // Tombol cetak individu dengan parameter filter
+    // $('.btn-cetak-individu').click(function(e) {
+    //     e.preventDefault();
+    //     var id = $(this).data('id');
+    //     var jenis = $('#filterJenis').val();
+        
+    //     // Jika ada filter jenis yang dipilih, tambahkan parameter
+    //     if (jenis !== '') {
+    //         var url = '<?= base_url('data/generateLaporan/') ?>' + id + '?jenis=' + jenis;
+    //     } else {
+    //         var url = '<?= base_url('data/generateLaporan/') ?>' + id;
+    //     }
+        
+    //     window.open(url, '_blank');
+    // });
 });
 </script>

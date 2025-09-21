@@ -27,7 +27,7 @@ class wordGenerator_latsar {
     {
         try {
             $phpword = new PhpWord();
-            // $pelatihan = is_array($data) ? (object)$data['pelatihan'] : $data->pelatihan;
+            $pelatihan = is_array($data) ? (object)$data['pelatihan'] : $data->pelatihan;
             // $ketua_loka = is_array($data) ? ($data['ketua_loka'] ?? 0) : $data->ketua_loka ?? 0;
             
             $phpword->setDefaultFontName('Times New Roman');
@@ -475,9 +475,13 @@ class wordGenerator_latsar {
             $toc1->update();
             
             // Save file
+            $tempFile = tempnam(sys_get_temp_dir(), 'word_');
+            $writer = IOFactory::createWriter($phpword, 'Word2007');
+            $writer->save($tempFile);
+
             $filename = "LAPORAN_PENYELENGGARAAN_LATSAR_CPNS_ANGGOTA_I_TAHUN_2025.docx";
-            $objWriter = IOFactory::createWriter($phpword, 'Word2007');
-            $objWriter->save($filename);
+            $target = FCPATH . 'downloads/' . $filename;
+            rename($tempFile, $target);
             
             return $filename;
             

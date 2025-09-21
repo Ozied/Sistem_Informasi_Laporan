@@ -32,22 +32,24 @@
                   </div>
                   
                   <div class="form-group">
-                    <label>Jenis Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jenis pelatihan sesuai dokumen"></i></label>
-                    <?php if (!empty($default_jenis)): ?>
-                        <?php 
-                            $jenis = $this->db->get_where('tbl_jenis_pelatihan', ['id_jenis_pelatihan' => $default_jenis])->row();
-                        ?>
-                        <input type="text" class="form-control" value="<?= $jenis->nama_jenis_pelatihan ?>" readonly>
-                    <?php else: ?>
-                        <select name="id_jenis_pelatihan" class="form-control" required>
-                            <option value="">- Pilih Jenis -</option>
-                            <?php foreach($jenis_pelatihan_options as $jenis): ?>
-                                <option value="<?= $jenis->id_jenis_pelatihan ?>">
-                                    <?= $jenis->nama_jenis_pelatihan ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    <?php endif; ?>
+                      <label>Jenis Pelatihan <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Jenis pelatihan sesuai dokumen"></i></label>
+                      <?php if (!empty($default_jenis)): ?>
+                          <?php 
+                              $jenis = $this->db->get_where('tbl_jenis_pelatihan', ['id_jenis_pelatihan' => $default_jenis])->row();
+                          ?>
+                          <input type="text" class="form-control" value="<?= $jenis->nama_jenis_pelatihan ?>" readonly>
+                          <!-- Tambahkan input hidden untuk mengirim nilai id_jenis_pelatihan -->
+                          <input type="hidden" name="id_jenis_pelatihan" value="<?= $default_jenis ?>">
+                      <?php else: ?>
+                          <select name="id_jenis_pelatihan" class="form-control" required>
+                              <option value="">- Pilih Jenis -</option>
+                              <?php foreach($jenis_pelatihan_options as $jenis): ?>
+                                  <option value="<?= $jenis->id_jenis_pelatihan ?>">
+                                      <?= $jenis->nama_jenis_pelatihan ?>
+                                  </option>
+                              <?php endforeach; ?>
+                          </select>
+                      <?php endif; ?>
                   </div>
 
                   <div class="form-group">

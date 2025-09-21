@@ -224,7 +224,7 @@
             </li>
 
             <!-- Code LDK Pekanbaru Menu Cetak Laporan PDWK-->
-            <li class="treeview 
+            <!-- <li class="treeview 
                 <?php if($this->uri->uri_string() == 'data/cetaklaporanpdwk'){ echo 'active';}?>
                 <?php if($this->uri->uri_string() == 'data/pegawaitambah'){ echo 'active';}?>
 				<?php if($this->uri->uri_string() == 'data/pegawaidetail/'.$this->uri->segment('3')){ echo 'active';}?>
@@ -253,15 +253,18 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
+            
+            <!-- Code LDK Pekanbaru Menu Cetak Laporan Latsar-->
+            
 
-            <li class="treeview">
-                <a href="<?= base_url('data/generateLaporanLatsar'); ?>">
+            <!-- <li class="<?php if($this->uri->uri_string() == 'data/generateLaporanLatsar'){ echo 'active';}?>">
+                <a href="<?= base_url('data/generateLaporanLatsar'); ?>" >
                     <i class="fa fa-file"></i>
                     <span>Cetak Laporan Latsar</span>
                     </span>
                 </a>
-            </li>
+            </li> -->
 
 
             <!-- Code LDK Pekanbaru Menu Pegawai-->
