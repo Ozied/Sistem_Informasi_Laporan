@@ -150,15 +150,15 @@ class wordGenerator_latsar {
             $section1->addTitle("KATA PENGANTAR", 1);
             $section1->addTextBreak(1);
             
-            $section1->addText("Puji dan syukur kehadirat Allah SWT, berkat rahmat serta karunianya, laporan Penyelenggaraan Pelatihan Dasar CPNS Golongan III Angkatan I di Wilayah Kerja Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru ini telah dapat disusun.", $fontstyle, $paragraphstyle);
+            $section1->addText("Puji dan syukur kehadirat Allah SWT, berkat rahmat serta karunianya, laporan Penyelenggaraan $pelatihan->nama_kegiatan di Wilayah Kerja Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru ini telah dapat disusun.", $fontstyle, $paragraphstyle);
             
             $section1->addText("Laporan ini disampaikan kepada Kepala Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru sebagai pertanggungjawaban tertulis dari panitia pelaksana kegiatan, sekaligus sebagai informasi tentang proses pelaksanaan kegiatan tersebut mulai dari tahap perencanaan, pelaksanaan, evaluasi sampai dengan pada tahap laporan.", $fontstyle, $paragraphstyle);
             
             $section1->addText("Kegiatan ini bertujuan untuk mengembangkan kompetensi pembentukan karakter ASN yang profesional sesuai bidang tugas yang diikuti oleh 40 orang Calon Pegawai Negeri Sipil di lingkungan Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru.", $fontstyle, $paragraphstyle);
             
-            $section1->addText("Laporan pelatihan ini terdiri dari enam bab. Bab I Latar Belakang, memuat latar belakang penyelenggaraan pelatihan dasar CPNS Golongan III. Bab II berisi tentang dasar hukum penyelenggaraan pelatihan dasar CPNS Golongan III. Bab III berisi perencanaan pelatihan dasar CPNS Golongan III yang memuat peserta dan tenaga pengajar. Bab IV berisi tentang penyelenggaraan pelatihan dasar CPNS Golongan III yang memuat pembukaan, pelaksanaan dan penutupan. Bab V berisi tentang evaluasi pelatihan dasar CPNS Golongan III yang memuat evaluasi peserta, evaluasi tenaga pelatihan dan evaluasi penyelenggaraan. Bab VI sebagai penutup. Laporan ini juga dilengkapi dengan lampiran-lampiran sebagai bukti fisik.", $fontstyle, $paragraphstyle);
+            $section1->addText("Laporan pelatihan ini terdiri dari enam bab. Bab I Latar Belakang, memuat latar belakang penyelenggaraan pelatihan dasar CPNS. Bab II berisi tentang dasar hukum penyelenggaraan pelatihan dasar CPNS. Bab III berisi perencanaan pelatihan dasar CPNS yang memuat peserta dan tenaga pengajar. Bab IV berisi tentang penyelenggaraan pelatihan dasar CPNS yang memuat pembukaan, pelaksanaan dan penutupan. Bab V berisi tentang evaluasi pelatihan dasar CPNS yang memuat evaluasi peserta, evaluasi tenaga pelatihan dan evaluasi penyelenggaraan. Bab VI sebagai penutup. Laporan ini juga dilengkapi dengan lampiran-lampiran sebagai bukti fisik.", $fontstyle, $paragraphstyle);
             
-            $section1->addText("Diharapkan bahwa dengan selesainya laporan ini, semua kegiatan yang berhubungan dengan Penyelenggaraan Pelatihan Dasar CPNS Golongan III Angkatan I dapat dipertanggungjawabkan.", $fontstyle, $paragraphstyle);
+            $section1->addText("Diharapkan bahwa dengan selesainya laporan ini, semua kegiatan yang berhubungan dengan Penyelenggaraan $pelatihan->nama_kegiatan dapat dipertanggungjawabkan.", $fontstyle, $paragraphstyle);
             
             $section1->addTextBreak(2);
             $section1->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);

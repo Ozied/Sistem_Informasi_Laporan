@@ -2766,7 +2766,7 @@ if (!empty($this->input->post('import_excel'))) {
         LEFT JOIN tbl_pegawai pg 
             ON pg.id_pegawai = ag.main_teacher_id 
            AND pg.deleted_at IS NULL
-        WHERE ag.id_pelatihan = ?
+        WHERE ag.agenda_id = ?
         GROUP BY 
             ag.agenda_id, ag.agenda_title, ag.main_teacher_id, pg.nama
         ORDER BY ag.agenda_id ASC
