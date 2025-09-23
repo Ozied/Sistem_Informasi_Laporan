@@ -431,8 +431,103 @@ class wordGenerator_latsar {
             $section1->addListItem("Evaluasi Pelaksanaan Aktualisasi dengan bobot 30%, berupa penilaian terhadap implementasi rencana aktualisasi di unit kerja masing-masing peserta.", 0, $fontstyle, $style);
             $section1->addListItem("Evaluasi Sikap dan Perilaku dengan bobot 15%, mencakup penilaian terhadap integritas, disiplin, kerja sama, dan etika selama mengikuti seluruh rangkaian pelatihan.", 0, $fontstyle, $style);
             $section1->addListItem("Evaluasi Pengembangan Kompetensi Teknis Bidang Tugas dengan bobot 15%, yang menilai keterampilan peserta dalam mendukung pelaksanaan tugas jabatan.", 0, $fontstyle, $style);
-            
-            $section1->addText("Hasil evaluasi peserta menunjukkan bahwa dari 40 peserta Latsar CPNS Angkatan 1, sebanyak 38 peserta (95%) dinyatakan lulus dengan nilai rata-rata 85, sedangkan 2 peserta (5%) dinyatakan tidak lulus dan harus mengulang pada tahapan tertentu sesuai dengan ketentuan yang berlaku.", $fontstyle, $paragraphstyle);
+
+            // helper: format "hari, d Month YYYY" (Indonesia)
+            $fmtHariTanggal = function($ymd) {
+                if (empty($ymd)) return "";
+                $ts = strtotime($ymd);
+                if (!$ts) return "";
+                $hariMap  = ['Sun'=>'Minggu','Mon'=>'Senin','Tue'=>'Selasa','Wed'=>'Rabu','Thu'=>'Kamis','Fri'=>'Jumat','Sat'=>'Sabtu'];
+                $bulanMap = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                $hari = $hariMap[date('D', $ts)];
+                return $hari . ', ' . date('j', $ts) . ' ' . $bulanMap[(int)date('n', $ts)] . ' ' . date('Y', $ts);
+            };
+
+            $tglRapat = $fmtHariTanggal($pelatihan->hari_tanggal_penutupan ?? null);
+
+            // pembuka paragraf
+            $section1->addText(
+                "Berdasarkan hasil Rapat Kelulusan oleh Tim Kelulusan Peserta Pelatihan Dasar CPNS Angkatan I yang dilaksanakan pada hari {$tglRapat}, didapatkan hasil sebagai berikut :",
+                $fontstyle,
+                $paragraphstyle
+            );
+
+            // tabel hasil predikat
+            $tableKel = $section1->addTable([
+                'borderSize' => 6,
+                'borderColor' => '000000',
+                'cellMargin' => 50
+            ]);
+            $tableKel->addRow();
+            $tableKel->addCell(900)->addText('No', ['bold'=>true], ['align'=>'center']);
+            $tableKel->addCell(3000)->addText('Predikat', ['bold'=>true]);
+            $tableKel->addCell(2200)->addText('Rentang Nilai', ['bold'=>true], ['align'=>'center']);
+            $tableKel->addCell(2000)->addText('Jumlah Peserta', ['bold'=>true], ['align'=>'center']);
+
+            // ambil angka dari detail_pelatihan (model sudah mengisi ke $pelatihan)
+            $sm = (int)($pelatihan->jml_peserta_nilai_sm ?? 0);
+            $m  = (int)($pelatihan->jml_peserta_nilai_m  ?? 0);
+            $cm = (int)($pelatihan->jml_peserta_nilai_cm ?? 0);
+            $dl = (int)($pelatihan->jml_peserta_nilai_dl ?? 0);
+            $tm = (int)($pelatihan->jml_peserta_tm       ?? 0);
+
+            $rows = [
+                [1, 'Sangat Memuaskan',  '90,01 – 100', $sm],
+                [2, 'Memuaskan',         '80,01 – 90,00', $m],
+                [3, 'Cukup Memuaskan',   '70,01 – 80,00', $cm],
+                [4, 'Ditunda Kelulusannya', '60,01 – 70,00', $dl],
+                [5, 'Tidak Memuaskan',   '≤ 60,00', $tm],
+            ];
+            foreach ($rows as $r) {
+                $tableKel->addRow();
+                $tableKel->addCell(900)->addText($r[0], null, ['align'=>'center']);
+                $tableKel->addCell(3000)->addText($r[1]);
+                $tableKel->addCell(2200)->addText($r[2], null, ['align'=>'center']);
+                $tableKel->addCell(2000)->addText((string)$r[3], null, ['align'=>'center']);
+            }
+
+            // ringkasan setelah tabel
+            $totalPeserta = (int)(
+                $pelatihan->jumlah_peserta_riil              // hitung langsung dari tabel peserta
+                ?? $pelatihan->jumlah_peserta                // fallback dari detail_pelatihan (bila terisi)
+                ?? count($pelatihan->peserta ?? [])          // fallback terakhir: hitung array yang sudah dimuat
+            );
+            $lulusCount = $totalPeserta - ($dl + $tm);
+            $statusKel  = (($dl + $tm) === 0)
+                ? 'seluruh peserta dinyatakan LULUS'
+                : ($lulusCount . ' peserta dinyatakan LULUS, ' . ($dl + $tm) . ' peserta belum lulus');
+
+
+            $section1->addText(
+                "Berdasarkan hasil Rapat Kelulusan oleh Tim Kelulusan Peserta Pelatihan Dasar CPNS Angkatan I yang dilaksanakan pada hari {$tglRapat}, diperoleh hasil sebagai berikut:",
+                $fontstyle, $paragraphstyle
+            );
+
+            // bullet ringkasan
+            $styleBullet = generate_list_style($phpword, 'bullet');
+            $section1->addListItem("Jumlah peserta: {$totalPeserta} orang", 0, $fontstyle, $styleBullet);
+            $section1->addListItem("Status kelulusan: {$statusKel}", 0, $fontstyle, $styleBullet);
+
+            // paragraf tambahan
+            $section1->addText(
+                "Kepada peserta yang telah menyelesaikan seluruh program dengan baik dan dinyatakan lulus, diberikan Surat Tanda Tamat Pelatihan (STTP). Hasil rekapitulasi evaluasi peserta terdapat pada lampiran. Selain itu, kepada peserta yang menempati 3 (tiga) peringkat terbaik, diberikan Piagam Penghargaan.",
+                $fontstyle, $paragraphstyle
+            );
+
+            // Top 3 peserta (ambil dari model: peringkat_1..3 sudah di-resolve)
+            $nama1 = $pelatihan->peringkat_1->nama ?? '[Nama Peserta 1]';
+            $jab1  = $pelatihan->peringkat_1->jabatan ?? 'Jabatan';
+            $nama2 = $pelatihan->peringkat_2->nama ?? '[Nama Peserta 2]';
+            $jab2  = $pelatihan->peringkat_2->jabatan ?? 'Jabatan';
+            $nama3 = $pelatihan->peringkat_3->nama ?? '[Nama Peserta 3]';
+            $jab3  = $pelatihan->peringkat_3->jabatan ?? 'Jabatan';
+
+            $styleDecimal = generate_list_style($phpword, 'decimal');
+            $section1->addText("Adapun peserta Angkatan I yang memperoleh peringkat 3 besar adalah sebagai berikut:", $fontstyle, $paragraphstyle);
+            $section1->addListItem("{$nama1} – Peringkat I – {$jab1}", 0, $fontstyle, $styleDecimal);
+            $section1->addListItem("{$nama2} – Peringkat II – {$jab2}", 0, $fontstyle, $styleDecimal);
+            $section1->addListItem("{$nama3} – Peringkat III – {$jab3}", 0, $fontstyle, $styleDecimal);
+
             
             $section1->addTitle("5.2 Evaluasi Penyelenggaraan", 2);
             $section1->addText("Evaluasi penyelenggaraan Latsar CPNS dilakukan untuk mengukur efektivitas dan efisiensi pelaksanaan pelatihan. Aspek yang dievaluasi meliputi:", $fontstyle, $paragraphstyle);
