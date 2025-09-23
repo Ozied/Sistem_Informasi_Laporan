@@ -29,6 +29,20 @@ class wordGenerator_latsar {
             $phpword = new PhpWord();
             $pelatihan = is_array($data) ? (object)$data['pelatihan'] : $data->pelatihan;
             // $ketua_loka = is_array($data) ? ($data['ketua_loka'] ?? 0) : $data->ketua_loka ?? 0;
+            // --- SAFE DEFAULTS ---
+            $namaKegiatan = isset($pelatihan->nama_kegiatan) ? (string)$pelatihan->nama_kegiatan : 'Kegiatan';
+            $tahun        = isset($pelatihan->tahun) ? (string)$pelatihan->tahun : date('Y');
+            $bulanTTD     = isset($pelatihan->bulan_ttd_lap) ? (string)$pelatihan->bulan_ttd_lap : '';
+
+            $ketuaObj     = (isset($pelatihan->ketua_panitia) && is_object($pelatihan->ketua_panitia)) ? $pelatihan->ketua_panitia : null;
+            $ketuaNama    = $ketuaObj->nama ?? '-';
+            $ketuaNIP     = $ketuaObj->NIP  ?? '-';
+
+            // Pastikan koleksi tersedia
+            $pelatihan->peserta          = $pelatihan->peserta ?? [];
+            $pelatihan->tenaga_pengajar  = $pelatihan->tenaga_pengajar ?? [];
+            $pelatihan->tim_penyelenggara= $pelatihan->tim_penyelenggara ?? [];
+
             
             $phpword->setDefaultFontName('Times New Roman');
             $phpword->setDefaultFontSize(12);
@@ -75,7 +89,7 @@ class wordGenerator_latsar {
             // Add background image
             $imageWidth = Converter::cmToTwip(1.05);
             $coverSection->addImage(
-                'assets/cover/Cover_Latsar_CPNS.png',
+                'assets/cover/Cover_PDWK_Penyelenggaraan.png',
                 [
                     'width' => $imageWidth,
                     'positioning' => Image::POSITION_ABSOLUTE,
@@ -104,7 +118,7 @@ class wordGenerator_latsar {
             );
 
             $coverSection->addText(
-                strtoupper($pelatihan->nama_kegiatan),
+                strtoupper(($namaKegiatan)),
                 [
                     'name' => 'Times New Roman',
                     'size' => 16,
@@ -161,11 +175,11 @@ class wordGenerator_latsar {
             $section1->addText("Diharapkan bahwa dengan selesainya laporan ini, semua kegiatan yang berhubungan dengan Penyelenggaraan $pelatihan->nama_kegiatan dapat dipertanggungjawabkan.", $fontstyle, $paragraphstyle);
             
             $section1->addTextBreak(2);
-            $section1->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section1->addText("Pekanbaru, {$bulanTTD} {$tahun},", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section1->addText('Ketua Panitia', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section1->addTextBreak(3);
-            $section1->addText("{$pelatihan->ketua_panitia->nama}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section1->addText("NIP. {$pelatihan->ketua_panitia->NIP}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section1->addText($ketuaNama, array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section1->addText("NIP. {$ketuaNIP}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
             // Daftar Isi
             $section1->addPageBreak();
@@ -247,41 +261,47 @@ class wordGenerator_latsar {
                     $no++;
                 }
             }
-            
+
             $section1->addTitle("B. Tenaga Pengajar", 2);
-            $section1->addText("Tenaga pengajar Pelatihan Dasar CPNS Golongan III Angkatan I tahun 2025 merupakan tenaga-tenaga ahli yang berkompeten di bidangnya sesuai dengan mata pelatihan yang diajarkan dalam Pelatihan Dasar CPNS. Rincian tenaga pengajar sebagai berikut:", $fontstyle, $paragraphstyle);
-            
-            // Create table for instructors
+            $section1->addText(
+            "Tenaga pengajar Pelatihan Dasar CPNS Golongan III Angkatan I tahun 2025 merupakan tenaga-tenaga ahli yang berkompeten di bidangnya sesuai dengan mata pelatihan yang diajarkan dalam Pelatihan Dasar CPNS. Rincian tenaga pengajar sebagai berikut:",
+            $fontstyle, $paragraphstyle
+            );
+
+            // table header
             $table2 = $section1->addTable([
                 'borderSize' => 6,
                 'borderColor' => '000000',
                 'cellMargin' => 50
             ]);
-            
-            // Table headers
             $table2->addRow();
-            $table2->addCell(1000)->addText('No', ['bold' => true], ['align' => 'center']);
-            $table2->addCell(4000)->addText('Agenda/Mata Pelatihan', ['bold' => true], ['align' => 'center']);
-            $table2->addCell(1000)->addText('JP Async', ['bold' => true], ['align' => 'center']);
-            $table2->addCell(1000)->addText('JP Sync', ['bold' => true], ['align' => 'center']);
-            $table2->addCell(1000)->addText('Kel.', ['bold' => true], ['align' => 'center']);
-            $table2->addCell(2000)->addText('Pengajar', ['bold' => true], ['align' => 'center']);
-            
-            // Add instructors data
-            if (!empty($pelatihan->tenaga_pengajar)) {
-                $no = 1;
-                foreach ($pelatihan->tenaga_pengajar as $pengajar) {
+            $table2->addCell(900)->addText('No', ['bold'=>true], ['align'=>'center']);
+            $table2->addCell(5400)->addText('Agenda/Mata Pelatihan', ['bold'=>true]);
+            $table2->addCell(1200)->addText('JP Async', ['bold'=>true], ['align'=>'center']);
+            $table2->addCell(1200)->addText('JP Sync',  ['bold'=>true], ['align'=>'center']);
+            $table2->addCell(900)->addText('Kel.',     ['bold'=>true], ['align'=>'center']);
+            $table2->addCell(2600)->addText('Pengajar', ['bold'=>true]);
+
+            $no = 1;
+            foreach (($pelatihan->agenda ?? []) as $ag) {
+                // kalau tidak ada grup: satu baris saja, gunakan main teacher
+                $groups = $ag->grup ?: [ (object)[
+                    'group_no' => null,
+                    'teacher'  => $ag->main_teacher ?? null
+                ]];
+
+                foreach ($groups as $gr) {
+                    $teacherName = $gr->teacher->nama ?? ($ag->main_teacher->nama ?? '');
                     $table2->addRow();
-                    $table2->addCell(1000)->addText($no, null, ['align' => 'center']);
-                    $table2->addCell(4000)->addText($pengajar->agenda, null, ['align' => 'left']);
-                    $table2->addCell(1000)->addText($pengajar->jp_async, null, ['align' => 'center']);
-                    $table2->addCell(1000)->addText($pengajar->jp_sync, null, ['align' => 'center']);
-                    $table2->addCell(1000)->addText($pengajar->kel, null, ['align' => 'center']);
-                    $table2->addCell(2000)->addText($pengajar->nama_pengajar, null, ['align' => 'left']);
-                    $no++;
+                    $table2->addCell(900)->addText($no++, null, ['align'=>'center']);
+                    $table2->addCell(5400)->addText($ag->agenda_title);
+                    $table2->addCell(1200)->addText((int)($ag->sum_jp_async ?? 0), null, ['align'=>'center']);
+                    $table2->addCell(1200)->addText((int)($ag->sum_jp_sync  ?? 0), null, ['align'=>'center']);
+                    $table2->addCell(900)->addText(isset($gr->group_no) ? (string)(int)$gr->group_no : '', null, ['align'=>'center']);
+                    $table2->addCell(2600)->addText($teacherName);
                 }
             }
-            
+                        
             $section1->addTitle("C. Tim Penyelenggara", 2);
             $section1->addText("Persyaratan panitia tim penyelenggara Pelatihan Dasar CPNS pada wilayah kerja Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru tahun 2025 adalah sebagai berikut:", $fontstyle, $paragraphstyle);
             
@@ -470,9 +490,6 @@ class wordGenerator_latsar {
             $section1->addListItem("Berita Acara Penyelenggaraan", 0, $fontstyle, $style);
             $section1->addListItem("Rekapitulasi Evaluasi Peserta", 0, $fontstyle, $style);
             $section1->addListItem("Rekapitulasi Evaluasi Penyelenggaraan", 0, $fontstyle, $style);
-
-            // Update TOC
-            $toc1->update();
             
             // Save file
             $tempFile = tempnam(sys_get_temp_dir(), 'word_');

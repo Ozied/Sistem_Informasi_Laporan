@@ -55,7 +55,8 @@
                     <td><?= $no; ?></td>
                     <td><?= htmlentities($isi['nama_pelatihan']); ?></td>
                     <td>
-                      <?= ($isi['id_jenis_pelatihan'] == 1) ? 'PJJ' : (($isi['id_jenis_pelatihan'] == 2) ? 'PDWK' : 'UNKNOWN (' . $isi['id_jenis_pelatihan'] . ')') ?>
+                      <?= ($isi['id_jenis_pelatihan'] == 1) ? 'PJJ' : (($isi['id_jenis_pelatihan'] == 2) ? 'PDWK' : (($isi['id_jenis_pelatihan'] == 3) ? 'Latsar' : 'UNKNOWN (' . $isi['id_jenis_pelatihan'] . ')')) ?>
+
                     </td>
                     <td><?= htmlentities($isi['kab_kota']); ?></td>
                     <td><?= htmlentities($isi['tempat']); ?></td>

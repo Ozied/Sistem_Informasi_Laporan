@@ -1732,109 +1732,245 @@ public function detailpelatihanedit()
 		$this->load->view('footer_view', $this->data);
 	}
 
+	// public function generateLaporan($id_pelatihan)
+	// {
+	// 	$sess = $this->session->userdata('ses_id');
+	// 	$this->load->helper('date');
+
+	// 	if ($sess == null){
+	// 		redirect('cetak_laporan/list_pelatihan_pjj');
+	// 		echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+	// 		return;
+	// 	}
+
+	// 	$pelatihan = $this->M_Admin->dataPelatihan($id_pelatihan);
+
+	// 	// Pastikan data pelatihan ada
+	// 	if (!$pelatihan) {
+	// 		echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+	// 		return;
+	// 	}
+
+	// 	// DEBUG: Tampilkan data pelatihan
+	// 	// Ganti bagian debug dengan ini:
+	// 	// echo '<h3>DEBUG DATA PELATIHAN</h3>';
+	// 	// echo 'ID Pelatihan: ' . $id_pelatihan . '<br>';
+	// 	// echo 'Tipe data: ' . gettype($pelatihan) . '<br>';
+
+	// 	// if (is_object($pelatihan)) {
+	// 	// 	echo 'Properties object: <pre>';
+	// 	// 	print_r(get_object_vars($pelatihan));
+	// 	// 	echo '</pre>';
+			
+	// 	// 	echo 'id_jenis_pelatihan: ' . $pelatihan->id_jenis_pelatihan . ' (type: ' . gettype($pelatihan->id_jenis_pelatihan) . ')<br>';
+			
+	// 	// 	// Cek langsung dari database
+	// 	// 	$direct_check = $this->db->select('id_jenis_pelatihan')
+	// 	// 							->from('tbl_pelatihan')
+	// 	// 							->where('id_pelatihan', $id_pelatihan)
+	// 	// 							->get()
+	// 	// 							->row();
+	// 	// 	echo 'Nilai langsung dari DB: ' . $direct_check->id_jenis_pelatihan . '<br>';
+			
+	// 	// } elseif (is_array($pelatihan)) {
+	// 	// 	echo 'Array keys: <pre>';
+	// 	// 	print_r(array_keys($pelatihan));
+	// 	// 	echo '</pre>';
+			
+	// 	// 	echo 'id_jenis_pelatihan: ' . $pelatihan['id_jenis_pelatihan'] . '<br>';
+	// 	// }
+
+	// 	// die();
+
+	// 	// Tentukan library word generator berdasarkan jenis pelatihan
+	// 	$jenis_pelatihan = $pelatihan->id_jenis_pelatihan;
+		
+	// 	if ($jenis_pelatihan == 2) { // PDWK
+	// 		$this->load->library('wordgenerator_pdwk');
+	// 		$word_generator = $this->wordgenerator_pdwk;
+	// 	} elseif ($jenis_pelatihan == 3) { // Latsar
+	// 		$this->load->library('wordgenerator_latsar');
+	// 		$word_generator = $this->wordgenerator_latsar;
+	// 	}
+	// 	else { // PJJ (default)
+	// 		$this->load->library('wordgenerator');
+	// 		$word_generator = $this->wordgenerator;
+	// 	}
+
+	// 	$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
+	// 	$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
+	// 	$ketua_loka = $this->M_Admin->get_ketua_loka();
+
+	// 	$data = [
+	// 		'pelatihan' => $pelatihan,
+	// 		'durasi' => $durasi,
+	// 		'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
+	// 		'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
+	// 		'ketua_loka' => $ketua_loka
+	// 	];
+
+	// 	if (!empty($pelatihan->materi)) {
+	// 		foreach ($pelatihan->materi as $materi) {
+	// 			$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
+	// 		}
+	// 	}	
+
+	// 		try {
+	// 	// 1) Ubah SEMUA warning/notice menjadi Exception selama proses generate
+	// 	set_error_handler(function ($severity, $message, $file, $line) {
+	// 		// Respect error_reporting level
+	// 		if (!(error_reporting() & $severity)) {
+	// 			return false; // biarkan PHP default
+	// 		}
+	// 		throw new \ErrorException($message, 0, $severity, $file, $line);
+	// 	});
+
+	// 	// 2) Jalankan generate
+	// 	$filename = $word_generator->generate($data);
+
+	// } catch (\Throwable $e) {
+	// 	// 3) Pulihkan handler lalu tampilkan error yang jelas
+	// 	restore_error_handler();
+	// 	log_message('error', "Wordgen gagal: {$e->getMessage()}\n{$e->getTraceAsString()}");
+	// 	show_error(
+	// 		'Gagal generate dokumen: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'),
+	// 		500,
+	// 		'Word Generator Error'
+	// 	);
+	// 	return;
+	// } finally {
+	// 	// 4) Pastikan handler dipulihkan jika tidak masuk catch
+	// 	restore_error_handler();
+	// }
+
+	// if (!$filename) {
+	// 	// Masih false tanpa Exception -> beri petunjuk kuat
+	// 	show_error(
+	// 		'Gagal generate dokumen: Library mengembalikan FALSE tanpa exception. Cek path aset, izin folder downloads/, atau modifikasi library agar melempar exception saat gagal.',
+	// 		500,
+	// 		'Word Generator Error'
+	// 	);
+	// 	return;
+	// }
+
+		
+	// 	$filepath = FCPATH . 'downloads/' . $filename;
+	// 	if(file_exists($filepath)){
+	// 		header("Content-Description: File Transfer");
+	// 		header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+	// 		header("Content-Disposition: inline; filename= " . basename($filepath));
+	// 		header("Content-Transfer-Encoding: binary");
+	// 		header("Expires: 0");
+	// 		header("Cache-Control: must-revalidate");
+	// 		header("Pragma: public");
+	// 		header("Content-Length: " . filesize($filepath));
+			
+	// 		readfile($filepath);
+	// 		exit;
+	// 	} else {
+	// 		show_error('File tidak ditemukan: ' . $filepath);
+	// 	}
+	// }
+
 	public function generateLaporan($id_pelatihan)
-	{
-		$sess = $this->session->userdata('ses_id');
-		$this->load->helper('date');
+{
+    $sess = $this->session->userdata('ses_id');
+    $this->load->helper('date');
 
-		if ($sess == null){
-			redirect('cetak_laporan/list_pelatihan_pjj');
-			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
-			return;
-		}
+    if ($sess == null) {
+        redirect('cetak_laporan/list_pelatihan_pjj');
+        echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+        return;
+    }
 
-		$pelatihan = $this->M_Admin->dataPelatihan($id_pelatihan);
+    // Ambil pelatihan dengan seluruh komponen (materi, peserta, agenda+topik+grup, pegawai, peringkat, dsb)
+    $pelatihan = $this->M_Admin->dataPelatihan((int)$id_pelatihan);
+    if (!$pelatihan) {
+        echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
+        return;
+    }
 
-		// Pastikan data pelatihan ada
-		if (!$pelatihan) {
-			echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/dokumenpelatihan') . '"</script>';
-			return;
-		}
+    // Tentukan library berdasarkan jenis pelatihan
+    $jenis_pelatihan = (int)$pelatihan->id_jenis_pelatihan;
+    if ($jenis_pelatihan === 2) { // PDWK
+        $this->load->library('wordgenerator_pdwk');
+        $word_generator = $this->wordgenerator_pdwk;
+    } elseif ($jenis_pelatihan === 3) { // Latsar
+        $this->load->library('wordgenerator_latsar');
+        $word_generator = $this->wordgenerator_latsar;
+    } else { // PJJ (default)
+        $this->load->library('wordgenerator');
+        $word_generator = $this->wordgenerator;
+    }
 
-		// DEBUG: Tampilkan data pelatihan
-		// Ganti bagian debug dengan ini:
-		// echo '<h3>DEBUG DATA PELATIHAN</h3>';
-		// echo 'ID Pelatihan: ' . $id_pelatihan . '<br>';
-		// echo 'Tipe data: ' . gettype($pelatihan) . '<br>';
+    $durasi     = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
+    $ketua_loka = $this->M_Admin->get_ketua_loka();
 
-		// if (is_object($pelatihan)) {
-		// 	echo 'Properties object: <pre>';
-		// 	print_r(get_object_vars($pelatihan));
-		// 	echo '</pre>';
-			
-		// 	echo 'id_jenis_pelatihan: ' . $pelatihan->id_jenis_pelatihan . ' (type: ' . gettype($pelatihan->id_jenis_pelatihan) . ')<br>';
-			
-		// 	// Cek langsung dari database
-		// 	$direct_check = $this->db->select('id_jenis_pelatihan')
-		// 							->from('tbl_pelatihan')
-		// 							->where('id_pelatihan', $id_pelatihan)
-		// 							->get()
-		// 							->row();
-		// 	echo 'Nilai langsung dari DB: ' . $direct_check->id_jenis_pelatihan . '<br>';
-			
-		// } elseif (is_array($pelatihan)) {
-		// 	echo 'Array keys: <pre>';
-		// 	print_r(array_keys($pelatihan));
-		// 	echo '</pre>';
-			
-		// 	echo 'id_jenis_pelatihan: ' . $pelatihan['id_jenis_pelatihan'] . '<br>';
-		// }
+    // Siapkan data untuk generator (akses langsung sebagai object)
+    $data = [
+        'pelatihan'        => $pelatihan,
+        'durasi'           => $durasi,
+        'tanggal_mulai'    => format_tanggal_indonesia($pelatihan->tanggal_mulai_pelatihan),
+        'tanggal_selesai'  => format_tanggal_indonesia($pelatihan->tanggal_selesai_pelatihan),
+        'ketua_loka'       => $ketua_loka
+    ];
 
-		// die();
+    // Pastikan materi punya parsed_tujuan (bila ada)
+    if (!empty($pelatihan->materi)) {
+        foreach ($pelatihan->materi as $materi) {
+            $materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
+        }
+    }
 
-		// Tentukan library word generator berdasarkan jenis pelatihan
-		$jenis_pelatihan = $pelatihan->id_jenis_pelatihan;
-		
-		if ($jenis_pelatihan == 2) { // PDWK
-			$this->load->library('wordgenerator_pdwk');
-			$word_generator = $this->wordgenerator_pdwk;
-		} else { // PJJ (default)
-			$this->load->library('wordgenerator');
-			$word_generator = $this->wordgenerator;
-		}
+    try {
+        // Naikkan notice/warning menjadi exception saat generate
+        set_error_handler(function ($severity, $message, $file, $line) {
+            if (!(error_reporting() & $severity)) return false;
+            throw new \ErrorException($message, 0, $severity, $file, $line);
+        });
 
-		$durasi = $this->M_Admin->get_durasi_pelatihan($id_pelatihan);
-		$pelatihanData = is_object($pelatihan) ? json_decode(json_encode($pelatihan), true) : $pelatihan;
-		$ketua_loka = $this->M_Admin->get_ketua_loka();
+        $filename = $word_generator->generate($data);
 
-		$data = [
-			'pelatihan' => $pelatihan,
-			'durasi' => $durasi,
-			'tanggal_mulai'  => format_tanggal_indonesia($pelatihanData['tanggal_mulai_pelatihan']),
-			'tanggal_selesai' => format_tanggal_indonesia($pelatihanData['tanggal_selesai_pelatihan']),
-			'ketua_loka' => $ketua_loka
-		];
+    } catch (\Throwable $e) {
+        restore_error_handler();
+        log_message('error', "Wordgen gagal: {$e->getMessage()}\n{$e->getTraceAsString()}");
+        show_error(
+            'Gagal generate dokumen: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'),
+            500,
+            'Word Generator Error'
+        );
+        return;
+    } finally {
+        restore_error_handler();
+    }
 
-		if (!empty($pelatihan->materi)) {
-			foreach ($pelatihan->materi as $materi) {
-				$materi->parsed_tujuan = $this->M_Admin->parseTujuanKursil($materi->tujuan_kursil);
-			}
-		}	
+    if (!$filename) {
+        show_error(
+            'Gagal generate dokumen: Library mengembalikan FALSE tanpa exception. Cek path aset, izin folder downloads/, atau modifikasi library agar melempar exception saat gagal.',
+            500,
+            'Word Generator Error'
+        );
+        return;
+    }
 
-		// Generate laporan menggunakan library yang sesuai
-		$filename = $word_generator->generate($data);
-		
-		if (!$filename){
-			show_error('Gagal generate dokumen');
-		}
-		
-		$filepath = FCPATH . 'downloads/' . $filename;
-		if(file_exists($filepath)){
-			header("Content-Description: File Transfer");
-			header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-			header("Content-Disposition: inline; filename= " . basename($filepath));
-			header("Content-Transfer-Encoding: binary");
-			header("Expires: 0");
-			header("Cache-Control: must-revalidate");
-			header("Pragma: public");
-			header("Content-Length: " . filesize($filepath));
-			
-			readfile($filepath);
-			exit;
-		} else {
-			show_error('File tidak ditemukan: ' . $filepath);
-		}
-	}
+    $filepath = FCPATH . 'downloads/' . $filename;
+    if (file_exists($filepath)) {
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        header("Content-Disposition: inline; filename=" . basename($filepath));
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate");
+        header("Pragma: public");
+        header("Content-Length: " . filesize($filepath));
+        readfile($filepath);
+        exit;
+    } else {
+        show_error('File tidak ditemukan: ' . $filepath);
+    }
+}
+
+
 
 	// public function generateLaporanpdwk($id_pelatihan)
 	// {
@@ -2747,30 +2883,40 @@ if (!empty($this->input->post('import_excel'))) {
     $this->data['id_pelatihan']= $id_pelatihan;
 
     // ===== Daftar Materi & Pengajar (Agenda) =====
-    // Join ke pegawai untuk nama main teacher.
-    // Tambahkan metrik agregat yang bermanfaat untuk tampilan.
-    $this->data['materi_pengajar'] = $this->db->query("
-        SELECT 
-            ag.agenda_id,
-            ag.agenda_title,
-            ag.main_teacher_id,
-            pg.nama AS main_teacher_name,
-            COUNT(DISTINCT tp.topic_id) AS jumlah_topik,
-            COALESCE(SUM(tp.jp_async + tp.jp_sync), 0) AS total_jp,
-            COUNT(DISTINCT ga.teacher_id) AS jumlah_pengajar_kelompok
-        FROM tbl_agenda ag
-        LEFT JOIN tbl_topik tp 
-            ON tp.agenda_id = ag.agenda_id
-        LEFT JOIN tbl_grup_agenda ga
-            ON ga.agenda_id = ag.agenda_id
-        LEFT JOIN tbl_pegawai pg 
-            ON pg.id_pegawai = ag.main_teacher_id 
-           AND pg.deleted_at IS NULL
-        WHERE ag.agenda_id = ?
-        GROUP BY 
-            ag.agenda_id, ag.agenda_title, ag.main_teacher_id, pg.nama
-        ORDER BY ag.agenda_id ASC
-    ", [$id_pelatihan])->result();
+	// Catatan: pakai ag.id_pelatihan (BUKAN ag.agenda_id) untuk mem-filter per pelatihan.
+	$this->data['materi_pengajar'] = $this->db->query("
+		SELECT 
+			ag.agenda_id,
+			ag.agenda_title,
+			ag.main_teacher_id,
+			pg.nama AS main_teacher_name,
+
+			COUNT(DISTINCT tp.topic_id) AS jumlah_topik,
+			COALESCE(SUM(tp.jp_async + tp.jp_sync), 0) AS total_jp,
+			COUNT(DISTINCT ga.teacher_id) AS jumlah_pengajar_kelompok
+
+		FROM tbl_agenda ag
+		LEFT JOIN tbl_topik tp 
+			ON tp.agenda_id = ag.agenda_id
+			-- Jika tbl_topik ada soft delete, aktifkan baris di bawah:
+			-- AND tp.deleted_at IS NULL
+		LEFT JOIN tbl_grup_agenda ga
+			ON ga.agenda_id = ag.agenda_id
+			-- Jika tbl_grup_agenda ada soft delete, aktifkan baris di bawah:
+			-- AND ga.deleted_at IS NULL
+		LEFT JOIN tbl_pegawai pg 
+			ON pg.id_pegawai = ag.main_teacher_id 
+			AND (pg.deleted_at IS NULL OR pg.deleted_at IS NULL) -- aman jika kolomnya ada
+
+		WHERE ag.id_pelatihan = ?
+		-- Jika tbl_agenda ada soft delete, aktifkan baris di bawah:
+		-- AND ag.deleted_at IS NULL
+
+		GROUP BY 
+			ag.agenda_id, ag.agenda_title, ag.main_teacher_id, pg.nama
+		ORDER BY ag.agenda_id ASC
+	", [$id_pelatihan])->result();
+
 
     // (Opsional) Daftar pegawai untuk assignment pengajar di UI
     $this->data['pegawai'] = $this->db
@@ -2780,7 +2926,10 @@ if (!empty($this->input->post('import_excel'))) {
         ->result();
 
     // Title halaman
-    $this->data['title_web'] = 'Materi & Pengajar - ' . htmlentities($cek_pelatihan->nama_pelatihan);
+	$judul = !empty($cek_pelatihan->nama_pelatihan) ? $cek_pelatihan->nama_pelatihan
+       : (!empty($cek_pelatihan->nama_kegiatan) ? $cek_pelatihan->nama_kegiatan : 'Pelatihan');
+	$this->data['title_web'] = 'Materi & Pengajar - ' . htmlentities($judul);
+
 
     // Render view
     $this->load->view('header_view',  $this->data);

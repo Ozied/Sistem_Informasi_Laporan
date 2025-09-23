@@ -9,8 +9,137 @@ class M_Admin extends CI_Model
 	 }
 
   //  Get Data Pelatihan
-   function dataPelatihan($id_pelatihan){
-    // Di model M_Admin->dataPelatihan(), ganti dengan:
+  //  function dataPelatihan($id_pelatihan){
+  //   // Di model M_Admin->dataPelatihan(), ganti dengan:
+  //   $this->db->select('
+  //       p.*,
+  //       d.id_detail_pelatihan,
+  //       d.id_penanggung_jawab,
+  //       d.id_ketua_panitia,
+  //       d.id_akademis,
+  //       d.id_keuangan,
+  //       d.id_administrasi,
+  //       d.id_wi_1,
+  //       d.id_wi_2,
+  //       d.id_wi_3,
+  //       d.id_wi_rapat_kelulusan,
+  //       d.id_wi_4,
+  //       d.id_pengajar_1,
+  //       d.id_pengajar_2,
+  //       d.id_pengajar_3,
+  //       d.jumlah_wi_pengajar,
+  //       d.jumlah_pendidikan_wi_s1,
+  //       d.jumlah_pendidikan_wi_s2,
+  //       d.jumlah_pendidikan_wi_s3,
+  //       d.jumlah_peserta,
+  //       d.jumlah_lulus,
+  //       d.jumlah_tidak_lulus,
+  //       d.jabatan_peserta,
+  //       d.jumlah_peserta_asn,
+  //       d.jumlah_peserta_non_asn,
+  //       d.jumlah_peserta_laki,
+  //       d.jumlah_peserta_wanita,
+  //       d.jumlah_pendidikan_peserta_sma,
+  //       d.jumlah_pendidikan_wi_d2,
+  //       d.jumlah_pendidikan_peserta_d3,
+  //       d.jumlah_pendidikan_peserta_s1,
+  //       d.jumlah_pendidikan_peserta_s2,
+  //       d.jumlah_pendidikan_peserta_s3,
+  //       d.rab,
+  //       d.realisasi,
+  //       j.nama_jenis_pelatihan,
+  //       pembuka.nama as nama_pejabat_pembuka,
+  //       pembuka.NIP as nip_pejabat_pembuka,
+  //       pembuka.jabatan as jabatan_pejabat_pembuka,
+  //       pembuka.asal_satker as satker_pejabat_pembuka,
+  //       penutup.nama as nama_pejabat_penutup,
+  //       penutup.NIP as nip_pejabat_penutup,
+  //       penutup.jabatan as jabatan_pejabat_penutup,
+  //       penutup.asal_satker as satker_pejabat_penutup
+  //   ');
+
+  //   $this->db->from('tbl_pelatihan p');
+  //   $this->db->join('tbl_detail_pelatihan d', 'p.id_pelatihan = d.id_pelatihan', 'left');
+  //   $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
+  //   $this->db->join('tbl_pegawai pembuka', 'p.id_pejabat_pembuka = pembuka.id_pegawai', 'left');
+  //   $this->db->join('tbl_pegawai penutup', 'p.id_pejabat_penutup = penutup.id_pegawai', 'left');
+  //   $this->db->where('p.id_pelatihan', $id_pelatihan);
+
+  //   $pelatihan = $this->db->get()->row();
+
+  //   // $pelatihan->materi->tujuan_parsed = $this->parseTujuanKursil($pelatihan->materi->tujuan_kursil ?? '');
+
+  //   if(!$pelatihan) return null;
+
+  //   $pegawai_ids = [];
+  //   $pegawai_fields = [
+  //     'id_pejabat_pembuka',
+  //     'id_pejabat_penutup',
+  //     'id_penanggung_jawab',
+  //     'id_ketua_panitia',
+  //     'id_akademis',
+  //     'id_keuangan',
+  //     'id_administrasi',
+  //     'id_wi_1',
+  //     'id_wi_2',
+  //     'id_wi_3',
+  //     'id_wi_4',
+  //     'id_wi_rapat_kelulusan',
+  //     'id_pengajar_1',
+  //     'id_pengajar_2',
+  //     'id_pengajar_3'
+  //   ];
+
+  //   foreach ($pegawai_fields as $field){
+  //     if (!empty($pelatihan->{$field})) {
+  //       $pegawai_ids[] = $pelatihan->{$field};
+  //     }
+  //   }
+
+  //   if(!empty($pegawai_ids)) {
+  //     $this->db->select('p.*, r.nama_role as jabatan');
+  //     $this->db->from('tbl_pegawai p');
+  //     $this->db->join('tbl_role r', 'p.jabatan = r.id_role', 'left');
+  //     $this->db->where_in('p.id_pegawai', array_unique($pegawai_ids));
+  //     $pegawai_data = $this->db->get()->result();
+
+  //     $pegawai_map = array_column($pegawai_data, null, 'id_pegawai');
+
+  //     foreach ($pegawai_fields as $field) {
+  //       $key = str_replace('id_', '', $field);
+  //       if (!empty($pelatihan->{$field}) && isset($pegawai_map[$pelatihan->{$field}])) {
+  //         $pelatihan->{$key} = $pegawai_map[$pelatihan->{$field}];
+  //       }
+  //     }
+
+  //     //Ambil materi pelatihan
+  //    $materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => $id_pelatihan])->result();
+
+  //    //Daftar materi
+  //     $kolom_materi = [
+  //         'nama_mata_pelatihan_kel_dasar',
+  //         'nama_mata_pelatihan_kel_inti',
+  //         'nama_mata_pelatihan_kel_penunjang'
+  //     ];
+
+  //    foreach ($materi as $m) {
+  //     $m->tujuan_kursil_parsed = $this->parseTujuanKursil($m->tujuan_kursil ?? '');
+  //     foreach ($kolom_materi as $kolom){
+  //       $materi_parsed = str_replace('nama_mata_pelatihan_', '', $kolom) . '_parsed';
+  //       $m->{$materi_parsed} = $this->_parse_materi($m->{$kolom} ?? '');
+  //     }
+  //    }
+
+  //    $pelatihan->materi = $materi;
+
+  //     return $pelatihan;
+  //   }
+  // }
+
+
+  public function dataPelatihan($id_pelatihan)
+{
+    // 1) Ambil baris induk + detail + pejabat pembuka/penutup + jenis
     $this->db->select('
         p.*,
         d.id_detail_pelatihan,
@@ -47,94 +176,264 @@ class M_Admin extends CI_Model
         d.jumlah_pendidikan_peserta_s3,
         d.rab,
         d.realisasi,
-        j.nama_jenis_pelatihan,
-        pembuka.nama as nama_pejabat_pembuka,
-        pembuka.NIP as nip_pejabat_pembuka,
-        pembuka.jabatan as jabatan_pejabat_pembuka,
-        pembuka.asal_satker as satker_pejabat_pembuka,
-        penutup.nama as nama_pejabat_penutup,
-        penutup.NIP as nip_pejabat_penutup,
-        penutup.jabatan as jabatan_pejabat_penutup,
-        penutup.asal_satker as satker_pejabat_penutup
-    ');
+        d.pic_smartbangkom,
+        d.jml_peserta_nilai_sm,
+        d.jml_peserta_nilai_m,
+        d.jml_peserta_nilai_cm,
+        d.jml_peserta_nilai_dl,
+        d.jml_peserta_tm,
+        d.peserta_peringkat_1,
+        d.peserta_peringkat_2,
+        d.peserta_peringkat_3,
 
+        j.nama_jenis_pelatihan,
+
+        pembuka.nama         AS nama_pejabat_pembuka,
+        pembuka.NIP          AS nip_pejabat_pembuka,
+        pembuka.jabatan      AS jabatan_pejabat_pembuka,
+        pembuka.asal_satker  AS satker_pejabat_pembuka,
+
+        penutup.nama         AS nama_pejabat_penutup,
+        penutup.NIP          AS nip_pejabat_penutup,
+        penutup.jabatan      AS jabatan_pejabat_penutup,
+        penutup.asal_satker  AS satker_pejabat_penutup
+    ');
     $this->db->from('tbl_pelatihan p');
     $this->db->join('tbl_detail_pelatihan d', 'p.id_pelatihan = d.id_pelatihan', 'left');
     $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
     $this->db->join('tbl_pegawai pembuka', 'p.id_pejabat_pembuka = pembuka.id_pegawai', 'left');
     $this->db->join('tbl_pegawai penutup', 'p.id_pejabat_penutup = penutup.id_pegawai', 'left');
-    $this->db->where('p.id_pelatihan', $id_pelatihan);
+    $this->db->where('p.id_pelatihan', (int)$id_pelatihan);
 
     $pelatihan = $this->db->get()->row();
+    if (!$pelatihan) return null;
 
-    // $pelatihan->materi->tujuan_parsed = $this->parseTujuanKursil($pelatihan->materi->tujuan_kursil ?? '');
+    // Pastikan tipe numerik aman untuk percabangan
+    $pelatihan->id_jenis_pelatihan = (int)$pelatihan->id_jenis_pelatihan;
 
-    if(!$pelatihan) return null;
-
-    $pegawai_ids = [];
+    // 2) PETAKAN pegawai untuk semua field id_pegawai (termasuk pic_smartbangkom)
     $pegawai_fields = [
-      'id_pejabat_pembuka',
-      'id_pejabat_penutup',
-      'id_penanggung_jawab',
-      'id_ketua_panitia',
-      'id_akademis',
-      'id_keuangan',
-      'id_administrasi',
-      'id_wi_1',
-      'id_wi_2',
-      'id_wi_3',
-      'id_wi_4',
-      'id_wi_rapat_kelulusan',
-      'id_pengajar_1',
-      'id_pengajar_2',
-      'id_pengajar_3'
+        'id_pejabat_pembuka','id_pejabat_penutup',
+        'id_penanggung_jawab','id_ketua_panitia','id_akademis','id_keuangan','id_administrasi',
+        'id_wi_1','id_wi_2','id_wi_3','id_wi_4','id_wi_rapat_kelulusan',
+        'id_pengajar_1','id_pengajar_2','id_pengajar_3',
+        'pic_smartbangkom'
     ];
+    $pegawai_ids = [];
+    foreach ($pegawai_fields as $f) if (!empty($pelatihan->{$f})) $pegawai_ids[] = (int)$pelatihan->{$f};
+    $pegawai_map = [];
+    if ($pegawai_ids) {
+        $this->db->select('p.*, r.nama_role as jabatan');
+        $this->db->from('tbl_pegawai p');
+        $this->db->join('tbl_role r', 'p.jabatan = r.id_role', 'left');
+        $this->db->where_in('p.id_pegawai', array_unique($pegawai_ids));
+        $pegawai_data = $this->db->get()->result();
+        $pegawai_map  = array_column($pegawai_data, null, 'id_pegawai');
 
-    foreach ($pegawai_fields as $field){
-      if (!empty($pelatihan->{$field})) {
-        $pegawai_ids[] = $pelatihan->{$field};
-      }
-    }
-
-    if(!empty($pegawai_ids)) {
-      $this->db->select('p.*, r.nama_role as jabatan');
-      $this->db->from('tbl_pegawai p');
-      $this->db->join('tbl_role r', 'p.jabatan = r.id_role', 'left');
-      $this->db->where_in('p.id_pegawai', array_unique($pegawai_ids));
-      $pegawai_data = $this->db->get()->result();
-
-      $pegawai_map = array_column($pegawai_data, null, 'id_pegawai');
-
-      foreach ($pegawai_fields as $field) {
-        $key = str_replace('id_', '', $field);
-        if (!empty($pelatihan->{$field}) && isset($pegawai_map[$pelatihan->{$field}])) {
-          $pelatihan->{$key} = $pegawai_map[$pelatihan->{$field}];
+        foreach ($pegawai_fields as $f) {
+            $key = str_replace('id_', '', $f); // id_ketua_panitia -> ketua_panitia; pic_smartbangkom -> pic_smartbangkom
+            if (!empty($pelatihan->{$f}) && isset($pegawai_map[$pelatihan->{$f}])) {
+                $pelatihan->{$key} = $pegawai_map[$pelatihan->{$f}];
+            }
         }
-      }
-
-      //Ambil materi pelatihan
-     $materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => $id_pelatihan])->result();
-
-     //Daftar materi
-      $kolom_materi = [
-          'nama_mata_pelatihan_kel_dasar',
-          'nama_mata_pelatihan_kel_inti',
-          'nama_mata_pelatihan_kel_penunjang'
-      ];
-
-     foreach ($materi as $m) {
-      $m->tujuan_kursil_parsed = $this->parseTujuanKursil($m->tujuan_kursil ?? '');
-      foreach ($kolom_materi as $kolom){
-        $materi_parsed = str_replace('nama_mata_pelatihan_', '', $kolom) . '_parsed';
-        $m->{$materi_parsed} = $this->_parse_materi($m->{$kolom} ?? '');
-      }
-     }
-
-     $pelatihan->materi = $materi;
-
-      return $pelatihan;
     }
-  }
+
+    // 3) MATERI (tetap seperti sebelumnya)
+    $materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => (int)$id_pelatihan])->result();
+    $kolom_materi = [
+        'nama_mata_pelatihan_kel_dasar',
+        'nama_mata_pelatihan_kel_inti',
+        'nama_mata_pelatihan_kel_penunjang'
+    ];
+    foreach ($materi as $m) {
+        $m->tujuan_kursil_parsed = $this->parseTujuanKursil($m->tujuan_kursil ?? '');
+        foreach ($kolom_materi as $k) {
+            $parsed_key = str_replace('nama_mata_pelatihan_', '', $k) . '_parsed';
+            $m->{$parsed_key} = $this->_parse_materi($m->{$k} ?? '');
+        }
+    }
+    $pelatihan->materi = $materi;
+
+    // 4) PESERTA (tbl_peserta) + buat peta untuk resolusi peringkat
+    $this->db->select('
+        id_peserta,
+        nama_peserta  AS nama,
+        nip,
+        pangkatgol    AS golru,
+        jabatan,
+        unit_kerja
+    ');
+    $this->db->from('tbl_peserta_pelatihan');
+    $this->db->where('id_pelatihan', (int)$id_pelatihan);
+    $this->db->where('deleted_at IS NULL', null, false);
+    $this->db->order_by('nama_peserta', 'asc');
+    $peserta = $this->db->get()->result();
+    $pelatihan->peserta = $peserta;
+
+    $peserta_map = [];
+    if ($peserta) {
+        foreach ($peserta as $ps) {
+            $peserta_map[(int)$ps->id_peserta] = $ps;
+        }
+    }
+
+    // 5) Peringkat 1-3 (resolve ke objek peserta)
+    $pelatihan->peringkat_1 = !empty($pelatihan->peserta_peringkat_1) && isset($peserta_map[$pelatihan->peserta_peringkat_1])
+        ? $peserta_map[$pelatihan->peserta_peringkat_1] : null;
+    $pelatihan->peringkat_2 = !empty($pelatihan->peserta_peringkat_2) && isset($peserta_map[$pelatihan->peserta_peringkat_2])
+        ? $peserta_map[$pelatihan->peserta_peringkat_2] : null;
+    $pelatihan->peringkat_3 = !empty($pelatihan->peserta_peringkat_3) && isset($peserta_map[$pelatihan->peserta_peringkat_3])
+        ? $peserta_map[$pelatihan->peserta_peringkat_3] : null;
+
+    // 6) AGENDA + nested TOPIK + GRUP (dengan teacher)
+    //    a) ambil daftar agenda untuk id_pelatihan
+    $this->db->select('agenda_id, id_pelatihan, agenda_title, main_teacher_id');
+    $this->db->from('tbl_agenda');
+    $this->db->where('id_pelatihan', (int)$id_pelatihan);
+    $this->db->order_by('agenda_id', 'asc');
+    $agenda_rows = $this->db->get()->result();
+
+    // Kumpulkan id guru (main teacher & grup) untuk 1x fetch
+    $teacher_ids = [];
+    foreach ($agenda_rows as $a) if (!empty($a->main_teacher_id)) $teacher_ids[] = (int)$a->main_teacher_id;
+
+    // Ambil grup per agenda lalu kumpulkan teacher_id juga
+    $agenda_ids = array_column($agenda_rows, 'agenda_id');
+    $grup_by_agenda = [];
+    if ($agenda_ids) {
+        $this->db->select('agenda_group_id, agenda_id, group_no, teacher_id');
+        $this->db->from('tbl_grup_agenda');
+        $this->db->where_in('agenda_id', $agenda_ids);
+        $this->db->order_by('group_no', 'asc');
+        $grup_rows = $this->db->get()->result();
+        foreach ($grup_rows as $g) {
+            $grup_by_agenda[$g->agenda_id][] = $g;
+            if (!empty($g->teacher_id)) $teacher_ids[] = (int)$g->teacher_id;
+        }
+    }
+
+    // Ambil topik per agenda
+    $topik_by_agenda = [];
+    if ($agenda_ids) {
+        $this->db->select('topic_id, agenda_id, topic_no, topic_title, jp_async, jp_sync');
+        $this->db->from('tbl_topik');
+        $this->db->where_in('agenda_id', $agenda_ids);
+        $this->db->order_by('topic_no', 'asc');
+        $topik_rows = $this->db->get()->result();
+        foreach ($topik_rows as $t) {
+            $topik_by_agenda[$t->agenda_id][] = $t;
+        }
+    }
+
+    // 1x fetch untuk semua teacher yang diperlukan (main teacher & grup teacher)
+    $teacher_map = [];
+    $teacher_ids = array_values(array_unique(array_filter($teacher_ids)));
+    if ($teacher_ids) {
+        $this->db->select('p.*, r.nama_role as jabatan');
+        $this->db->from('tbl_pegawai p');
+        $this->db->join('tbl_role r', 'p.jabatan = r.id_role', 'left');
+        $this->db->where_in('p.id_pegawai', $teacher_ids);
+        $trows = $this->db->get()->result();
+        $teacher_map = array_column($trows, null, 'id_pegawai');
+    }
+
+    // Rakit struktur agenda final
+    $agenda_final = [];
+    foreach ($agenda_rows as $a) {
+        $obj = (object)[
+            'agenda_id'      => (int)$a->agenda_id,
+            'agenda_title'   => $a->agenda_title,
+            'main_teacher'   => (!empty($a->main_teacher_id) && isset($teacher_map[$a->main_teacher_id])) ? $teacher_map[$a->main_teacher_id] : null,
+            'topik'          => isset($topik_by_agenda[$a->agenda_id]) ? $topik_by_agenda[$a->agenda_id] : [],
+            'grup'           => [],
+        ];
+
+        // Tambahkan teacher object untuk tiap grup
+        if (isset($grup_by_agenda[$a->agenda_id])) {
+            foreach ($grup_by_agenda[$a->agenda_id] as $g) {
+                $obj->grup[] = (object)[
+                    'agenda_group_id' => (int)$g->agenda_group_id,
+                    'group_no'        => (int)$g->group_no,
+                    'teacher'         => (!empty($g->teacher_id) && isset($teacher_map[$g->teacher_id])) ? $teacher_map[$g->teacher_id] : null,
+                ];
+            }
+        }
+
+        $agenda_final[] = $obj;
+    }
+    $pelatihan->agenda = $agenda_final;
+
+    // 7) Bentuk flatten "tenaga_pengajar" agar kompatibel dengan Word template Anda
+    //    Aturan: satu baris per (agenda_title, topik) x setiap group_no yang ada.
+    //    nama_pengajar = teacher pada grup jika ada; jika tidak ada grup, pakai main_teacher.
+    $tenaga_pengajar = [];
+    foreach ($pelatihan->agenda as $ag) {
+        $topiks = $ag->topik ?: [];
+        $grups  = $ag->grup  ?: [];
+
+        // Jika tidak ada grup sama sekali → buat satu entri tanpa "kel", nama_pengajar main_teacher
+        if (!$grups) {
+            foreach ($topiks as $tp) {
+                $tenaga_pengajar[] = (object)[
+                    'agenda'        => $ag->agenda_title,
+                    'jp_async'      => (int)$tp->jp_async,
+                    'jp_sync'       => (int)$tp->jp_sync,
+                    'kel'           => null,
+                    'nama_pengajar' => $ag->main_teacher->nama ?? '-', // fallback '-'
+                ];
+            }
+            continue;
+        }
+
+        // Ada grup → duplikasi per group_no
+        foreach ($grups as $gr) {
+            $nama_pengajar = $gr->teacher->nama ?? ($ag->main_teacher->nama ?? '-');
+            foreach ($topiks as $tp) {
+                $tenaga_pengajar[] = (object)[
+                    'agenda'        => $ag->agenda_title,
+                    'jp_async'      => (int)$tp->jp_async,
+                    'jp_sync'       => (int)$tp->jp_sync,
+                    'kel'           => (int)$gr->group_no,
+                    'nama_pengajar' => $nama_pengajar,
+                ];
+            }
+        }
+    }
+    $pelatihan->tenaga_pengajar = $tenaga_pengajar;
+
+    // Susun tim_penyelenggara dari pegawai yang sudah dipetakan
+$tim = [];
+$slot_to_label = [
+    'penanggung_jawab' => 'Penanggung Jawab',
+    'ketua_panitia'    => 'Ketua Panitia',
+    'akademis'         => 'Koordinator Akademis',
+    'administrasi'     => 'Koordinator Administrasi',
+    'pic_smartbangkom'         => 'PIC Smartbangkom',
+];
+
+foreach ($slot_to_label as $slot => $label) {
+    if (isset($pelatihan->{$slot}) && is_object($pelatihan->{$slot})) {
+        $tim[] = (object)[
+            'nama'    => $pelatihan->{$slot}->nama ?? '-',
+            'nip'     => $pelatihan->{$slot}->NIP  ?? '-',
+            'jabatan' => $label,
+        ];
+    }
+}
+$pelatihan->tim_penyelenggara = $tim;
+
+// Default-kan agar aman dipakai di generator
+if (!isset($pelatihan->peserta) || !is_array($pelatihan->peserta)) {
+    $pelatihan->peserta = [];
+}
+if (!isset($pelatihan->tenaga_pengajar) || !is_array($pelatihan->tenaga_pengajar)) {
+    $pelatihan->tenaga_pengajar = [];
+}
+
+
+    return $pelatihan;
+}
+
 
   private function _parse_materi($text){
     if (empty(trim($text))) return ["-"];
