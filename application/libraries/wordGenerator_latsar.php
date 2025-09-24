@@ -496,7 +496,7 @@ class wordGenerator_latsar {
             $writer = IOFactory::createWriter($phpword, 'Word2007');
             $writer->save($tempFile);
 
-            $filename = "LAPORAN_PENYELENGGARAAN_LATSAR_CPNS_ANGGOTA_I_TAHUN_2025.docx";
+            $filename = "LAPORAN_PENYELENGGARAAN_LATSAR_CPNS_ANGKATAN_I_TAHUN_{$tahun}.docx";
             $target = FCPATH . 'downloads/' . $filename;
             rename($tempFile, $target);
             
