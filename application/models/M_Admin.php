@@ -430,6 +430,12 @@ if (!isset($pelatihan->tenaga_pengajar) || !is_array($pelatihan->tenaga_pengajar
     $pelatihan->tenaga_pengajar = [];
 }
 
+// Total peserta riil (hanya yang belum di-soft delete)
+$pelatihan->jumlah_peserta_riil = (int)$this->db
+    ->where('id_pelatihan', (int)$id_pelatihan)
+    ->where('deleted_at IS NULL', null, false)
+    ->count_all_results('tbl_peserta_pelatihan');
+
 
     return $pelatihan;
 }
