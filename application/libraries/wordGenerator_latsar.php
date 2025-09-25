@@ -168,7 +168,7 @@ class wordGenerator_latsar {
             
             $section1->addText("Laporan ini disampaikan kepada Kepala Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru sebagai pertanggungjawaban tertulis dari panitia pelaksana kegiatan, sekaligus sebagai informasi tentang proses pelaksanaan kegiatan tersebut mulai dari tahap perencanaan, pelaksanaan, evaluasi sampai dengan pada tahap laporan.", $fontstyle, $paragraphstyle);
             
-            $section1->addText("Kegiatan ini bertujuan untuk mengembangkan kompetensi pembentukan karakter ASN yang profesional sesuai bidang tugas yang diikuti oleh 40 orang Calon Pegawai Negeri Sipil di lingkungan Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru.", $fontstyle, $paragraphstyle);
+            $section1->addText("Kegiatan ini bertujuan untuk mengembangkan kompetensi pembentukan karakter ASN yang profesional sesuai bidang tugas yang diikuti oleh $pelatihan->jumlah_peserta_riil orang Calon Pegawai Negeri Sipil di lingkungan Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru.", $fontstyle, $paragraphstyle);
             
             $section1->addText("Laporan pelatihan ini terdiri dari enam bab. Bab I Latar Belakang, memuat latar belakang penyelenggaraan pelatihan dasar CPNS. Bab II berisi tentang dasar hukum penyelenggaraan pelatihan dasar CPNS. Bab III berisi perencanaan pelatihan dasar CPNS yang memuat peserta dan tenaga pengajar. Bab IV berisi tentang penyelenggaraan pelatihan dasar CPNS yang memuat pembukaan, pelaksanaan dan penutupan. Bab V berisi tentang evaluasi pelatihan dasar CPNS yang memuat evaluasi peserta, evaluasi tenaga pelatihan dan evaluasi penyelenggaraan. Bab VI sebagai penutup. Laporan ini juga dilengkapi dengan lampiran-lampiran sebagai bukti fisik.", $fontstyle, $paragraphstyle);
             
@@ -229,7 +229,7 @@ class wordGenerator_latsar {
             $section1->addListItem("Surat Penugasan dari Pejabat Pembina Kepegawaian", 0, $fontstyle, $style);
             $section1->addListItem("Surat pernyataan kesediaan mematuhi ketentuan yang berlaku dalam penyelenggaraan Pelatihan Dasar CPNS", 0, $fontstyle, $style);
             
-            $section1->addText("Adapun peserta Pelatihan Dasar CPNS Golongan III Angkatan I berjumlah 40 peserta dengan rincian sebagai berikut:", $fontstyle, $paragraphstyle);
+            $section1->addText("Adapun peserta Pelatihan Dasar CPNS Golongan III Angkatan I berjumlah $pelatihan->jumlah_peserta_riil peserta dengan rincian sebagai berikut:", $fontstyle, $paragraphstyle);
             
             // Create table for participant list
             $table = $section1->addTable([
@@ -395,7 +395,7 @@ class wordGenerator_latsar {
             
             $table4->addRow();
             $table4->addCell(3000)->addText('Keterangan', ['bold' => true], ['align' => 'left']);
-            $table4->addCell(6000)->addText(': Pembukaan pelatihan dasar CPNS Angkatan 1 diikuti oleh 40 orang cpns di wilayah kerja Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru dibuka secara formal oleh Kepala Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru', null, ['align' => 'left']);
+            $table4->addCell(6000)->addText(': Pembukaan pelatihan dasar CPNS Angkatan 1 diikuti oleh ' . $pelatihan->jumlah_peserta_riil . ' orang cpns di wilayah kerja Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru dibuka secara formal oleh Kepala Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru', null, ['align' => 'left']);
             
             $section1->addListItem("Distance Learning (E-Learning 1)", 0, $fontstyle, $style);
             $section1->addText("Tahap berikutnya adalah pembelajaran jarak jauh dengan metode e-learning yang berlangsung selama 20 hari kerja. Kegiatan ini tetap dilaksanakan dari kedudukan peserta, dengan memanfaatkan media pembelajaran daring yang interaktif. Peserta difasilitasi untuk mendalami materi, melakukan diskusi, serta menyelesaikan berbagai penugasan terkait Sikap Perilaku Bela Negara, Nilai-Nilai Dasar PNS, dan Kedudukan dan Peran PNS untuk mendukung terwujudnya smart governance sesuai dengan ketentuan peraturan perundang-undangan.", $fontstyle, $paragraphstyle);
