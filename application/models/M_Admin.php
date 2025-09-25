@@ -265,7 +265,7 @@ class M_Admin extends CI_Model
     ');
     $this->db->from('tbl_peserta_pelatihan');
     $this->db->where('id_pelatihan', (int)$id_pelatihan);
-    $this->db->where('deleted_at IS NULL', null, false);
+    // $this->db->where('deleted_at IS NULL', null, false);
     $this->db->order_by('nama_peserta', 'asc');
     $peserta = $this->db->get()->result();
     $pelatihan->peserta = $peserta;

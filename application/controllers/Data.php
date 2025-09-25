@@ -2591,7 +2591,7 @@ public function pesertapelatihanjenis()
 		// Get all peserta for this pelatihan
 		$this->data['peserta_pelatihan'] = $this->db->query("
 			SELECT * FROM tbl_peserta_pelatihan 
-			WHERE id_pelatihan = ? AND deleted_at IS NULL 
+			WHERE id_pelatihan = ? 
 			ORDER BY nama_peserta ASC
 		", [$id_pelatihan])->result();
 
@@ -2726,75 +2726,108 @@ if (!empty($this->input->post('import_excel'))) {
     $upload_data = $this->upload->data();
     $file_path = $upload_data['full_path'];
 
-    // Load the helper
-    $this->load->helper('excel_helper');
-    
-    // Convert Excel to CSV if needed
-    $csv_file_path = convert_excel_to_csv($file_path);
-    
-    if (!$csv_file_path) {
-        $this->session->set_flashdata('pesan', '<div class="alert alert-danger">
-            <p>Gagal mengkonversi file Excel ke CSV. Pastikan file formatnya benar.</p>
-        </div>');
-        @unlink($file_path);
-        redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
-    }
+    // Load library PhpSpreadsheet
+    require_once FCPATH . 'vendor/autoload.php'; // Sesuaikan path
 
     $success_count = 0;
     $error_count = 0;
     $error_messages = [];
 
-    // Read CSV file
-    if (($handle = fopen($csv_file_path, "r")) !== FALSE) {
-        $row_number = 0;
+    try {
+        // Identifikasi reader berdasarkan tipe file
+        $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
         
-        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-            $row_number++;
-            
-            // Skip header row (row 1)
-            if ($row_number == 1) {
+        if ($file_extension == 'xlsx') {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        } elseif ($file_extension == 'xls') {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        } else {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+        }
+
+        // Baca file Excel
+        $spreadsheet = $reader->load($file_path);
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = $worksheet->toArray();
+
+        // Proses setiap baris
+        foreach ($rows as $row_number => $row) {
+            // Skip header (baris 1)
+            if ($row_number == 0) {
                 continue;
             }
 
-            // Skip empty rows
-            if (empty($data[0]) || trim($data[0]) === '') {
+            // Skip baris kosong
+            if (empty($row[0]) || trim($row[0]) === '') {
                 continue;
             }
 
-            // Map CSV columns to data
-            $nama_peserta = isset($data[0]) ? trim($data[0]) : '';
-            $jenis_kelamin = isset($data[1]) ? trim($data[1]) : '';
-            $nip = isset($data[2]) ? trim($data[2]) : '';
-            $pangkatgol = isset($data[3]) ? trim($data[3]) : '';
-            $jabatan = isset($data[4]) ? trim($data[4]) : '';
-            $unit_kerja = isset($data[5]) ? trim($data[5]) : '';
+            // Mapping data
+            $nama_peserta = isset($row[0]) ? trim($row[0]) : '';
+            $jenis_kelamin = isset($row[1]) ? trim($row[1]) : '';
+            $nip = isset($row[2]) ? trim($row[2]) : '';
+            $pangkatgol = isset($row[3]) ? trim($row[3]) : '';
+            $jabatan = isset($row[4]) ? trim($row[4]) : '';
+            $unit_kerja = isset($row[5]) ? trim($row[5]) : '';
+
+            // **FIX: Handle formula Excel untuk NIP**
+            // Jika NIP berisi formula, coba ekstrak nilai calculated-nya
+            if (strpos($nip, '=') === 0) {
+                // Ini adalah formula, coba ambil nilai calculated dari cell
+                $cell = $worksheet->getCellByColumnAndRow(3, $row_number + 1); // Kolom C (index 2)
+                $calculated_value = $cell->getCalculatedValue();
+                
+                if (!empty($calculated_value) && $calculated_value != $nip) {
+                    $nip = $calculated_value;
+                } else {
+                    // Jika tidak bisa dapat calculated value, skip atau generate NIP sementara
+                    $error_count++;
+                    $error_messages[] = "Baris " . ($row_number + 1) . ": NIP berisi formula yang tidak bisa diproses";
+                    continue;
+                }
+            }
 
             // Validasi required fields
-            if (empty($nama_peserta) || empty($nip)) {
+            if (empty($nama_peserta)) {
                 $error_count++;
-                $error_messages[] = "Baris $row_number: Nama dan NIP wajib diisi";
+                $error_messages[] = "Baris " . ($row_number + 1) . ": Nama peserta wajib diisi";
                 continue;
+            }
+
+            // Handle NIP yang mungkin masih kosong
+            if (empty($nip)) {
+                // Generate NIP sementara berdasarkan nama dan timestamp
+                $nip = 'TEMP_' . preg_replace('/[^a-zA-Z0-9]/', '', $nama_peserta) . '_' . time();
             }
 
             // Handle jenis_kelamin
             $jk = 'L'; // default value
             if (!empty($jenis_kelamin)) {
-                $first_char = strtoupper(substr($jenis_kelamin, 0, 1));
-                $jk = ($first_char == 'L' || $first_char == 'P') ? $first_char : 'L';
+                $jenis_kelamin_lower = strtolower(trim($jenis_kelamin));
+                if (strpos($jenis_kelamin_lower, 'laki') !== false || $jenis_kelamin_lower == 'l' || $jenis_kelamin_lower == 'laki-laki') {
+                    $jk = 'L';
+                } elseif (strpos($jenis_kelamin_lower, 'perempuan') !== false || $jenis_kelamin_lower == 'p') {
+                    $jk = 'P';
+                }
             }
 
-            // Validasi NIP unik
-            $cek_nip = $this->db->get_where('tbl_peserta_pelatihan', [
-                'id_pelatihan' => $id_pelatihan,
-                'nip' => $nip,
-                'deleted_at' => NULL
-            ])->row();
+            // Validasi NIP unik dalam pelatihan yang sama
+            if (strpos($nip, 'TEMP_') === false) { // Hanya validasi untuk NIP non-temporary
+                $cek_nip = $this->db->get_where('tbl_peserta_pelatihan', [
+                    'id_pelatihan' => $id_pelatihan,
+                    'nip' => $nip,
+                    'deleted_at' => NULL
+                ])->row();
 
-            if ($cek_nip) {
-                $error_count++;
-                $error_messages[] = "Baris $row_number: NIP $nip sudah terdaftar";
-                continue;
+                if ($cek_nip) {
+                    $error_count++;
+                    $error_messages[] = "Baris " . ($row_number + 1) . ": NIP $nip sudah terdaftar dalam pelatihan ini";
+                    continue;
+                }
             }
+
+            // Bersihkan data jabatan
+            $jabatan = $this->bersihkan_jabatan($jabatan);
 
             $data_insert = array(
                 'id_pelatihan' => $id_pelatihan,
@@ -2813,17 +2846,17 @@ if (!empty($this->input->post('import_excel'))) {
             } else {
                 $error_count++;
                 $db_error = $this->db->error();
-                $error_messages[] = "Baris $row_number: Gagal menyimpan data - " . $db_error['message'];
+                $error_messages[] = "Baris " . ($row_number + 1) . ": Gagal menyimpan data - " . $db_error['message'];
             }
         }
-        fclose($handle);
+
+    } catch (Exception $e) {
+        $error_count++;
+        $error_messages[] = "Error membaca file: " . $e->getMessage();
     }
 
-    // Clean up files
+    // Clean up file
     @unlink($file_path);
-    if ($csv_file_path != $file_path) {
-        @unlink($csv_file_path);
-    }
 
     // Prepare flash message
     $message = "<div class='alert alert-success'>
@@ -2841,6 +2874,27 @@ if (!empty($this->input->post('import_excel'))) {
     $this->session->set_flashdata('pesan', $message);
     redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
 }
+}
+
+// Function untuk membersihkan dan standardisasi jabatan
+private function bersihkan_jabatan($jabatan) {
+    if (empty($jabatan)) return $jabatan;
+    
+    $jabatan = trim($jabatan);
+    
+    // Perbaiki typo umum
+    $jabatan = str_replace('Penghulu Ahli Pertamaa', 'Penghulu Ahli Pertama', $jabatan);
+    $jabatan = str_replace('Ahli Pertamaa', 'Ahli Pertama', $jabatan);
+    
+    // Standardisasi pemisah
+    $jabatan = str_replace(' - ', ' - ', $jabatan); // pastikan konsisten
+    $jabatan = str_replace('-', ' - ', $jabatan); // ubah single dash ke format standar
+    $jabatan = str_replace('/', ' / ', $jabatan); // beri spasi sekitar slash
+    
+    // Standardisasi penulisan "Ahli Pertama"
+    $jabatan = preg_replace('/Ahli\s+Pertama/i', 'Ahli Pertama', $jabatan);
+    
+    return $jabatan;
 }
 
 	// Code LDK Pekanbaru Materi dan Pengajar (Latsar)
