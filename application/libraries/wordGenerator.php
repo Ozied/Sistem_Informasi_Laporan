@@ -30,6 +30,19 @@ class wordGenerator{
 
             $phpword = new PhpWord();
             $pelatihan = is_array($data) ? (object)$data['pelatihan'] : $data->pelatihan;
+            // helper flags & lists for non-Latsar (PJJ/PDWK)
+            $isNonLatsar = in_array((int)($pelatihan->id_jenis_pelatihan ?? 0), [1,2], true);
+            $wiList       = ($isNonLatsar && isset($pelatihan->wi_list)      && is_array($pelatihan->wi_list))      ? $pelatihan->wi_list      : [];
+            $pengajarList = ($isNonLatsar && isset($pelatihan->pengajar_list) && is_array($pelatihan->pengajar_list)) ? $pelatihan->pengajar_list : [];
+            $wiRapat      = ($isNonLatsar && isset($pelatihan->wi_rapat)) ? $pelatihan->wi_rapat : null;
+
+            // tiny helper to print "Nama berasal dari Satker"
+            $teacherLine = function($o) {
+                $nm  = isset($o->nama) ? $o->nama : '-';
+                $sat = isset($o->asal_satker) && $o->asal_satker !== '' ? $o->asal_satker : '—';
+                return "{$nm} berasal dari {$sat}";
+            };
+
             $durasi = is_array($data) ? ($data['durasi'] ?? 0) : $data->durasi ?? 0;
             $ketua_loka = is_array($data) ? ($data['ketua_loka'] ?? 0) : $data->ketua_loka ?? 0;
             
@@ -236,37 +249,70 @@ class wordGenerator{
             $section1->addText("Jumlah peserta seluruhnya " . $pelatihan->jumlah_peserta . " orang;", $fontstyle, $paragraphstyle);
             $section1->addText("Alokasi peserta berada di lingkungan " . $pelatihan->jabatan_peserta . " pada Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru;", $fontstyle, $paragraphstyle);
             
+            // New WI List from tbl_pelatihan_pengajar
             $section1->addListItem("Tenaga Fasilitator/Widyaiswara", 0, $fontstyle, $alphaStyle);
             $section1->addText("Tenaga Fasilitator/Widyaiswara pengajar pelatihan ini berasal dari :", $fontstyle, $paragraphstyle);
 
-            $style = generate_list_style($phpword, 'decimal');
-            if (isset($pelatihan->wi_1)) {
-                $section1->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style);
-            }
+            $styleDec = generate_list_style($phpword, 'decimal');
 
-            if (isset($pelatihan->wi_2)) {
-                $section1->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style);
-            }
-
-            if (isset($pelatihan->wi_3)) {
-                $section1->addListItem("{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style);
+            if ($isNonLatsar && (!empty($wiList) || $wiRapat)) {
+                foreach ($wiList as $o) {
+                    $section1->addListItem($teacherLine($o), 0, $fontstyle, $styleDec);
+                }
+                if ($wiRapat) {
+                    $section1->addListItem($teacherLine($wiRapat) . " (Rapat Kelulusan)", 0, $fontstyle, $styleDec);
+                }
+            } else {
+                // Fallback ke field lama bila bukan PJJ/PDWK
+                if (isset($pelatihan->wi_1)) { $section1->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $styleDec); }
+                if (isset($pelatihan->wi_2)) { $section1->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $styleDec); }
+                if (isset($pelatihan->wi_3)) { $section1->addListItem("{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $styleDec); }
             }
 
             $section1->addListItem("Pengajar/Fasilitator", 0, $fontstyle, $alphaStyle);
 
-            $style = generate_list_style($phpword, 'decimal');
-
-            if (isset($pelatihan->pengajar_1)) {
-                $section1->addListItem("{$pelatihan->pengajar_1->nama} berasal dari {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $style);
+            if ($isNonLatsar && !empty($pengajarList)) {
+                foreach ($pengajarList as $o) {
+                    $section1->addListItem($teacherLine($o), 0, $fontstyle, $styleDec);
+                }
+            } else {
+                if (isset($pelatihan->pengajar_1)) { $section1->addListItem("{$pelatihan->pengajar_1->nama} berasal dari {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $styleDec); }
+                if (isset($pelatihan->pengajar_2)) { $section1->addListItem("{$pelatihan->pengajar_2->nama} berasal dari {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $styleDec); }
+                if (isset($pelatihan->pengajar_3)) { $section1->addListItem("{$pelatihan->pengajar_3->nama} berasal dari {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $styleDec); }
             }
 
-            if (isset($pelatihan->pengajar_2)) {
-                $section1->addListItem("{$pelatihan->pengajar_2->nama} berasal dari {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $style);
-            }
 
-            if (isset($pelatihan->pengajar_3)) {
-                $section1->addListItem("{$pelatihan->pengajar_3->nama} berasal dari {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $style);
-            }
+            // $section1->addListItem("Tenaga Fasilitator/Widyaiswara", 0, $fontstyle, $alphaStyle);
+            // $section1->addText("Tenaga Fasilitator/Widyaiswara pengajar pelatihan ini berasal dari :", $fontstyle, $paragraphstyle);
+
+            // $style = generate_list_style($phpword, 'decimal');
+            // if (isset($pelatihan->wi_1)) {
+            //     $section1->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style);
+            // }
+
+            // if (isset($pelatihan->wi_2)) {
+            //     $section1->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style);
+            // }
+
+            // if (isset($pelatihan->wi_3)) {
+            //     $section1->addListItem("{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style);
+            // }
+
+            // $section1->addListItem("Pengajar/Fasilitator", 0, $fontstyle, $alphaStyle);
+
+            // $style = generate_list_style($phpword, 'decimal');
+
+            // if (isset($pelatihan->pengajar_1)) {
+            //     $section1->addListItem("{$pelatihan->pengajar_1->nama} berasal dari {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $style);
+            // }
+
+            // if (isset($pelatihan->pengajar_2)) {
+            //     $section1->addListItem("{$pelatihan->pengajar_2->nama} berasal dari {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $style);
+            // }
+
+            // if (isset($pelatihan->pengajar_3)) {
+            //     $section1->addListItem("{$pelatihan->pengajar_3->nama} berasal dari {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $style);
+            // }
                         
             //PENYELENGGARAAN PELATIHAN
             $section1->addPageBreak();
@@ -717,65 +763,103 @@ class wordGenerator{
             $section2->addText("S2\t: $pelatihan->jumlah_pendidikan_peserta_s2", $fontstyle, $paragraphstyle);
             $section2->addText("S3\t: $pelatihan->jumlah_pendidikan_peserta_s3", $fontstyle, $paragraphstyle);
 
-            $section2->addTitle("F. Widyaisuara/Tenaga Pengajar", 2);
+            $section2->addTitle("F. Widyaiswara/Tenaga Pengajar", 2);
             $section2->addText("Jumlah, asal daerah, dan jenjang akademik Widyaiswara/Tenaga Pengajar $pelatihan->nama_kegiatan bagi $pelatihan->tempat Tahun $pelatihan->tahun ini adalah adalah sebagai berikut :", $fontstyle, $paragraphstyle);
+            // New WI list from tbl_pelatihan_pengajar
             $section2->addText("Jumlah dan Asal Widyaiswara/Tenaga Pengajar", $fontstyle, $paragraphstyle);
-            $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah $pelatihan->jumlah_wi_pengajar orang, yakni :", $fontstyle, $paragraphstyle);
+
+            $styleDec = generate_list_style($phpword, 'decimal');
+
+            if ($isNonLatsar) {
+                // hitung dari mapping baru
+                $totalTeachers = count($wiList) + count($pengajarList) + ($wiRapat ? 1 : 0);
+                $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah {$totalTeachers} orang, yakni :", $fontstyle, $paragraphstyle);
+
+                foreach ($wiList as $o) {
+                    $section2->addListItem($teacherLine($o), 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+                }
+                if ($wiRapat) {
+                    $section2->addListItem($teacherLine($wiRapat) . " (Rapat Kelulusan)", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+                }
+
+                if (!empty($pengajarList)) {
+                    // garis pemisah kecil antar kelompok (opsional)
+                    // $section2->addTextBreak(1);
+                    foreach ($pengajarList as $o) {
+                        $section2->addListItem($teacherLine($o), 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]);
+                    }
+                }
+            } else {
+                // fallback (Latsar) – tetap pakai field lama
+                $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah " . (int)$pelatihan->jumlah_wi_pengajar . " orang, yakni :", $fontstyle, $paragraphstyle);
+
+                if (isset($pelatihan->wi_1)) { $section2->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
+                if (isset($pelatihan->wi_2)) { $section2->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
+                if (isset($pelatihan->wi_3)) { $section2->addListItem("{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
+
+                if (isset($pelatihan->pengajar_1)) { $section2->addListItem("{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
+                if (isset($pelatihan->pengajar_2)) { $section2->addListItem("{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
+                if (isset($pelatihan->pengajar_3)) { $section2->addListItem("{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
+            }
+
             
-            $style = generate_list_style($phpword, 'decimal');
+            // $section2->addText("Jumlah dan Asal Widyaiswara/Tenaga Pengajar", $fontstyle, $paragraphstyle);
+            // $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah $pelatihan->jumlah_wi_pengajar orang, yakni :", $fontstyle, $paragraphstyle);
             
-            if (isset($pelatihan->wi_1)) {
-                $section2->addListItem(
-                    "{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}",
-                    0, $fontstyle, $style,
-                    ['indentation' => ['left' => 720, 'hanging' => 360]]
-                );
-            }
+            // $style = generate_list_style($phpword, 'decimal');
+            
+            // if (isset($pelatihan->wi_1)) {
+            //     $section2->addListItem(
+            //         "{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}",
+            //         0, $fontstyle, $style,
+            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
+            //     );
+            // }
 
-            if (isset($pelatihan->wi_2)) {
-                $section2->addListItem(
-                    "{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}",
-                    0, $fontstyle, $style,
-                    ['indentation' => ['left' => 720, 'hanging' => 360]]
-                );
-            }
+            // if (isset($pelatihan->wi_2)) {
+            //     $section2->addListItem(
+            //         "{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}",
+            //         0, $fontstyle, $style,
+            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
+            //     );
+            // }
 
-            if (isset($pelatihan->wi_3)) {
-                $section2->addListItem(
-                    "{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}",
-                    0, $fontstyle, $style,
-                    ['indentation' => ['left' => 720, 'hanging' => 360]]
-                );
-            }
+            // if (isset($pelatihan->wi_3)) {
+            //     $section2->addListItem(
+            //         "{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}",
+            //         0, $fontstyle, $style,
+            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
+            //     );
+            // }
 
             
-            $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah 2 orang, yakni :", $fontstyle, $paragraphstyle);
+            // $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah 2 orang, yakni :", $fontstyle, $paragraphstyle);
             
-            $style = generate_list_style($phpword, 'decimal');
+            // $style = generate_list_style($phpword, 'decimal');
 
-            if (isset($pelatihan->pengajar_1)) {
-                $section2->addListItem(
-                    "{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}",
-                    0, $fontstyle, $style,
-                    ['indentation' => ['left' => 720, 'hanging' => 360]]
-                );
-            }
+            // if (isset($pelatihan->pengajar_1)) {
+            //     $section2->addListItem(
+            //         "{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}",
+            //         0, $fontstyle, $style,
+            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
+            //     );
+            // }
 
-            if (isset($pelatihan->pengajar_2)) {
-                $section2->addListItem(
-                    "{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}",
-                    0, $fontstyle, $style,
-                    ['indentation' => ['left' => 720, 'hanging' => 360]]
-                );
-            }
+            // if (isset($pelatihan->pengajar_2)) {
+            //     $section2->addListItem(
+            //         "{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}",
+            //         0, $fontstyle, $style,
+            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
+            //     );
+            // }
 
-            if (isset($pelatihan->pengajar_3)) {
-                $section2->addListItem(
-                    "{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}",
-                    0, $fontstyle, $style,
-                    ['indentation' => ['left' => 720, 'hanging' => 360]]
-                );
-            }
+            // if (isset($pelatihan->pengajar_3)) {
+            //     $section2->addListItem(
+            //         "{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}",
+            //         0, $fontstyle, $style,
+            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
+            //     );
+            // }
 
 
             $section2->addTitle("G. Jenjang Akademik/Kualifikasi Widyaiswara/Tenaga Pengajar", 2);
@@ -1050,56 +1134,111 @@ class wordGenerator{
             $section3->addText("Tahap Purna Pelatihan", $fontstyle, $paragraphstyle);
             $section3->addText("Penyampaian Surat Pengembalian Peserta yang telah selesai melakukan kegiatan. Memberikan fasilitas bagi alumni pelatihan berupa media untuk berdiskusi.", $fontstyle, $paragraphstyle);
 
-            $section3->addTitle("H. Tempat dan Wkatu Pelaksanaan", 2);
-            $section3->addText("Pelatihan ini dilaksanakan melalui online (daring) pada " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . " dengan jumlah $materi->jumlah_jp Jam Pelajaran(JP).", $fontstyle, $paragraphstyle);
-            
+            // H. Tempat dan Waktu Pelaksanaan
+            $section3->addTitle("H. Tempat dan Waktu Pelaksanaan", 2);
+            $section3->addText(
+                "Pelatihan ini dilaksanakan melalui online (daring) pada " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . " dengan jumlah $materi->jumlah_jp Jam Pelajaran(JP).",
+                $fontstyle,
+                $paragraphstyle
+            );
+
             $section3->addTitle("I. Panitia dan Tenaga Pengajar", 2);
-            $section3->addText("Penyelenggara pelatihan ini adalah Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru , dengan susunan panitia sebagai berikut : ", $fontstyle, $paragraphstyle);
+            $section3->addText(
+                "Penyelenggara pelatihan ini adalah Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru , dengan susunan panitia sebagai berikut : ",
+                $fontstyle,
+                $paragraphstyle
+            );
 
+            // Panitia (tetap sama)
             if (isset($pelatihan->penanggung_jawab)) {
-                $section3->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}");
+                $section3->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}", $fontstyle, $paragraphstyle);
             }
-
             if (isset($pelatihan->ketua_panitia)) {
-                $section3->addText("Ketua Panitia\t: {$pelatihan->ketua_panitia->nama}");
+                $section3->addText("Ketua Panitia\t: {$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
             }
-
             if (isset($pelatihan->akademis)) {
-                $section3->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}");
+                $section3->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
             }
-
             if (isset($pelatihan->administrasi)) {
-                $section3->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}");
+                $section3->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
             }
-
             if (isset($pelatihan->keuangan)) {
-                $section3->addText("Bidang Keuangan\t: {$pelatihan->keuangan->nama}");
+                $section3->addText("Bidang Keuangan\t: {$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
             }
 
-            // Widyaiswara
-            if (isset($pelatihan->wi_1)) {
-                $section3->addText("Widyaiswara\t: 1. {$pelatihan->wi_1->nama}");
-            }
-            if (isset($pelatihan->wi_2)) {
-                $section3->addText("\t: 2. {$pelatihan->wi_2->nama}");
-            }
-            if (isset($pelatihan->wi_3)) {
-                $section3->addText("\t: 3. {$pelatihan->wi_3->nama}");
-            }
+            // === Tenaga Pengajar dari tabel baru ===
+            $styleDec = generate_list_style($phpword, 'decimal');
 
-            // Tenaga Pengajar
-            if (isset($pelatihan->pengajar_1)) {
-                $section3->addText("Tenaga Pengajar\t: 1. {$pelatihan->pengajar_1->nama}");
-            }
-            if (isset($pelatihan->pengajar_2)) {
-                $section3->addText("\t: 2. {$pelatihan->pengajar_2->nama}");
-            }
-            if (isset($pelatihan->pengajar_3)) {
-                $section3->addText("\t: 3. {$pelatihan->pengajar_3->nama}");
-            }
+            // flag PJJ/PDWK spt sebelumnya
+            $isNonLatsar = in_array((int)($pelatihan->id_jenis_pelatihan ?? 0), [1, 2], true);
+            $wiList       = ($isNonLatsar && isset($pelatihan->wi_list)       && is_array($pelatihan->wi_list))       ? $pelatihan->wi_list       : [];
+            $pengajarList = ($isNonLatsar && isset($pelatihan->pengajar_list) && is_array($pelatihan->pengajar_list)) ? $pelatihan->pengajar_list : [];
+            $wiRapat      = ($isNonLatsar && isset($pelatihan->wi_rapat)) ? $pelatihan->wi_rapat : null;
 
+            if ($isNonLatsar && (!empty($wiList) || !empty($pengajarList) || $wiRapat)) {
+                // Widyaiswara (baru)
+                if (!empty($wiList) || $wiRapat) {
+                    $section3->addText("Widyaiswara\t:", $fontstyle, $paragraphstyle);
+                    $n = 1;
+                    foreach ($wiList as $o) {
+                        $nm = isset($o->nama) ? $o->nama : '-';
+                        $section3->addText("\t{$n}. {$nm}", $fontstyle, $paragraphstyle);
+                        $n++;
+                    }
+                    if ($wiRapat) {
+                        $nm = isset($wiRapat->nama) ? $wiRapat->nama : '-';
+                        $section3->addText("\t{$n}. {$nm} (Rapat Kelulusan)", $fontstyle, $paragraphstyle);
+                    }
+                }
 
-            $section3->addText("Tenaga pengajar dalam pelatihan ini berjumlah orang dengan persyaratan:", $fontstyle, $paragraphstyle);
+                // Tenaga Pengajar (baru)
+                if (!empty($pengajarList)) {
+                    $section3->addText("Tenaga Pengajar\t:", $fontstyle, $paragraphstyle);
+                    $n = 1;
+                    foreach ($pengajarList as $o) {
+                        $nm = isset($o->nama) ? $o->nama : '-';
+                        $section3->addText("\t{$n}. {$nm}", $fontstyle, $paragraphstyle);
+                        $n++;
+                    }
+                }
+
+                // Total (isi angka yang sebelumnya kosong)
+                $totalTeachers = count($wiList) + count($pengajarList) + ($wiRapat ? 1 : 0);
+                $section3->addText(
+                    "Widyaiswara/Tenaga pengajar dalam pelatihan ini berjumlah {$totalTeachers} orang dengan persyaratan:",
+                    $fontstyle,
+                    $paragraphstyle
+                );
+
+            } else {
+                // === Fallback: skema lama (untuk Latsar atau data lama) ===
+                if (isset($pelatihan->wi_1)) {
+                    $section3->addText("Widyaiswara\t: 1. {$pelatihan->wi_1->nama}", $fontstyle, $paragraphstyle);
+                }
+                if (isset($pelatihan->wi_2)) {
+                    $section3->addText("\t: 2. {$pelatihan->wi_2->nama}", $fontstyle, $paragraphstyle);
+                }
+                if (isset($pelatihan->wi_3)) {
+                    $section3->addText("\t: 3. {$pelatihan->wi_3->nama}", $fontstyle, $paragraphstyle);
+                }
+
+                if (isset($pelatihan->pengajar_1)) {
+                    $section3->addText("Tenaga Pengajar\t: 1. {$pelatihan->pengajar_1->nama}", $fontstyle, $paragraphstyle);
+                }
+                if (isset($pelatihan->pengajar_2)) {
+                    $section3->addText("\t: 2. {$pelatihan->pengajar_2->nama}", $fontstyle, $paragraphstyle);
+                }
+                if (isset($pelatihan->pengajar_3)) {
+                    $section3->addText("\t: 3. {$pelatihan->pengajar_3->nama}", $fontstyle, $paragraphstyle);
+                }
+
+                $fallbackTotal = isset($pelatihan->jumlah_wi_pengajar) ? (int)$pelatihan->jumlah_wi_pengajar : 0;
+                $section3->addText(
+                    "Widyaiswara/Tenaga pengajar dalam pelatihan ini berjumlah {$fallbackTotal} orang dengan persyaratan:",
+                    $fontstyle,
+                    $paragraphstyle
+                );
+            }
 
             $style = generate_list_style($phpword, 'decimal');
 

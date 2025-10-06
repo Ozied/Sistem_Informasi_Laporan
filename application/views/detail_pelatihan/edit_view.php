@@ -20,6 +20,7 @@
 
   <section class="content">
     <form action="<?= base_url('data/prosesdetailpelatihan'); ?>" method="POST">
+      <input type="hidden" name="id_jenis_pelatihan" value="<?= (int)$id_jenis; ?>">
       <div class="row">
         <div class="col-md-12">
 
@@ -91,44 +92,88 @@
                     </div>
                   <?php endforeach; ?>
                 </div>
-              <?php else: ?>
-                <?php
-                  // PJJ/PDWK: lengkap
-                  $positions = [
-                    'id_ketua_panitia' => ['label' => 'Ketua Panitia', 'desc' => 'Pilih ketua panitia pelaksana kegiatan'],
-                    'id_akademis'      => ['label' => 'Akademis', 'desc' => 'Pilih penanggung jawab akademik kegiatan'],
-                    'id_keuangan'      => ['label' => 'Keuangan', 'desc' => 'Pilih penanggung jawab keuangan kegiatan'],
-                    'id_administrasi'  => ['label' => 'Administrasi', 'desc' => 'Pilih penanggung jawab administrasi kegiatan'],
-                    'id_wi_1'          => ['label' => 'WI 1', 'desc' => 'Pilih widyaiswara pertama'],
-                    'id_wi_2'          => ['label' => 'WI 2', 'desc' => 'Pilih widyaiswara kedua'],
-                    'id_wi_3'          => ['label' => 'WI 3', 'desc' => 'Pilih widyaiswara ketiga'],
-                    'id_wi_4'          => ['label' => 'WI 4', 'desc' => 'Pilih widyaiswara keempat'],
-                    'id_wi_rapat_kelulusan' => ['label' => 'WI Rapat Kelulusan', 'desc' => 'Pilih widyaiswara yang hadir dalam rapat kelulusan'],
-                    'id_pengajar_1'    => ['label' => 'Pengajar 1', 'desc' => 'Pilih pengajar pertama'],
-                    'id_pengajar_2'    => ['label' => 'Pengajar 2', 'desc' => 'Pilih pengajar kedua'],
-                    'id_pengajar_3'    => ['label' => 'Pengajar 3', 'desc' => 'Pilih pengajar ketiga'],
-                  ];
-                ?>
-                <div class="row">
-                  <?php foreach ($positions as $name => $data): ?>
-                    <div class="form-group col-md-4">
-                      <label>
-                        <?= $data['label'] ?>
-                        <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i>
-                      </label>
-                      <select class="form-control select2" name="<?= $name; ?>">
-                        <option disabled <?= is_null($detail_pelatihan->$name) ? 'selected' : ''; ?>>-- Pilih Pegawai --</option>
-                        <?php foreach($pegawais as $isi): ?>
-                          <option value="<?= $isi['id_pegawai']; ?>"
-                            <?= ($isi['id_pegawai'] == $detail_pelatihan->$name) ? 'selected' : ''; ?>>
-                            <?= $isi['nama']; ?>
-                          </option>
-                        <?php endforeach; ?>
-                      </select>
-                    </div>
-                  <?php endforeach; ?>
-                </div>
-              <?php endif; ?>
+                <?php else: ?>
+  <!-- PJJ/PDWK: Struktur Tim + Widyaiswara & Pengajar (pakai tabel baru) -->
+  <div class="row">
+    <?php
+      $positions = [
+        'id_ketua_panitia' => ['label' => 'Ketua Panitia', 'desc' => 'Pilih ketua panitia pelaksana kegiatan'],
+        'id_akademis'      => ['label' => 'Akademis', 'desc' => 'Pilih penanggung jawab akademik kegiatan'],
+        'id_keuangan'      => ['label' => 'Keuangan', 'desc' => 'Pilih penanggung jawab keuangan kegiatan'],
+        'id_administrasi'  => ['label' => 'Administrasi', 'desc' => 'Pilih penanggung jawab administrasi kegiatan'],
+      ];
+    ?>
+    <?php foreach ($positions as $name => $data): ?>
+      <div class="form-group col-md-3">
+        <label><?= $data['label'] ?>
+          <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i>
+        </label>
+        <select class="form-control select2" name="<?= $name; ?>">
+          <option disabled <?= is_null($detail_pelatihan->$name) ? 'selected' : ''; ?>>-- Pilih Pegawai --</option>
+          <?php foreach($pegawais as $isi): ?>
+            <option value="<?= $isi['id_pegawai']; ?>"
+              <?= ($isi['id_pegawai'] == $detail_pelatihan->$name) ? 'selected' : ''; ?>>
+              <?= $isi['nama']; ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+    <?php endforeach; ?>
+  </div>
+
+  <div class="row">
+    <!-- Widyaiswara (multi) -->
+    <div class="form-group col-md-4">
+      <label>Widyaiswara (multi)
+        <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
+           title="Pilih satu atau lebih Widyaiswara. Tersimpan ke tbl_pelatihan_pengajar (tipe_peran = 'Widyaiswara')."></i>
+      </label>
+      <select class="form-control select2" name="wi_ids[]" id="wi_ids" multiple>
+        <?php foreach($pegawais as $pg): ?>
+          <option value="<?= $pg['id_pegawai']; ?>"
+            <?= in_array((int)$pg['id_pegawai'], $wi_selected ?? []) ? 'selected' : '' ?>>
+            <?= $pg['nama']; ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+      <small class="text-muted">Tekan Ctrl/⌘ untuk memilih banyak (atau gunakan Select2).</small>
+    </div>
+
+    <!-- WI Rapat Kelulusan (single) -->
+    <div class="form-group col-md-4">
+      <label>WI Rapat Kelulusan
+        <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
+           title="Opsional: Widyaiswara yang hadir pada rapat kelulusan (tipe_peran = 'Widyaiswara Rapat Kelulusan')."></i>
+      </label>
+      <select class="form-control select2" name="wi_rapat_kelulusan" id="wi_rapat_kelulusan">
+        <option value="">-- Pilih Pegawai (opsional) --</option>
+        <?php foreach($pegawais as $pg): ?>
+          <option value="<?= $pg['id_pegawai']; ?>"
+            <?= isset($wi_rapat_selected) && (int)$wi_rapat_selected === (int)$pg['id_pegawai'] ? 'selected' : '' ?>>
+            <?= $pg['nama']; ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+
+    <!-- Pengajar (multi) -->
+    <div class="form-group col-md-4">
+      <label>Pengajar (multi)
+        <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
+           title="Pilih satu atau lebih Pengajar. Tersimpan ke tbl_pelatihan_pengajar (tipe_peran = 'Pengajar')."></i>
+      </label>
+      <select class="form-control select2" name="pengajar_ids[]" id="pengajar_ids" multiple>
+        <?php foreach($pegawais as $pg): ?>
+          <option value="<?= $pg['id_pegawai']; ?>"
+            <?= in_array((int)$pg['id_pegawai'], $pengajar_selected ?? []) ? 'selected' : '' ?>>
+            <?= $pg['nama']; ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+  </div>
+<?php endif; ?>
+
             </div>
           </div>
 
@@ -191,25 +236,56 @@
           <?php else: ?>
 
             <!-- Default Section 3 & 4 (Statistik & Data Peserta) -->
-            <div class="box box-warning">
-              <div class="box-header with-border"><h4 class="box-title">Statistik Widyaiswara & Pengajar</h4></div>
-              <div class="box-body row">
-                <?php
-                  $stat_fields = [
-                    'jumlah_wi_pengajar'       => 'Jumlah WI & Pengajar',
-                    'jumlah_pendidikan_wi_d2'  => 'WI D2/D3',
-                    'jumlah_pendidikan_wi_s1'  => 'WI S1',
-                    'jumlah_pendidikan_wi_s2'  => 'WI S2',
-                    'jumlah_pendidikan_wi_s3'  => 'WI S3',
-                  ];
-                ?>
-                <?php foreach ($stat_fields as $name => $label): ?>
-                  <div class="form-group col-md-4">
-                    <label><?= $label ?></label>
-                    <input type="number" name="<?= $name ?>" class="form-control" min="0"
-                           value="<?= (int)$detail_pelatihan->$name; ?>">
-                  </div>
-                <?php endforeach; ?>
+<div class="box box-warning">
+  <div class="box-header with-border"><h4 class="box-title">Statistik Widyaiswara & Pengajar</h4></div>
+  <div class="box-body row">
+    <?php
+      // Daftar field statistik (tetap)
+      $stat_fields = [
+        'jumlah_wi_pengajar'       => 'Jumlah WI & Pengajar',
+        'jumlah_pendidikan_wi_d2'  => 'WI D2/D3',
+        'jumlah_pendidikan_wi_s1'  => 'WI S1',
+        'jumlah_pendidikan_wi_s2'  => 'WI S2',
+        'jumlah_pendidikan_wi_s3'  => 'WI S3',
+      ];
+
+      // Hitung prefill khusus untuk "Jumlah WI & Pengajar"
+      $init_wi_pengajar = (int)(
+        (!empty($wi_selected)       ? count($wi_selected)       : 0)
+        + (!empty($pengajar_selected) ? count($pengajar_selected) : 0)
+      );
+      if ($init_wi_pengajar <= 0) {
+        // fallback ke nilai existing di DB jika prefill kosong
+        $init_wi_pengajar = (int)$detail_pelatihan->jumlah_wi_pengajar;
+      }
+    ?>
+
+    <?php foreach ($stat_fields as $name => $label): ?>
+      <?php if ($name === 'jumlah_wi_pengajar'): ?>
+        <!-- KHUSUS: readonly + prefill -->
+        <div class="form-group col-md-4">
+          <label><?= $label ?></label>
+          <input type="number"
+                 name="jumlah_wi_pengajar"
+                 id="jumlah_wi_pengajar"
+                 class="form-control"
+                 min="0"
+                 value="<?= $init_wi_pengajar; ?>"
+                 readonly>
+          <small class="text-muted">Terisi otomatis dari pilihan Widyaiswara & Pengajar.</small>
+        </div>
+      <?php else: ?>
+        <!-- Field statistik lain (seperti semula) -->
+        <div class="form-group col-md-4">
+          <label><?= $label ?></label>
+          <input type="number"
+                 name="<?= $name ?>"
+                 class="form-control"
+                 min="0"
+                 value="<?= (int)$detail_pelatihan->$name; ?>">
+        </div>
+      <?php endif; ?>
+    <?php endforeach; ?>
               </div>
             </div>
 
@@ -289,87 +365,163 @@
 <script>
 $(document).ready(function(){
   $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover', placement: 'right', container: 'body' });
+  $('.select2').select2({ width: '100%' });
 
   var isLatsar = <?= !empty($is_latsar) && $is_latsar ? 'true' : 'false'; ?>;
-  if (!isLatsar) return;
 
-  var $idPel = $('#id_pelatihan');
-  var $rankSelects = $('.peserta-ranking');
+  // =========================
+  // PJJ / PDWK (non-Latsar)
+  // =========================
+  if (!isLatsar) {
+    var $wiMulti       = $('#wi_ids');
+    var $wiRapat       = $('#wi_rapat_kelulusan');
+    var $pengajarMulti = $('#pengajar_ids');
+    var $jumlahAuto    = $('#jumlah_wi_pengajar');
+    var $idPel         = $('#id_pelatihan');
 
-  // nilai existing untuk preselect
-  var curRank = {
-    'peserta_peringkat_1': '<?= (int)$detail_pelatihan->peserta_peringkat_1; ?>',
-    'peserta_peringkat_2': '<?= (int)$detail_pelatihan->peserta_peringkat_2; ?>',
-    'peserta_peringkat_3': '<?= (int)$detail_pelatihan->peserta_peringkat_3; ?>'
-  };
+    function updateJumlahWIPengajar() {
+      var countWI       = ($wiMulti.val()       || []).length;
+      var countPengajar = ($pengajarMulti.val() || []).length;
+      $jumlahAuto.val(countWI + countPengajar); // tidak menghitung WI rapat
+    }
 
-  function populateRankingSelects(options) {
-    $rankSelects.each(function(){
-      var $sel = $(this);
-      var name = $sel.attr('name');
-      var selectedVal = curRank[name] || '';
+    // Reset -> disable konflik hanya antar WI <-> Pengajar (dua arah)
+    function disableConflicts($sel, conflicts) {
+      // 1) re-enable semua opsi agar tidak ada sisa state
+      $sel.find('option').prop('disabled', false);
 
-      $sel.prop('disabled', false).empty()
-          .append('<option disabled selected>-- Pilih Peserta --</option>');
-
-      // isi opsi dari server
-      options.forEach(function(row) {
-        var opt = $('<option/>', { value: row.id_peserta, text: row.nama_peserta });
-        $sel.append(opt);
-      });
-
-      // jika nilai existing tidak ada di hasil (peserta mungkin sudah tidak aktif), tetap tampilkan agar tidak hilang
-      if (selectedVal && !$sel.find('option[value="'+selectedVal+'"]').length) {
-        $sel.append($('<option/>', { value: selectedVal, text: '[non-list] ID '+selectedVal }));
-      }
-
-      if (selectedVal) { $sel.val(selectedVal); }
-
-      $sel.trigger('change.select2');
-    });
-  }
-
-  function enforceUniqueRanks() {
-    var chosen = {};
-    $rankSelects.each(function(){
-      var v = $(this).val();
-      if (v) chosen[v] = true;
-    });
-    $rankSelects.each(function(){
-      var $sel = $(this);
-      var myVal = $sel.val();
+      // 2) disable yang konflik KECUALI yang sedang terpilih di select tsb
+      var selectedHere = ($sel.val() || []).map(String);
       $sel.find('option').each(function(){
-        var ov = $(this).attr('value');
-        if (!ov) return;
-        var shouldDisable = chosen[ov] && ov !== myVal;
-        $(this).prop('disabled', shouldDisable);
+        var val = $(this).attr('value');
+        if (!val) return;
+        var isSelectedHere = selectedHere.includes(val);
+        var conflict = conflicts.includes(val);
+        if (conflict && !isSelectedHere) {
+          $(this).prop('disabled', true);
+        }
       });
+
       $sel.trigger('change.select2');
+    }
+
+    function enforceUniquePeople() {
+      var selectedWI       = ($wiMulti.val() || []).map(String);
+      var selectedPengajar = ($pengajarMulti.val() || []).map(String);
+
+      // Terapkan konflik dua arah hanya WI <-> Pengajar
+      disableConflicts($wiMulti,       selectedPengajar);
+      disableConflicts($pengajarMulti, selectedWI);
+
+      // Penting: WI Rapat selalu full list & selalu enabled (tidak dibatasi sama sekali)
+      $wiRapat.find('option').prop('disabled', false);
+      $wiRapat.trigger('change.select2');
+
+      updateJumlahWIPengajar();
+    }
+
+    // Inisialisasi & sinkron awal
+    enforceUniquePeople();
+    setTimeout(updateJumlahWIPengajar, 0);
+
+    // Event perubahan
+    $wiMulti.on('change', enforceUniquePeople);
+    $pengajarMulti.on('change', enforceUniquePeople);
+
+    // Perubahan WI Rapat tidak memengaruhi apa pun; tetap pastikan semua opsi aktif
+    $wiRapat.on('change', function(){
+      $wiRapat.find('option').prop('disabled', false);
+      $wiRapat.trigger('change.select2');
+    });
+
+    // Jika ganti pelatihan, kosongkan pilihan multi & reset jumlah; WI rapat bebas sesuai kebutuhan Anda
+    $idPel.on('change', function(){
+      $wiMulti.val(null).trigger('change.select2');
+      $pengajarMulti.val(null).trigger('change.select2');
+      // opsional: kosongkan WI rapat (tetap menampilkan seluruh pegawai)
+      $wiRapat.val('').trigger('change.select2');
+      enforceUniquePeople();
     });
   }
 
-  function fetchAndPopulate(idPel) {
-    if (!idPel) return;
-    $.getJSON('<?= base_url('data/get_peserta_by_pelatihan'); ?>', { id_pelatihan: idPel }, function(res){
-      populateRankingSelects(Array.isArray(res) ? res : []);
+  // ==========
+  // LATSAR
+  // ==========
+  if (isLatsar) {
+    var $idPel = $('#id_pelatihan');
+    var $rankSelects = $('.peserta-ranking');
+
+    // nilai existing untuk preselect
+    var curRank = {
+      'peserta_peringkat_1': '<?= (int)$detail_pelatihan->peserta_peringkat_1; ?>',
+      'peserta_peringkat_2': '<?= (int)$detail_pelatihan->peserta_peringkat_2; ?>',
+      'peserta_peringkat_3': '<?= (int)$detail_pelatihan->peserta_peringkat_3; ?>'
+    };
+
+    function populateRankingSelects(options) {
+      $rankSelects.each(function(){
+        var $sel = $(this);
+        var name = $sel.attr('name');
+        var selectedVal = curRank[name] || '';
+
+        $sel.prop('disabled', false).empty()
+            .append('<option disabled selected>-- Pilih Peserta --</option>');
+
+        options.forEach(function(row) {
+          $sel.append($('<option/>', { value: row.id_peserta, text: row.nama_peserta }));
+        });
+
+        if (selectedVal && !$sel.find('option[value="'+selectedVal+'"]').length) {
+          $sel.append($('<option/>', { value: selectedVal, text: '[non-list] ID '+selectedVal }));
+        }
+        if (selectedVal) { $sel.val(selectedVal); }
+        $sel.trigger('change.select2');
+      });
+    }
+
+    function enforceUniqueRanks() {
+      var chosen = {};
+      $rankSelects.each(function(){
+        var v = $(this).val();
+        if (v) chosen[v] = true;
+      });
+      $rankSelects.each(function(){
+        var $sel = $(this);
+        var myVal = $sel.val();
+        $sel.find('option').each(function(){
+          var ov = $(this).attr('value');
+          if (!ov) return;
+          var shouldDisable = chosen[ov] && ov !== myVal;
+          $(this).prop('disabled', shouldDisable);
+        });
+        $sel.trigger('change.select2');
+      });
+    }
+
+    function fetchAndPopulate(idPel) {
+      if (!idPel) return;
+      $.getJSON('<?= base_url('data/get_peserta_by_pelatihan'); ?>', { id_pelatihan: idPel }, function(res){
+        populateRankingSelects(Array.isArray(res) ? res : []);
+        enforceUniqueRanks();
+      }).fail(function(){
+        populateRankingSelects([]);
+      });
+    }
+
+    // init
+    $rankSelects.select2({ width: '100%' });
+    fetchAndPopulate($idPel.val());
+
+    // on change kegiatan
+    $idPel.on('change', function(){
+      curRank = { 'peserta_peringkat_1':'', 'peserta_peringkat_2':'', 'peserta_peringkat_3':'' };
+      fetchAndPopulate($(this).val());
+    });
+
+    $(document).on('change', '.peserta-ranking', function(){
       enforceUniqueRanks();
-    }).fail(function(){
-      populateRankingSelects([]);
     });
   }
-
-  // initial load (untuk prefill saat edit)
-  fetchAndPopulate($idPel.val());
-
-  // on change kegiatan
-  $idPel.on('change', function(){
-    // reset pilihan existing bila ganti pelatihan
-    curRank = { 'peserta_peringkat_1':'', 'peserta_peringkat_2':'', 'peserta_peringkat_3':'' };
-    fetchAndPopulate($(this).val());
-  });
-
-  $(document).on('change', '.peserta-ranking', function(){
-    enforceUniqueRanks();
-  });
 });
 </script>
+

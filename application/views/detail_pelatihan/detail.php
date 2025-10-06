@@ -10,6 +10,13 @@ function dv_get_nama_pegawai($pegawais, $id) {
   return '<span class="text-muted" title="Pegawai tidak ditemukan">-</span>';
 }
 
+function dv_split_names($s) {
+  $s = trim((string)$s);
+  if ($s === '' || $s === '-') return [];
+  $parts = array_map('trim', explode(',', $s));
+  return array_values(array_filter($parts, function($x){ return $x !== ''; }));
+}
+
 function dv_get_nama_kegiatan($pelatihans, $id) {
   if (empty($id)) return '<span class="text-muted">-</span>';
   foreach ($pelatihans as $k) {
@@ -48,6 +55,9 @@ $is_latsar = !empty($is_latsar) ? $is_latsar : (!empty($jenis) && $jenis === 'La
   .lts-grid { display: flex; flex-wrap: wrap; gap: 10px; }
   .lts-col { flex: 1 1 260px; min-width: 240px; }
   .lts-grid-5 .lts-col { flex: 1 1 180px; min-width: 180px; }
+  .list-compact { margin: 0; padding-left: 18px; }
+.list-compact li { margin: 0; }
+
 </style>
 
 <div class="content-wrapper">
@@ -104,31 +114,72 @@ $is_latsar = !empty($is_latsar) ? $is_latsar : (!empty($jenis) && $jenis === 'La
             <?php endif; ?>
 
             <?php if (!$is_latsar): ?>
-              <!-- Widyaiswara & Pengajar (hanya non-Latsar) -->
-              <div class="section-title"><i class="fa fa-chalkboard-teacher text-orange"></i> Widyaiswara & Pengajar</div>
-              <table class="table table-bordered table-detail">
-                <tr><th style="width:30%">WI 1</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_wi_1); ?></td></tr>
-                <tr><th>WI 2</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_wi_2); ?></td></tr>
-                <tr><th>WI 3</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_wi_3); ?></td></tr>
-                <tr><th>WI 4</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_wi_4); ?></td></tr>
-                <tr><th>WI Rapat Kelulusan</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_wi_rapat_kelulusan); ?></td></tr>
-                <tr><th>Pengajar 1</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_pengajar_1); ?></td></tr>
-                <tr><th>Pengajar 2</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_pengajar_2); ?></td></tr>
-                <tr><th>Pengajar 3</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_pengajar_3); ?></td></tr>
-                <tr><th>Jumlah WI & Pengajar</th><td><?= dv_fmt_num($detail_pelatihan->jumlah_wi_pengajar); ?></td></tr>
-                <tr><th>WI D2/D3 / S1 / S2 / S3</th>
-                    <td>
-                      <?= dv_fmt_num($detail_pelatihan->jumlah_pendidikan_wi_d2); ?>
-                      /
-                      <?= dv_fmt_num($detail_pelatihan->jumlah_pendidikan_wi_s1); ?>
-                      /
-                      <?= dv_fmt_num($detail_pelatihan->jumlah_pendidikan_wi_s2); ?>
-                      /
-                      <?= dv_fmt_num($detail_pelatihan->jumlah_pendidikan_wi_s3); ?>
-                    </td>
-                </tr>
-              </table>
-            <?php endif; ?>
+  <?php
+    // Safe defaults if controller didn’t set them for any reason
+    $wi_names       = isset($wi_names)       && is_array($wi_names)       ? $wi_names       : [];
+    $pengajar_names = isset($pengajar_names) && is_array($pengajar_names) ? $pengajar_names : [];
+    $wi_rapat_name  = isset($wi_rapat_name)  ? $wi_rapat_name : null;
+  ?>
+  <style>
+    .list-compact { margin: 0; padding-left: 18px; }
+    .list-compact li { margin: 0; }
+  </style>
+
+  <div class="section-title"><i class="fa fa-chalkboard-teacher text-orange"></i> Widyaiswara & Pengajar</div>
+  <table class="table table-bordered table-detail">
+    <tr>
+      <th style="width:30%">Widyaiswara</th>
+      <td>
+        <?php if (!empty($wi_names)): ?>
+          <ol class="list-compact">
+            <?php foreach ($wi_names as $nama): ?>
+              <li><?= htmlspecialchars($nama) ?></li>
+            <?php endforeach; ?>
+          </ol>
+        <?php else: ?>
+          <span class="text-muted">-</span>
+        <?php endif; ?>
+      </td>
+    </tr>
+    <tr>
+      <th>WI Rapat Kelulusan</th>
+      <td><?= $wi_rapat_name ? htmlspecialchars($wi_rapat_name) : '<span class="text-muted">-</span>'; ?></td>
+    </tr>
+    <tr>
+      <th>Pengajar</th>
+      <td>
+        <?php if (!empty($pengajar_names)): ?>
+          <ol class="list-compact">
+            <?php foreach ($pengajar_names as $nama): ?>
+              <li><?= htmlspecialchars($nama) ?></li>
+            <?php endforeach; ?>
+          </ol>
+        <?php else: ?>
+          <span class="text-muted">-</span>
+        <?php endif; ?>
+      </td>
+    </tr>
+    <tr>
+      <th>Jumlah WI & Pengajar</th>
+      <td>
+        <?= (int)$detail_pelatihan->jumlah_wi_pengajar; ?>
+      </td>
+    </tr>
+    <tr>
+      <th>WI D2/D3 / S1 / S2 / S3</th>
+      <td>
+        <?= (int)$detail_pelatihan->jumlah_pendidikan_wi_d2; ?>
+        /
+        <?= (int)$detail_pelatihan->jumlah_pendidikan_wi_s1; ?>
+        /
+        <?= (int)$detail_pelatihan->jumlah_pendidikan_wi_s2; ?>
+        /
+        <?= (int)$detail_pelatihan->jumlah_pendidikan_wi_s3; ?>
+      </td>
+    </tr>
+  </table>
+<?php endif; ?>
+
 
             <?php if ($is_latsar): ?>
               <!-- Penilaian Latsar -->

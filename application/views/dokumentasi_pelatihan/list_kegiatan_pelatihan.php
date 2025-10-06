@@ -36,7 +36,6 @@
                     <th>Hari Ke</th>
                     <th>Nama Kegiatan</th>
                     <th>Narasumber</th>
-                    <th>Deskripsi</th>
                     <th>Tanggal</th>
                     <th>Jam Mulai</th>
                     <th>Jam Selesai</th>
@@ -51,7 +50,6 @@
                       <td><?= htmlentities($kegiatan['day_ke']); ?></td>
                       <td><?= htmlentities($kegiatan['nama_kegiatan']); ?></td>
                       <td><?= htmlentities($kegiatan['nama_narasumber']); ?></td>
-                      <td><?= htmlentities($kegiatan['activity_desc']); ?></td>
                       <td><?= date('d-m-Y', strtotime($kegiatan['tanggal_activity'])); ?></td>
                       <td><?= date('H:i', strtotime($kegiatan['jam_mulai'])); ?></td>
                       <td><?= date('H:i', strtotime($kegiatan['jam_selesai'])); ?></td>
@@ -60,6 +58,22 @@
                             <!-- Tombol Edit -->
                             <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalEditKegiatanPelatihan<?= $kegiatan['id_activity']; ?>">
                             <i class="fa fa-edit"></i> Edit
+                            </button>
+                            <!-- Tombol Detail (reusable modal) -->
+                            <button type="button"
+                                    class="btn btn-default btn-sm btn-detail-activity"
+                                    data-id_activity="<?= $kegiatan['id_activity']; ?>"
+                                    data-sesi="<?= htmlentities($kegiatan['sesi_ke']); ?>"
+                                    data-day="<?= htmlentities($kegiatan['day_ke']); ?>"
+                                    data-nama="<?= htmlentities($kegiatan['nama_kegiatan']); ?>"
+                                    data-narasumber="<?= htmlentities($kegiatan['nama_narasumber']); ?>"
+                                    data-desc="<?= htmlentities($kegiatan['activity_desc']); ?>"
+                                    data-tanggal="<?= date('d-m-Y', strtotime($kegiatan['tanggal_activity'])); ?>"
+                                    data-jammulai="<?= date('H:i', strtotime($kegiatan['jam_mulai'])); ?>"
+                                    data-jamselesai="<?= date('H:i', strtotime($kegiatan['jam_selesai'])); ?>"
+                                    data-jp="<?= isset($kegiatan['jp_counts']) ? (int)$kegiatan['jp_counts'] : 0; ?>"
+                                    data-jptype="<?= !empty($kegiatan['jp_type']) ? htmlentities($kegiatan['jp_type']) : ''; ?>">
+                              <i class="fa fa-info-circle"></i> Detail
                             </button>
                             <!-- Tombol Upload Foto -->
                             <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalUploadFoto<?= $kegiatan['id_activity']; ?>">
@@ -75,7 +89,6 @@
                         <?php } ?>
                       </td>
                     </tr>
-                    <!-- Modal Edit Kegiatan Pelatihan -->
                    <div class="modal fade" id="modalEditKegiatanPelatihan<?= $kegiatan['id_activity']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalEditKegiatanPelatihanLabel<?= $kegiatan['id_activity']; ?>">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -335,6 +348,45 @@
   </div>
 </div>
 
+                    <!-- Modal Edit Kegiatan Pelatihan -->
+                     <!-- Modal Detail Aktivitas (Reusable, hanya 1x di luar loop) -->
+<div class="modal fade" id="modalDetailActivity" tabindex="-1" role="dialog" aria-labelledby="modalDetailActivityLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-gray">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 class="modal-title" id="modalDetailActivityLabel">
+          <i class="fa fa-info-circle" style="color:white;"></i> Detail Kegiatan
+        </h4>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-striped">
+          <tbody>
+            <tr><th style="width:220px;">Nama Kegiatan</th><td id="da-nama"></td></tr>
+            <tr><th>Sesi / Hari</th><td id="da-sesi-hari"></td></tr>
+            <tr><th>Tanggal</th><td id="da-tanggal"></td></tr>
+            <tr><th>Jam</th><td id="da-jam"></td></tr>
+            <tr><th>Jumlah JP</th><td id="da-jp"></td></tr>
+            <tr><th>Narasumber</th><td id="da-narasumber"></td></tr>
+            <tr><th>Link Dokumentasi</th><td id="da-linkdoc"></td></tr>
+          </tbody>
+        </table>
+
+        <div class="text-right">
+          <button type="button" class="btn btn-warning" id="da-open-photos" style="display:none;">
+            <i class="fa fa-eye"></i> Buka Galeri Foto
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">
+          <i class="fa fa-times"></i> Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // Initialize tooltips for all modals
 $(document).ready(function(){
@@ -365,6 +417,61 @@ function deletePhoto(id_foto, id_pelatihan) {
         window.location.href = '<?= base_url('data/proseskegiatanpelatihan?delete_foto='); ?>' + id_foto + '&id_pelatihan=' + id_pelatihan;
     }
 }
+
+$(document).ready(function(){
+  // Pastikan modal reusable tidak ter-clip
+  $('#modalDetailActivity').appendTo('body');
+
+  function esc(s){ return $('<div/>').text(s == null ? '' : s).html(); }
+  function extractFirstUrl(text){
+    if(!text) return null;
+    var m = text.match(/https?:\/\/[^\s]+/i);
+    return m ? m[0] : null;
+  }
+
+  $(document).on('click', '.btn-detail-activity', function(){
+    var $btn = $(this);
+
+    var idActivity  = $btn.data('id_activity');
+    var nama        = $btn.data('nama');
+    var sesi        = $btn.data('sesi');
+    var day         = $btn.data('day');
+    var tanggal     = $btn.data('tanggal');
+    var jamMulai    = $btn.data('jammulai');
+    var jamSelesai  = $btn.data('jamselesai');
+    var jp          = $btn.data('jp');
+    var jpType      = $btn.data('jptype');
+    var narasumber  = $btn.data('narasumber');
+    var desc        = $btn.data('desc');
+
+    $('#da-nama').html(esc(nama || '-'));
+    $('#da-sesi-hari').html('Sesi ' + esc(sesi || '-') + ' / Hari ' + esc(day || '-'));
+    $('#da-tanggal').html(esc(tanggal || '-'));
+    $('#da-jam').html(esc((jamMulai || '-') + ' - ' + (jamSelesai || '-')));
+    $('#da-jp').html(esc((jp !== undefined ? jp : '-') + (jpType ? (' ('+jpType+')') : '')));
+    $('#da-narasumber').html(esc(narasumber || '-'));
+    $('#da-deskripsi').html(esc(desc || '-'));
+
+    var link = extractFirstUrl(desc || '');
+    if (link) {
+      $('#da-linkdoc').html('<a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a>');
+    } else {
+      $('#da-linkdoc').html('-');
+    }
+
+    // var gallerySelector = '#modalPhotoGallery' + idActivity;
+    // if ($(gallerySelector).length) {
+    //   $('#da-open-photos').off('click').on('click', function(){
+    //     $(gallerySelector).modal('show');
+    //   }).show();
+    // } else {
+    //   $('#da-open-photos').hide().off('click');
+    // }
+
+    $('#modalDetailActivity').modal('show');
+  });
+});
+
 
 // Function to calculate JP based on time inputs
 function calculateJP(jamMulai, jamSelesai) {
@@ -413,5 +520,11 @@ $(document).ready(function() {
             $(this).find('.jp_counts').val(jpCount);
         }
     });
+      // --- FIX penempatan modal agar tampil normal ---
+  $('[id^="modalEditKegiatanPelatihan"], [id^="modalUploadFoto"], [id^="modalPhotoGallery"]').appendTo('body');
 });
+// $(function () {
+//   // Pastikan semua modal hasil loop dipindahkan ke body agar tidak di-clip oleh .table-responsive/DataTables
+//   $('[id^="modalEditKegiatanPelatihan"], [id^="modalUploadFoto"], [id^="modalPhotoGallery"]').appendTo('body');
+// });
 </script>

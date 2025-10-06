@@ -136,9 +136,14 @@
                             
                         </a>
                     </li>
-                    <li class=" <?php if($this->uri->uri_string() == 'data/materipengajar'){ echo 'active';}?>">
-                        <a href="<?php echo base_url("data/materipengajar");?>" class="cursor">
-                            <span class="fa fa-book"></span> Materi dan Pengajar
+                    <li class=" <?php if($this->uri->uri_string() == 'data/materi'){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data/materi");?>" class="cursor">
+                            <span class="fa fa-book"></span> Materi
+                        </a>
+                    </li>
+                    <li class=" <?php if($this->uri->uri_string() == 'data/pengajar'){ echo 'active';}?>">
+                        <a href="<?php echo base_url("data/pengajar");?>" class="cursor">
+                            <span class="fa fa-users"></span> Pengajar
                         </a>
                     </li>
                 </ul>

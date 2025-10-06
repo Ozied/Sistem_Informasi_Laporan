@@ -20,10 +20,11 @@ class Data extends CI_Controller {
 		$this->load->model('M_Admin');
 		$this->load->library('form_validation');
 		$this->load->helper('date');
+        $this->load->library('upload');                 // <-- add this line
 		
 		//validasi jika user belum login
 		$this->data['CI'] =& get_instance();
-		$this->load->helper(array('form', 'url'));
+		$this->load->helper(array('form', 'url', 'excel'));
 		$this->load->model('M_Admin');
 			if($this->session->userdata('masuk_perpus') != TRUE){
 					$url=base_url('login');
@@ -771,79 +772,342 @@ public function index()
 	// 	}
 	// }
 
-	public function prosesdetailpelatihan()
+// 	public function prosesdetailpelatihan()
+// {
+//     // Pastikan user sudah login
+//     if ($this->session->userdata('masuk_perpus') != TRUE) {
+//         return redirect(base_url('login'));
+//     }
+
+//     // Ambil konteks jenis (agar redirect balik ke tab yang sama)
+//     $jenis_ctx = $this->input->get('jenis', TRUE);
+//     if (!$jenis_ctx) { $jenis_ctx = $this->input->post('jenis', TRUE); }
+//     $redir_url = base_url('data/detailpelatihan' . ($jenis_ctx ? '?jenis=' . urlencode($jenis_ctx) : ''));
+
+//     // === SOFT DELETE DETAIL PELATIHAN ===
+//     if (!empty($this->input->get('id_detail_pelatihan'))) {
+//         $id_detail_pelatihan = (int) $this->input->get('id_detail_pelatihan', TRUE);
+
+//         $detail_pelatihan = $this->M_Admin->get_tableid_edit(
+//             'tbl_detail_pelatihan',
+//             'id_detail_pelatihan',
+//             $id_detail_pelatihan
+//         );
+
+//         if ($detail_pelatihan) {
+//             $this->db->set('deleted_at', date('Y-m-d H:i:s'));
+//             $this->db->where('id_detail_pelatihan', $id_detail_pelatihan);
+//             $this->db->update('tbl_detail_pelatihan');
+
+//             $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-warning">
+//                 <p>Berhasil Hapus (Soft Delete) Data Detail Pelatihan!</p>
+//             </div></div>');
+//         } else {
+//             $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-danger">
+//                 <p>Data Detail Pelatihan tidak ditemukan!</p>
+//             </div></div>');
+//         }
+
+//         return redirect($redir_url);
+//     }
+
+//     // Helper untuk ambil POST dgn fallback NULL (XSS filter sudah aktif di $post)
+//     $post = $this->input->post(NULL, TRUE);
+//     $getS = function($key, $default = NULL) use ($post) {
+//         return (isset($post[$key]) && $post[$key] !== '') ? trim($post[$key]) : $default;
+//     };
+//     $getI = function($key, $default = NULL) use ($post) {
+//         return (isset($post[$key]) && $post[$key] !== '') ? (int)$post[$key] : $default;
+//     };
+//     $getF = function($key, $default = NULL) use ($post) {
+//         return (isset($post[$key]) && $post[$key] !== '') ? (float)$post[$key] : $default;
+//     };
+
+//     // === TAMBAH DETAIL PELATIHAN ===
+//     if (!empty($post['tambah'])) {
+
+//         $data = array(
+//             'id_pelatihan'          => $getI('id_pelatihan'), // required
+//             'id_penanggung_jawab'   => $getI('id_penanggung_jawab'),
+//             'id_ketua_panitia'      => $getI('id_ketua_panitia'),
+//             'id_akademis'           => $getI('id_akademis'),
+//             'id_keuangan'           => $getI('id_keuangan'),
+//             'id_administrasi'       => $getI('id_administrasi'),
+
+//             'id_wi_1'               => $getI('id_wi_1'),
+//             'id_wi_2'               => $getI('id_wi_2'),
+//             'id_wi_3'               => $getI('id_wi_3'),
+//             'id_wi_4'               => $getI('id_wi_4'),
+//             'id_wi_rapat_kelulusan' => $getI('id_wi_rapat_kelulusan'),
+
+//             'id_pengajar_1'         => $getI('id_pengajar_1'),
+//             'id_pengajar_2'         => $getI('id_pengajar_2'),
+//             'id_pengajar_3'         => $getI('id_pengajar_3'),
+
+//             // Statistik WI & Peserta (PJJ/PDWK). Pada Latsar field ini tidak dikirim → NULL aman.
+//             'jumlah_wi_pengajar'            => $getI('jumlah_wi_pengajar'),
+//             'jumlah_pendidikan_wi_d2'       => $getI('jumlah_pendidikan_wi_d2'),
+//             'jumlah_pendidikan_wi_s1'       => $getI('jumlah_pendidikan_wi_s1'),
+//             'jumlah_pendidikan_wi_s2'       => $getI('jumlah_pendidikan_wi_s2'),
+//             'jumlah_pendidikan_wi_s3'       => $getI('jumlah_pendidikan_wi_s3'),
+
+//             'jumlah_peserta'                => $getI('jumlah_peserta'),
+//             'jumlah_lulus'                  => $getI('jumlah_lusus'), // <-- typo? pastikan 'jumlah_lulus' di form! (lihat catatan di bawah)
+//             'jumlah_tidak_lulus'            => $getI('jumlah_tidak_lulus'),
+//             'jabatan_peserta'               => $getS('jabatan_peserta'),
+
+//             'jumlah_peserta_asn'            => $getI('jumlah_peserta_asn'),
+//             'jumlah_peserta_non_asn'        => $getI('jumlah_peserta_non_asn'),
+
+//             'jumlah_peserta_laki'           => $getI('jumlah_peserta_laki'),
+//             'jumlah_peserta_wanita'         => $getI('jumlah_peserta_wanita'),
+
+//             'jumlah_pendidikan_peserta_sma' => $getI('jumlah_pendidikan_peserta_sma'),
+//             'jumlah_pendidikan_peserta_d3'  => $getI('jumlah_pendidikan_peserta_d3'),
+//             'jumlah_pendidikan_peserta_s1'  => $getI('jumlah_pendidikan_peserta_s1'),
+//             'jumlah_pendidikan_peserta_s2'  => $getI('jumlah_pendidikan_peserta_s2'),
+//             'jumlah_pendidikan_peserta_s3'  => $getI('jumlah_pendidikan_peserta_s3'),
+
+//             'rab'                           => $getF('rab'),
+//             'realisasi'                     => $getF('realisasi'),
+
+//             // Field khusus Latsar (jika tidak dikirim → NULL aman)
+//             'pic_smartbangkom'      => $getI('pic_smartbangkom'),
+//             'jml_peserta_nilai_sm'  => $getI('jml_peserta_nilai_sm'),
+//             'jml_peserta_nilai_m'   => $getI('jml_peserta_nilai_m'),
+//             'jml_peserta_nilai_cm'  => $getI('jml_peserta_nilai_cm'),
+//             'jml_peserta_nilai_dl'  => $getI('jml_peserta_nilai_dl'),
+//             'jml_peserta_tm'        => $getI('jml_peserta_tm'),
+//             'peserta_peringkat_1'   => $getI('peserta_peringkat_1'),
+//             'peserta_peringkat_2'   => $getI('peserta_peringkat_2'),
+//             'peserta_peringkat_3'   => $getI('peserta_peringkat_3'),
+
+//             'created_at'            => date('Y-m-d H:i:s'),
+//             'updated_at'            => date('Y-m-d H:i:s'),
+//             'deleted_at'            => NULL
+//         );
+
+//         // Perbaiki typo 'jumlah_lusus' jika ada
+//         if (!isset($post['jumlah_lusus']) && isset($post['jumlah_lulus'])) {
+//             $data['jumlah_lulus'] = $getI('jumlah_lulus');
+//         }
+
+//         $this->db->insert('tbl_detail_pelatihan', $data);
+
+//         $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+//             <p>Tambah Detail Pelatihan Sukses!</p>
+//         </div></div>');
+//         return redirect($redir_url);
+//     }
+
+//     // === EDIT DETAIL PELATIHAN ===
+//     if (!empty($post['edit'])) {
+
+//         $data = array(
+//             'id_pelatihan'          => $getI('id_pelatihan'),
+//             'id_penanggung_jawab'   => $getI('id_penanggung_jawab'),
+//             'id_ketua_panitia'      => $getI('id_ketua_panitia'),
+//             'id_akademis'           => $getI('id_akademis'),
+//             'id_keuangan'           => $getI('id_keuangan'),
+//             'id_administrasi'       => $getI('id_administrasi'),
+
+//             'id_wi_1'               => $getI('id_wi_1'),
+//             'id_wi_2'               => $getI('id_wi_2'),
+//             'id_wi_3'               => $getI('id_wi_3'),
+//             'id_wi_4'               => $getI('id_wi_4'),
+//             'id_wi_rapat_kelulusan' => $getI('id_wi_rapat_kelulusan'),
+
+//             'id_pengajar_1'         => $getI('id_pengajar_1'),
+//             'id_pengajar_2'         => $getI('id_pengajar_2'),
+//             'id_pengajar_3'         => $getI('id_pengajar_3'),
+
+//             'jumlah_wi_pengajar'            => $getI('jumlah_wi_pengajar'),
+//             'jumlah_pendidikan_wi_d2'       => $getI('jumlah_pendidikan_wi_d2'),
+//             'jumlah_pendidikan_wi_s1'       => $getI('jumlah_pendidikan_wi_s1'),
+//             'jumlah_pendidikan_wi_s2'       => $getI('jumlah_pendidikan_wi_s2'),
+//             'jumlah_pendidikan_wi_s3'       => $getI('jumlah_pendidikan_wi_s3'),
+
+//             'jumlah_peserta'                => $getI('jumlah_peserta'),
+//             'jumlah_lulus'                  => $getI('jumlah_lulus'),
+//             'jumlah_tidak_lulus'            => $getI('jumlah_tidak_lulus'),
+//             'jabatan_peserta'               => $getS('jabatan_peserta'),
+
+//             'jumlah_peserta_asn'            => $getI('jumlah_peserta_asn'),
+//             'jumlah_peserta_non_asn'        => $getI('jumlah_peserta_non_asn'),
+
+//             'jumlah_peserta_laki'           => $getI('jumlah_peserta_laki'),
+//             'jumlah_peserta_wanita'         => $getI('jumlah_peserta_wanita'),
+
+//             'jumlah_pendidikan_peserta_sma' => $getI('jumlah_pendidikan_peserta_sma'),
+//             'jumlah_pendidikan_peserta_d3'  => $getI('jumlah_pendidikan_peserta_d3'),
+//             'jumlah_pendidikan_peserta_s1'  => $getI('jumlah_pendidikan_peserta_s1'),
+//             'jumlah_pendidikan_peserta_s2'  => $getI('jumlah_pendidikan_peserta_s2'),
+//             'jumlah_pendidikan_peserta_s3'  => $getI('jumlah_pendidikan_peserta_s3'),
+
+//             'rab'                           => $getF('rab'),
+//             'realisasi'                     => $getF('realisasi'),
+
+//             'pic_smartbangkom'      => $getI('pic_smartbangkom'),
+//             'jml_peserta_nilai_sm'  => $getI('jml_peserta_nilai_sm'),
+//             'jml_peserta_nilai_m'   => $getI('jml_peserta_nilai_m'),
+//             'jml_peserta_nilai_cm'  => $getI('jml_peserta_nilai_cm'),
+//             'jml_peserta_nilai_dl'  => $getI('jml_peserta_nilai_dl'),
+//             'jml_peserta_tm'        => $getI('jml_peserta_tm'),
+//             'peserta_peringkat_1'   => $getI('peserta_peringkat_1'),
+//             'peserta_peringkat_2'   => $getI('peserta_peringkat_2'),
+//             'peserta_peringkat_3'   => $getI('peserta_peringkat_3'),
+
+//             'updated_at'            => date('Y-m-d H:i:s')
+//         );
+
+//         $this->db->where('id_detail_pelatihan', $getI('edit'));
+//         $this->db->update('tbl_detail_pelatihan', $data);
+
+//         $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
+//             <p>Edit Detail Pelatihan Sukses!</p>
+//         </div></div>');
+//         return redirect($redir_url);
+//     }
+
+//     // Fallback
+//     return redirect($redir_url);
+// }
+
+public function prosesdetailpelatihan()
 {
-    // Pastikan user sudah login
     if ($this->session->userdata('masuk_perpus') != TRUE) {
         return redirect(base_url('login'));
     }
 
-    // Ambil konteks jenis (agar redirect balik ke tab yang sama)
     $jenis_ctx = $this->input->get('jenis', TRUE);
     if (!$jenis_ctx) { $jenis_ctx = $this->input->post('jenis', TRUE); }
     $redir_url = base_url('data/detailpelatihan' . ($jenis_ctx ? '?jenis=' . urlencode($jenis_ctx) : ''));
 
-    // === SOFT DELETE DETAIL PELATIHAN ===
+    // === SOFT DELETE DETAIL PELATIHAN === (tetap)
     if (!empty($this->input->get('id_detail_pelatihan'))) {
         $id_detail_pelatihan = (int) $this->input->get('id_detail_pelatihan', TRUE);
 
         $detail_pelatihan = $this->M_Admin->get_tableid_edit(
-            'tbl_detail_pelatihan',
-            'id_detail_pelatihan',
-            $id_detail_pelatihan
+            'tbl_detail_pelatihan','id_detail_pelatihan',$id_detail_pelatihan
         );
 
         if ($detail_pelatihan) {
-            $this->db->set('deleted_at', date('Y-m-d H:i:s'));
-            $this->db->where('id_detail_pelatihan', $id_detail_pelatihan);
-            $this->db->update('tbl_detail_pelatihan');
+            $now = date('Y-m-d H:i:s');
 
-            $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-warning">
-                <p>Berhasil Hapus (Soft Delete) Data Detail Pelatihan!</p>
-            </div></div>');
+            // soft-delete detail
+            $this->db->set('deleted_at', $now)
+                     ->where('id_detail_pelatihan', $id_detail_pelatihan)
+                     ->update('tbl_detail_pelatihan');
+
+            // ikut soft-delete mapping pengajar utk pelatihan ini
+            $this->db->set('deleted_at', $now)
+                     ->where('id_pelatihan', (int)$detail_pelatihan->id_pelatihan)
+                     ->where('deleted_at IS NULL', null, false)
+                     ->update('tbl_pelatihan_pengajar');
+
+            $this->session->set_flashdata('pesan',
+                '<div id="notifikasi"><div class="alert alert-warning"><p>Berhasil Hapus (Soft Delete) Data Detail Pelatihan!</p></div></div>');
         } else {
-            $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-danger">
-                <p>Data Detail Pelatihan tidak ditemukan!</p>
-            </div></div>');
+            $this->session->set_flashdata('pesan',
+                '<div id="notifikasi"><div class="alert alert-danger"><p>Data Detail Pelatihan tidak ditemukan!</p></div></div>');
         }
-
         return redirect($redir_url);
     }
 
-    // Helper untuk ambil POST dgn fallback NULL (XSS filter sudah aktif di $post)
+    // Helpers
     $post = $this->input->post(NULL, TRUE);
-    $getS = function($key, $default = NULL) use ($post) {
-        return (isset($post[$key]) && $post[$key] !== '') ? trim($post[$key]) : $default;
-    };
-    $getI = function($key, $default = NULL) use ($post) {
-        return (isset($post[$key]) && $post[$key] !== '') ? (int)$post[$key] : $default;
-    };
-    $getF = function($key, $default = NULL) use ($post) {
-        return (isset($post[$key]) && $post[$key] !== '') ? (float)$post[$key] : $default;
+    $getS = function($key, $default = NULL) use ($post) { return (isset($post[$key]) && $post[$key] !== '') ? trim($post[$key]) : $default; };
+    $getI = function($key, $default = NULL) use ($post) { return (isset($post[$key]) && $post[$key] !== '') ? (int)$post[$key] : $default; };
+    $getF = function($key, $default = NULL) use ($post) { return (isset($post[$key]) && $post[$key] !== '') ? (float)$post[$key] : $default; };
+    $getA = function($key) use ($post) {
+        $vals = [];
+        if (isset($post[$key])) {
+            $raw = is_array($post[$key]) ? $post[$key] : [$post[$key]];
+            foreach ($raw as $v) {
+                $v = (int)$v;
+                if ($v > 0) $vals[$v] = true; // dedup
+            }
+        }
+        return array_keys($vals);
     };
 
-    // === TAMBAH DETAIL PELATIHAN ===
+    /**
+     * Internal: sinkronisasi tabel baru (soft-delete + insert-batch dedup)
+     */
+    $sync_pengajar = function($id_pelatihan, $wi_ids, $wi_rapat_id, $pengajar_ids) {
+        $now = date('Y-m-d H:i:s');
+
+        // soft-delete existing
+        $this->db->set('deleted_at', $now)
+                 ->where('id_pelatihan', (int)$id_pelatihan)
+                 ->where('deleted_at IS NULL', null, false)
+                 ->update('tbl_pelatihan_pengajar');
+
+        // build rows
+        $rows = [];
+        foreach ($wi_ids as $idp) {
+            $rows[] = [
+                'id_pelatihan' => (int)$id_pelatihan,
+                'id_pegawai'   => (int)$idp,
+                'tipe_peran'   => 'Widyaiswara',
+                'created_at'   => $now,
+                'updated_at'   => $now,
+                'deleted_at'   => NULL,
+            ];
+        }
+        $wi_rapat_id = (int)$wi_rapat_id;
+        if ($wi_rapat_id > 0) {
+            $rows[] = [
+                'id_pelatihan' => (int)$id_pelatihan,
+                'id_pegawai'   => $wi_rapat_id,
+                'tipe_peran'   => 'Widyaiswara Rapat Kelulusan',
+                'created_at'   => $now,
+                'updated_at'   => $now,
+                'deleted_at'   => NULL,
+            ];
+        }
+        foreach ($pengajar_ids as $idp) {
+            $rows[] = [
+                'id_pelatihan' => (int)$id_pelatihan,
+                'id_pegawai'   => (int)$idp,
+                'tipe_peran'   => 'Pengajar',
+                'created_at'   => $now,
+                'updated_at'   => $now,
+                'deleted_at'   => NULL,
+            ];
+        }
+
+        // dedup 3 kolom
+        if (!empty($rows)) {
+            $seen = [];
+            $insert = [];
+            foreach ($rows as $r) {
+                $k = $r['id_pelatihan'].'|'.$r['id_pegawai'].'|'.$r['tipe_peran'];
+                if (!isset($seen[$k])) {
+                    $seen[$k] = true;
+                    $insert[] = $r;
+                }
+            }
+            if (!empty($insert)) {
+                $this->db->insert_batch('tbl_pelatihan_pengajar', $insert);
+            }
+        }
+    };
+
+    // === TAMBAH ===
     if (!empty($post['tambah'])) {
+        $id_pelatihan       = $getI('id_pelatihan');
+        $id_jenis_pelatihan = $getI('id_jenis_pelatihan'); // 1=PJJ, 2=PDWK, 3=Latsar
 
+        // siapkan payload dasar (tanpa field pengajar/wi)
         $data = array(
-            'id_pelatihan'          => $getI('id_pelatihan'), // required
+            'id_pelatihan'          => $id_pelatihan,
             'id_penanggung_jawab'   => $getI('id_penanggung_jawab'),
             'id_ketua_panitia'      => $getI('id_ketua_panitia'),
             'id_akademis'           => $getI('id_akademis'),
             'id_keuangan'           => $getI('id_keuangan'),
             'id_administrasi'       => $getI('id_administrasi'),
 
-            'id_wi_1'               => $getI('id_wi_1'),
-            'id_wi_2'               => $getI('id_wi_2'),
-            'id_wi_3'               => $getI('id_wi_3'),
-            'id_wi_4'               => $getI('id_wi_4'),
-            'id_wi_rapat_kelulusan' => $getI('id_wi_rapat_kelulusan'),
-
-            'id_pengajar_1'         => $getI('id_pengajar_1'),
-            'id_pengajar_2'         => $getI('id_pengajar_2'),
-            'id_pengajar_3'         => $getI('id_pengajar_3'),
-
-            // Statistik WI & Peserta (PJJ/PDWK). Pada Latsar field ini tidak dikirim → NULL aman.
             'jumlah_wi_pengajar'            => $getI('jumlah_wi_pengajar'),
             'jumlah_pendidikan_wi_d2'       => $getI('jumlah_pendidikan_wi_d2'),
             'jumlah_pendidikan_wi_s1'       => $getI('jumlah_pendidikan_wi_s1'),
@@ -851,18 +1115,17 @@ public function index()
             'jumlah_pendidikan_wi_s3'       => $getI('jumlah_pendidikan_wi_s3'),
 
             'jumlah_peserta'                => $getI('jumlah_peserta'),
-            'jumlah_lulus'                  => $getI('jumlah_lusus'), // <-- typo? pastikan 'jumlah_lulus' di form! (lihat catatan di bawah)
+            'jumlah_lulus'                  => $getI('jumlah_lulus'),
             'jumlah_tidak_lulus'            => $getI('jumlah_tidak_lulus'),
             'jabatan_peserta'               => $getS('jabatan_peserta'),
 
             'jumlah_peserta_asn'            => $getI('jumlah_peserta_asn'),
             'jumlah_peserta_non_asn'        => $getI('jumlah_peserta_non_asn'),
-
             'jumlah_peserta_laki'           => $getI('jumlah_peserta_laki'),
             'jumlah_peserta_wanita'         => $getI('jumlah_peserta_wanita'),
 
             'jumlah_pendidikan_peserta_sma' => $getI('jumlah_pendidikan_peserta_sma'),
-            'jumlah_pendidikan_peserta_d3'  => $getI('jumlah_pendidikan_peserta_d3'),
+            'jumlah_pendidikan_peserta_d3'  => $getI('jumlah_pendidikan_peserta_d3'), // jika typo, sesuaikan nama field form Anda
             'jumlah_pendidikan_peserta_s1'  => $getI('jumlah_pendidikan_peserta_s1'),
             'jumlah_pendidikan_peserta_s2'  => $getI('jumlah_pendidikan_peserta_s2'),
             'jumlah_pendidikan_peserta_s3'  => $getI('jumlah_pendidikan_peserta_s3'),
@@ -870,7 +1133,7 @@ public function index()
             'rab'                           => $getF('rab'),
             'realisasi'                     => $getF('realisasi'),
 
-            // Field khusus Latsar (jika tidak dikirim → NULL aman)
+            // field Latsar
             'pic_smartbangkom'      => $getI('pic_smartbangkom'),
             'jml_peserta_nilai_sm'  => $getI('jml_peserta_nilai_sm'),
             'jml_peserta_nilai_m'   => $getI('jml_peserta_nilai_m'),
@@ -886,39 +1149,67 @@ public function index()
             'deleted_at'            => NULL
         );
 
-        // Perbaiki typo 'jumlah_lusus' jika ada
-        if (!isset($post['jumlah_lusus']) && isset($post['jumlah_lulus'])) {
-            $data['jumlah_lulus'] = $getI('jumlah_lulus');
+        // ===== KEBIJAKAN PENYIMPANAN WI/PENGAJAR =====
+        if ($id_jenis_pelatihan === 1 || $id_jenis_pelatihan === 2) {
+            // PJJ/PDWK → set field lama ke NULL
+            $data['id_wi_1'] = $data['id_wi_2'] = $data['id_wi_3'] = $data['id_wi_4'] = NULL;
+            $data['id_wi_rapat_kelulusan'] = NULL;
+            $data['id_pengajar_1'] = $data['id_pengajar_2'] = $data['id_pengajar_3'] = NULL;
+        } else {
+            // Latsar → tetap pakai field lama
+            $data['id_wi_1']               = $getI('id_wi_1');
+            $data['id_wi_2']               = $getI('id_wi_2');
+            $data['id_wi_3']               = $getI('id_wi_3');
+            $data['id_wi_4']               = $getI('id_wi_4');
+            $data['id_wi_rapat_kelulusan'] = $getI('id_wi_rapat_kelulusan');
+            $data['id_pengajar_1']         = $getI('id_pengajar_1');
+            $data['id_pengajar_2']         = $getI('id_pengajar_2');
+            $data['id_pengajar_3']         = $getI('id_pengajar_3');
         }
 
+        // Simpan detail
         $this->db->insert('tbl_detail_pelatihan', $data);
 
-        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
-            <p>Tambah Detail Pelatihan Sukses!</p>
-        </div></div>');
+        // Sinkronisasi tabel baru utk PJJ/PDWK
+        if ($id_jenis_pelatihan === 1 || $id_jenis_pelatihan === 2) {
+            // Ambil dari array baru; jika kosong fallback ke field lama (kompatibilitas)
+            $wi_ids       = $getA('wi_ids');
+            $pengajar_ids = $getA('pengajar_ids');
+            $wi_rapat     = $getI('wi_rapat_kelulusan');
+
+            if (empty($wi_ids)) {
+                $legacy_wi = [$getI('id_wi_1'), $getI('id_wi_2'), $getI('id_wi_3'), $getI('id_wi_4')];
+                foreach ($legacy_wi as $v) { if ($v > 0) $wi_ids[$v]=true; }
+                $wi_ids = array_keys($wi_ids);
+            }
+            if (empty($pengajar_ids)) {
+                $legacy_peng = [$getI('id_pengajar_1'), $getI('id_pengajar_2'), $getI('id_pengajar_3')];
+                foreach ($legacy_peng as $v) { if ($v > 0) $pengajar_ids[$v]=true; }
+                $pengajar_ids = array_keys($pengajar_ids);
+            }
+
+            // execute sync
+            $sync_pengajar($id_pelatihan, $wi_ids, $wi_rapat, $pengajar_ids);
+        }
+
+        $this->session->set_flashdata('pesan',
+            '<div id="notifikasi"><div class="alert alert-success"><p>Tambah Detail Pelatihan Sukses!</p></div></div>');
         return redirect($redir_url);
     }
 
-    // === EDIT DETAIL PELATIHAN ===
+    // === EDIT ===
     if (!empty($post['edit'])) {
+        $id_detail           = (int)$getI('edit');
+        $id_pelatihan        = $getI('id_pelatihan');
+        $id_jenis_pelatihan  = $getI('id_jenis_pelatihan'); // 1/2/3
 
         $data = array(
-            'id_pelatihan'          => $getI('id_pelatihan'),
+            'id_pelatihan'          => $id_pelatihan,
             'id_penanggung_jawab'   => $getI('id_penanggung_jawab'),
             'id_ketua_panitia'      => $getI('id_ketua_panitia'),
             'id_akademis'           => $getI('id_akademis'),
             'id_keuangan'           => $getI('id_keuangan'),
             'id_administrasi'       => $getI('id_administrasi'),
-
-            'id_wi_1'               => $getI('id_wi_1'),
-            'id_wi_2'               => $getI('id_wi_2'),
-            'id_wi_3'               => $getI('id_wi_3'),
-            'id_wi_4'               => $getI('id_wi_4'),
-            'id_wi_rapat_kelulusan' => $getI('id_wi_rapat_kelulusan'),
-
-            'id_pengajar_1'         => $getI('id_pengajar_1'),
-            'id_pengajar_2'         => $getI('id_pengajar_2'),
-            'id_pengajar_3'         => $getI('id_pengajar_3'),
 
             'jumlah_wi_pengajar'            => $getI('jumlah_wi_pengajar'),
             'jumlah_pendidikan_wi_d2'       => $getI('jumlah_pendidikan_wi_d2'),
@@ -933,12 +1224,11 @@ public function index()
 
             'jumlah_peserta_asn'            => $getI('jumlah_peserta_asn'),
             'jumlah_peserta_non_asn'        => $getI('jumlah_peserta_non_asn'),
-
             'jumlah_peserta_laki'           => $getI('jumlah_peserta_laki'),
             'jumlah_peserta_wanita'         => $getI('jumlah_peserta_wanita'),
 
             'jumlah_pendidikan_peserta_sma' => $getI('jumlah_pendidikan_peserta_sma'),
-            'jumlah_pendidikan_peserta_d3'  => $getI('jumlah_pendidikan_peserta_d3'),
+            'jumlah_pendidikan_peserta_d3'  => $getI('jumlah_pendidikan_peserta_d3'), // sesuaikan jika typo
             'jumlah_pendidikan_peserta_s1'  => $getI('jumlah_pendidikan_peserta_s1'),
             'jumlah_pendidikan_peserta_s2'  => $getI('jumlah_pendidikan_peserta_s2'),
             'jumlah_pendidikan_peserta_s3'  => $getI('jumlah_pendidikan_peserta_s3'),
@@ -959,18 +1249,53 @@ public function index()
             'updated_at'            => date('Y-m-d H:i:s')
         );
 
-        $this->db->where('id_detail_pelatihan', $getI('edit'));
-        $this->db->update('tbl_detail_pelatihan', $data);
+        if ($id_jenis_pelatihan === 1 || $id_jenis_pelatihan === 2) {
+            // PJJ/PDWK → kosongkan field lama
+            $data['id_wi_1'] = $data['id_wi_2'] = $data['id_wi_3'] = $data['id_wi_4'] = NULL;
+            $data['id_wi_rapat_kelulusan'] = NULL;
+            $data['id_pengajar_1'] = $data['id_pengajar_2'] = $data['id_pengajar_3'] = NULL;
+        } else {
+            // Latsar → tetap isi field lama
+            $data['id_wi_1']               = $getI('id_wi_1');
+            $data['id_wi_2']               = $getI('id_wi_2');
+            $data['id_wi_3']               = $getI('id_wi_3');
+            $data['id_wi_4']               = $getI('id_wi_4');
+            $data['id_wi_rapat_kelulusan'] = $getI('id_wi_rapat_kelulusan');
+            $data['id_pengajar_1']         = $getI('id_pengajar_1');
+            $data['id_pengajar_2']         = $getI('id_pengajar_2');
+            $data['id_pengajar_3']         = $getI('id_pengajar_3');
+        }
 
-        $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-success">
-            <p>Edit Detail Pelatihan Sukses!</p>
-        </div></div>');
+        $this->db->where('id_detail_pelatihan', $id_detail)->update('tbl_detail_pelatihan', $data);
+
+        // Sinkronisasi tabel baru utk PJJ/PDWK
+        if ($id_jenis_pelatihan === 1 || $id_jenis_pelatihan === 2) {
+            $wi_ids       = $getA('wi_ids');
+            $pengajar_ids = $getA('pengajar_ids');
+            $wi_rapat     = $getI('wi_rapat_kelulusan');
+
+            if (empty($wi_ids)) {
+                $legacy_wi = [$getI('id_wi_1'), $getI('id_wi_2'), $getI('id_wi_3'), $getI('id_wi_4')];
+                foreach ($legacy_wi as $v) { if ($v > 0) $wi_ids[$v]=true; }
+                $wi_ids = array_keys($wi_ids);
+            }
+            if (empty($pengajar_ids)) {
+                $legacy_peng = [$getI('id_pengajar_1'), $getI('id_pengajar_2'), $getI('id_pengajar_3')];
+                foreach ($legacy_peng as $v) { if ($v > 0) $pengajar_ids[$v]=true; }
+                $pengajar_ids = array_keys($pengajar_ids);
+            }
+
+            $sync_pengajar($id_pelatihan, $wi_ids, $wi_rapat, $pengajar_ids);
+        }
+
+        $this->session->set_flashdata('pesan',
+            '<div id="notifikasi"><div class="alert alert-success"><p>Edit Detail Pelatihan Sukses!</p></div></div>');
         return redirect($redir_url);
     }
 
-    // Fallback
     return redirect($redir_url);
 }
+
 
 
 	// public function detailpelatihantambah()
@@ -1020,62 +1345,113 @@ public function index()
 	// 	$this->load->view('footer_view', $this->data);
 	// }
 
-	public function detailpelatihantambah()
+// 	public function detailpelatihantambah()
+// {
+//     $this->data['idbo'] = $this->session->userdata('ses_id');
+
+//     // Ambil filter jenis dari query string
+//     $jenis = $this->input->get('jenis', TRUE); // 'PJJ' | 'PDWK' | 'Latsar' | null
+//     $id_jenis = null;
+//     if ($jenis === 'PJJ')      $id_jenis = 1;
+//     elseif ($jenis === 'PDWK') $id_jenis = 2;
+//     elseif ($jenis === 'Latsar') $id_jenis = 3;
+
+//     // Ambil id_pelatihan yang sudah dipakai di tbl_detail_pelatihan (soft delete aware)
+//     $existing_detail_ids = $this->db->select('id_pelatihan')
+//         ->from('tbl_detail_pelatihan')
+//         ->where('deleted_at', NULL) // masih aktif
+//         ->get()->result_array();
+
+//     $used_ids = array_column($existing_detail_ids, 'id_pelatihan');
+
+//     // Query pelatihan yang belum punya detail, optional: filter by id_jenis_pelatihan
+//     $this->db->from('tbl_pelatihan');
+//     $this->db->where('deleted_at', NULL);
+//     if (!empty($used_ids)) {
+//         $this->db->where_not_in('id_pelatihan', $used_ids);
+//     }
+//     if (!is_null($id_jenis)) {
+//         $this->db->where('id_jenis_pelatihan', (int)$id_jenis);
+//     }
+//     $this->db->order_by('id_pelatihan', 'DESC');
+//     $this->data['pelatihans'] = $this->db->get()->result_array();
+
+//     // Ambil semua pegawai
+//     $this->data['pegawais'] = $this->db
+//         ->where('deleted_at', NULL)
+//         ->order_by('id_pegawai', 'DESC')
+//         ->get('tbl_pegawai')
+//         ->result_array();
+
+//     // Flag ke view
+//     $this->data['jenis'] = $jenis;                 // 'PJJ'|'PDWK'|'Latsar'|null
+//     $this->data['id_jenis'] = $id_jenis;           // 1|2|3|null
+//     $this->data['is_latsar'] = ($id_jenis === 3);  // boolean
+
+//     // Title
+//     $baseTitle = 'Tambah Detail Pelatihan';
+//     if ($jenis === 'PJJ')      $this->data['title_web'] = $baseTitle . ' – PJJ';
+//     elseif ($jenis === 'PDWK') $this->data['title_web'] = $baseTitle . ' – PDWK';
+//     elseif ($jenis === 'Latsar') $this->data['title_web'] = $baseTitle . ' – Latsar CPNS';
+//     else                       $this->data['title_web'] = $baseTitle;
+
+//     // Load views
+//     $this->load->view('header_view', $this->data);
+//     $this->load->view('sidebar_view', $this->data);
+//     $this->load->view('detail_pelatihan/tambah_view', $this->data);
+//     $this->load->view('footer_view', $this->data);
+// }
+
+public function detailpelatihantambah()
 {
     $this->data['idbo'] = $this->session->userdata('ses_id');
 
-    // Ambil filter jenis dari query string
-    $jenis = $this->input->get('jenis', TRUE); // 'PJJ' | 'PDWK' | 'Latsar' | null
+    $jenis = $this->input->get('jenis', TRUE);
     $id_jenis = null;
-    if ($jenis === 'PJJ')      $id_jenis = 1;
+    if ($jenis === 'PJJ') $id_jenis = 1;
     elseif ($jenis === 'PDWK') $id_jenis = 2;
     elseif ($jenis === 'Latsar') $id_jenis = 3;
 
-    // Ambil id_pelatihan yang sudah dipakai di tbl_detail_pelatihan (soft delete aware)
     $existing_detail_ids = $this->db->select('id_pelatihan')
         ->from('tbl_detail_pelatihan')
-        ->where('deleted_at', NULL) // masih aktif
+        ->where('deleted_at', NULL)
         ->get()->result_array();
-
     $used_ids = array_column($existing_detail_ids, 'id_pelatihan');
 
-    // Query pelatihan yang belum punya detail, optional: filter by id_jenis_pelatihan
     $this->db->from('tbl_pelatihan');
     $this->db->where('deleted_at', NULL);
-    if (!empty($used_ids)) {
-        $this->db->where_not_in('id_pelatihan', $used_ids);
-    }
-    if (!is_null($id_jenis)) {
-        $this->db->where('id_jenis_pelatihan', (int)$id_jenis);
-    }
+    if (!empty($used_ids)) $this->db->where_not_in('id_pelatihan', $used_ids);
+    if (!is_null($id_jenis)) $this->db->where('id_jenis_pelatihan', (int)$id_jenis);
     $this->db->order_by('id_pelatihan', 'DESC');
     $this->data['pelatihans'] = $this->db->get()->result_array();
 
-    // Ambil semua pegawai
     $this->data['pegawais'] = $this->db
         ->where('deleted_at', NULL)
         ->order_by('id_pegawai', 'DESC')
-        ->get('tbl_pegawai')
-        ->result_array();
+        ->get('tbl_pegawai')->result_array();
 
-    // Flag ke view
-    $this->data['jenis'] = $jenis;                 // 'PJJ'|'PDWK'|'Latsar'|null
-    $this->data['id_jenis'] = $id_jenis;           // 1|2|3|null
-    $this->data['is_latsar'] = ($id_jenis === 3);  // boolean
+    // flags & defaults untuk view
+    $this->data['jenis']      = $jenis;
+    $this->data['id_jenis']   = $id_jenis;
+    $this->data['is_latsar']  = ($id_jenis === 3);
 
-    // Title
+    // default selected (untuk PJJ/PDWK multi-select)
+    $this->data['wi_selected']        = [];
+    $this->data['pengajar_selected']  = [];
+    $this->data['wi_rapat_selected']  = NULL;
+
     $baseTitle = 'Tambah Detail Pelatihan';
-    if ($jenis === 'PJJ')      $this->data['title_web'] = $baseTitle . ' – PJJ';
-    elseif ($jenis === 'PDWK') $this->data['title_web'] = $baseTitle . ' – PDWK';
+    if     ($jenis === 'PJJ')    $this->data['title_web'] = $baseTitle . ' – PJJ';
+    elseif ($jenis === 'PDWK')   $this->data['title_web'] = $baseTitle . ' – PDWK';
     elseif ($jenis === 'Latsar') $this->data['title_web'] = $baseTitle . ' – Latsar CPNS';
-    else                       $this->data['title_web'] = $baseTitle;
+    else                         $this->data['title_web'] = $baseTitle;
 
-    // Load views
     $this->load->view('header_view', $this->data);
     $this->load->view('sidebar_view', $this->data);
     $this->load->view('detail_pelatihan/tambah_view', $this->data);
     $this->load->view('footer_view', $this->data);
 }
+
 
 
 	// public function detailpelatihandetail()
@@ -1121,58 +1497,120 @@ public function index()
     //     $this->load->view('footer_view',$this->data);
 	// }
 
-	public function detailpelatihandetail()
+// 	public function detailpelatihandetail()
+// {
+//     $this->data['idbo'] = $this->session->userdata('ses_id');
+
+//     // Keep jenis context (optional, nice for back button + Latsar toggle)
+//     $jenis = $this->input->get('jenis', TRUE); // 'PJJ'|'PDWK'|'Latsar'|NULL
+//     $this->data['jenis'] = $jenis;
+//     $this->data['is_latsar'] = ($jenis === 'Latsar');
+
+//     $id_detail = $this->uri->segment('3');
+//     $count = $this->M_Admin->CountTableId('tbl_detail_pelatihan', 'id_detail_pelatihan', $id_detail);
+
+//     if ($count > 0) {
+//         // Detail
+//         $this->data['detail_pelatihan'] = $this->M_Admin
+//             ->get_tableid_edit('tbl_detail_pelatihan', 'id_detail_pelatihan', $id_detail);
+
+//         // Kegiatan & Pegawai for rendering names
+//         $this->data['pelatihans'] = $this->db
+//             ->order_by('id_pelatihan', 'DESC')
+//             ->get('tbl_pelatihan')->result_array();
+
+//         $this->data['pegawais'] = $this->db
+//             ->order_by('id_pegawai', 'DESC')
+//             ->get('tbl_pegawai')->result_array();
+
+//         // === NEW: Ambil nama peserta untuk peringkat 1/2/3 ===
+//         $dp = $this->data['detail_pelatihan'];
+//         $rank_ids = array_filter([
+//             !empty($dp->peserta_peringkat_1) ? $dp->peserta_peringkat_1 : null,
+//             !empty($dp->peserta_peringkat_2) ? $dp->peserta_peringkat_2 : null,
+//             !empty($dp->peserta_peringkat_3) ? $dp->peserta_peringkat_3 : null,
+//         ]);
+
+//         $rank_map = [];
+//         if (!empty($rank_ids)) {
+//             $rows = $this->db->select('id_peserta, nama_peserta')
+//                 ->from('tbl_peserta_pelatihan')
+//                 ->where_in('id_peserta', $rank_ids)
+//                 ->where('deleted_at', NULL)      // hormati soft delete
+//                 ->get()->result_array();
+
+//             foreach ($rows as $r) {
+//                 $rank_map[$r['id_peserta']] = $r['nama_peserta'];
+//             }
+//         }
+//         $this->data['rank_peserta_map'] = $rank_map; // pass ke view
+
+//     } else {
+//         echo '<script>alert("DETAIL PELATIHAN TIDAK DITEMUKAN");window.location="' . base_url('data/detailpelatihan') . '"</script>';
+//         return;
+//     }
+
+//     $this->data['title_web'] = 'Data Detail Pelatihan';
+//     $this->load->view('header_view', $this->data);
+//     $this->load->view('sidebar_view', $this->data);
+//     $this->load->view('detail_pelatihan/detail', $this->data);
+//     $this->load->view('footer_view', $this->data);
+// }
+
+public function detailpelatihandetail()
 {
     $this->data['idbo'] = $this->session->userdata('ses_id');
 
-    // Keep jenis context (optional, nice for back button + Latsar toggle)
-    $jenis = $this->input->get('jenis', TRUE); // 'PJJ'|'PDWK'|'Latsar'|NULL
+    $jenis = $this->input->get('jenis', TRUE);
     $this->data['jenis'] = $jenis;
     $this->data['is_latsar'] = ($jenis === 'Latsar');
 
-    $id_detail = $this->uri->segment('3');
+    $id_detail = (int)$this->uri->segment('3');
     $count = $this->M_Admin->CountTableId('tbl_detail_pelatihan', 'id_detail_pelatihan', $id_detail);
 
-    if ($count > 0) {
-        // Detail
-        $this->data['detail_pelatihan'] = $this->M_Admin
-            ->get_tableid_edit('tbl_detail_pelatihan', 'id_detail_pelatihan', $id_detail);
-
-        // Kegiatan & Pegawai for rendering names
-        $this->data['pelatihans'] = $this->db
-            ->order_by('id_pelatihan', 'DESC')
-            ->get('tbl_pelatihan')->result_array();
-
-        $this->data['pegawais'] = $this->db
-            ->order_by('id_pegawai', 'DESC')
-            ->get('tbl_pegawai')->result_array();
-
-        // === NEW: Ambil nama peserta untuk peringkat 1/2/3 ===
-        $dp = $this->data['detail_pelatihan'];
-        $rank_ids = array_filter([
-            !empty($dp->peserta_peringkat_1) ? $dp->peserta_peringkat_1 : null,
-            !empty($dp->peserta_peringkat_2) ? $dp->peserta_peringkat_2 : null,
-            !empty($dp->peserta_peringkat_3) ? $dp->peserta_peringkat_3 : null,
-        ]);
-
-        $rank_map = [];
-        if (!empty($rank_ids)) {
-            $rows = $this->db->select('id_peserta, nama_peserta')
-                ->from('tbl_peserta_pelatihan')
-                ->where_in('id_peserta', $rank_ids)
-                ->where('deleted_at', NULL)      // hormati soft delete
-                ->get()->result_array();
-
-            foreach ($rows as $r) {
-                $rank_map[$r['id_peserta']] = $r['nama_peserta'];
-            }
-        }
-        $this->data['rank_peserta_map'] = $rank_map; // pass ke view
-
-    } else {
+    if ($count <= 0) {
         echo '<script>alert("DETAIL PELATIHAN TIDAK DITEMUKAN");window.location="' . base_url('data/detailpelatihan') . '"</script>';
         return;
     }
+
+    // join untuk dapat id_jenis_pelatihan & nama_kegiatan
+    $dp = $this->db->select('dp.*, p.id_jenis_pelatihan, p.nama_kegiatan')
+        ->from('tbl_detail_pelatihan dp')
+        ->join('tbl_pelatihan p', 'p.id_pelatihan = dp.id_pelatihan', 'left')
+        ->where('dp.id_detail_pelatihan', $id_detail)
+        ->get()->row();
+
+    $this->data['detail_pelatihan'] = $dp;
+
+    // list pelatihan & pegawai (render nama)
+    $this->data['pelatihans'] = $this->db
+        ->order_by('id_pelatihan', 'DESC')
+        ->get('tbl_pelatihan')->result_array();
+
+    $this->data['pegawais'] = $this->db
+        ->order_by('id_pegawai', 'DESC')
+        ->get('tbl_pegawai')->result_array();
+
+    // === BACA PENGAJAR DARI TABEL BARU UNTUK PJJ/PDWK ===
+    $ringkas_wi = $ringkas_pengajar = '-';
+    $ringkas_wi_rapat = '-';
+
+    if (in_array((int)$dp->id_jenis_pelatihan, [1,2], true)) {
+        $map = $this->_get_pengajar_assignments((int)$dp->id_pelatihan);
+        $this->data['wi_names']        = $map['wi_names'];        // array of names (Widyaiswara)
+        $this->data['pengajar_names']  = $map['pengajar_names'];  // array of names (Pengajar)
+        $this->data['wi_rapat_name']   = $map['wi_rapat_name'];   // string or null
+        // if (!empty($map['wi_names']))        $ringkas_wi = implode(', ', $map['wi_names']);
+        // if (!empty($map['pengajar_names']))  $ringkas_pengajar = implode(', ', $map['pengajar_names']);
+        // if (!empty($map['wi_rapat_name']))   $ringkas_wi_rapat = $map['wi_rapat_name'];
+    } else {
+        // Latsar tetap bisa diringkas dari field lama bila Anda mau
+        $ringkas_wi = $ringkas_pengajar = $ringkas_wi_rapat = '(menggunakan field lama)';
+    }
+
+    $this->data['ringkas_wi']        = $ringkas_wi;
+    $this->data['ringkas_wi_rapat']  = $ringkas_wi_rapat;
+    $this->data['ringkas_pengajar']  = $ringkas_pengajar;
 
     $this->data['title_web'] = 'Data Detail Pelatihan';
     $this->load->view('header_view', $this->data);
@@ -1181,13 +1619,80 @@ public function index()
     $this->load->view('footer_view', $this->data);
 }
 
+
+// public function detailpelatihanedit()
+// {
+//     $this->data['idbo'] = $this->session->userdata('ses_id');
+
+//     $id = (int) $this->uri->segment(3);
+
+//     // Ambil record dengan join ke tbl_pelatihan untuk tahu jenis
+//     $row = $this->db->select('dp.*, p.id_jenis_pelatihan, p.nama_kegiatan')
+//         ->from('tbl_detail_pelatihan dp')
+//         ->join('tbl_pelatihan p', 'p.id_pelatihan = dp.id_pelatihan', 'left')
+//         ->where('dp.id_detail_pelatihan', $id)
+//         ->get()->row();
+
+//     if (!$row) {
+//         $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-danger">
+//             <p>DETAIL PELATIHAN TIDAK DITEMUKAN</p>
+//         </div></div>');
+//         return redirect(base_url('data/detailpelatihan'));
+//     }
+
+//     // Turunkan/override konteks jenis
+//     $jenis_param = $this->input->get('jenis', TRUE);
+//     if ($jenis_param) {
+//         $jenis = $jenis_param; // 'PJJ' | 'PDWK' | 'Latsar'
+//         $id_jenis = ($jenis === 'PJJ' ? 1 : ($jenis === 'PDWK' ? 2 : ($jenis === 'Latsar' ? 3 : null)));
+//     } else {
+//         $id_jenis = isset($row->id_jenis_pelatihan) ? (int)$row->id_jenis_pelatihan : null;
+//         $jenis = ($id_jenis === 1 ? 'PJJ' : ($id_jenis === 2 ? 'PDWK' : ($id_jenis === 3 ? 'Latsar' : null)));
+//     }
+//     $is_latsar = ($id_jenis === 3);
+
+//     // Data untuk view
+//     $this->data['detail_pelatihan'] = $row;
+//     $this->data['jenis']     = $jenis;
+//     $this->data['id_jenis']  = $id_jenis;
+//     $this->data['is_latsar'] = $is_latsar;
+
+//     // Dropdown pelatihans: batasi ke jenis yang sama & tidak terhapus
+//     $this->db->from('tbl_pelatihan');
+//     $this->db->where('deleted_at', NULL);
+//     if (!is_null($id_jenis)) {
+//         $this->db->where('id_jenis_pelatihan', $id_jenis);
+//     }
+//     $this->db->order_by('id_pelatihan', 'DESC');
+//     $this->data['pelatihans'] = $this->db->get()->result_array();
+
+//     // Pegawais
+//     $this->data['pegawais'] = $this->db
+//         ->where('deleted_at', NULL)
+//         ->order_by('id_pegawai', 'DESC')
+//         ->get('tbl_pegawai')
+//         ->result_array();
+
+//     // Title
+//     $baseTitle = 'Edit Detail Pelatihan';
+//     if ($jenis === 'PJJ')        $this->data['title_web'] = $baseTitle . ' – PJJ';
+//     elseif ($jenis === 'PDWK')   $this->data['title_web'] = $baseTitle . ' – PDWK';
+//     elseif ($jenis === 'Latsar') $this->data['title_web'] = $baseTitle . ' – Latsar CPNS';
+//     else                         $this->data['title_web'] = $baseTitle;
+
+//     // Render
+//     $this->load->view('header_view', $this->data);
+//     $this->load->view('sidebar_view', $this->data);
+//     $this->load->view('detail_pelatihan/edit_view', $this->data);
+//     $this->load->view('footer_view', $this->data);
+// }
+
 public function detailpelatihanedit()
 {
     $this->data['idbo'] = $this->session->userdata('ses_id');
 
     $id = (int) $this->uri->segment(3);
 
-    // Ambil record dengan join ke tbl_pelatihan untuk tahu jenis
     $row = $this->db->select('dp.*, p.id_jenis_pelatihan, p.nama_kegiatan')
         ->from('tbl_detail_pelatihan dp')
         ->join('tbl_pelatihan p', 'p.id_pelatihan = dp.id_pelatihan', 'left')
@@ -1196,15 +1701,13 @@ public function detailpelatihanedit()
 
     if (!$row) {
         $this->session->set_flashdata('pesan', '<div id="notifikasi"><div class="alert alert-danger">
-            <p>DETAIL PELATIHAN TIDAK DITEMUKAN</p>
-        </div></div>');
+            <p>DETAIL PELATIHAN TIDAK DITEMUKAN</p></div></div>');
         return redirect(base_url('data/detailpelatihan'));
     }
 
-    // Turunkan/override konteks jenis
     $jenis_param = $this->input->get('jenis', TRUE);
     if ($jenis_param) {
-        $jenis = $jenis_param; // 'PJJ' | 'PDWK' | 'Latsar'
+        $jenis = $jenis_param;
         $id_jenis = ($jenis === 'PJJ' ? 1 : ($jenis === 'PDWK' ? 2 : ($jenis === 'Latsar' ? 3 : null)));
     } else {
         $id_jenis = isset($row->id_jenis_pelatihan) ? (int)$row->id_jenis_pelatihan : null;
@@ -1212,36 +1715,52 @@ public function detailpelatihanedit()
     }
     $is_latsar = ($id_jenis === 3);
 
-    // Data untuk view
+    // Data dasar utk view
     $this->data['detail_pelatihan'] = $row;
     $this->data['jenis']     = $jenis;
     $this->data['id_jenis']  = $id_jenis;
     $this->data['is_latsar'] = $is_latsar;
 
-    // Dropdown pelatihans: batasi ke jenis yang sama & tidak terhapus
+    // Dropdown pelatihan & pegawai
     $this->db->from('tbl_pelatihan');
     $this->db->where('deleted_at', NULL);
-    if (!is_null($id_jenis)) {
-        $this->db->where('id_jenis_pelatihan', $id_jenis);
-    }
+    if (!is_null($id_jenis)) $this->db->where('id_jenis_pelatihan', $id_jenis);
     $this->db->order_by('id_pelatihan', 'DESC');
     $this->data['pelatihans'] = $this->db->get()->result_array();
 
-    // Pegawais
     $this->data['pegawais'] = $this->db
         ->where('deleted_at', NULL)
         ->order_by('id_pegawai', 'DESC')
-        ->get('tbl_pegawai')
-        ->result_array();
+        ->get('tbl_pegawai')->result_array();
+
+    // === PREFILL ASSIGNMENTS UNTUK PJJ/PDWK ===
+    $wi_selected = []; $pengajar_selected = []; $wi_rapat_selected = NULL;
+    if (in_array((int)$id_jenis, [1,2], true)) {
+        $map = $this->_get_pengajar_assignments((int)$row->id_pelatihan);
+        $wi_selected       = $map['wi_ids'];
+        $pengajar_selected = $map['pengajar_ids'];
+        $wi_rapat_selected = $map['wi_rapat_id'];
+    } else {
+        // Latsar: boleh gunakan field lama sebagai prefill (opsional)
+        foreach (['id_wi_1','id_wi_2','id_wi_3','id_wi_4'] as $f) {
+            if (!empty($row->$f)) $wi_selected[] = (int)$row->$f;
+        }
+        if (!empty($row->id_wi_rapat_kelulusan)) $wi_rapat_selected = (int)$row->id_wi_rapat_kelulusan;
+        foreach (['id_pengajar_1','id_pengajar_2','id_pengajar_3'] as $f) {
+            if (!empty($row->$f)) $pengajar_selected[] = (int)$row->$f;
+        }
+    }
+    $this->data['wi_selected']       = $wi_selected;
+    $this->data['pengajar_selected'] = $pengajar_selected;
+    $this->data['wi_rapat_selected'] = $wi_rapat_selected;
 
     // Title
     $baseTitle = 'Edit Detail Pelatihan';
-    if ($jenis === 'PJJ')        $this->data['title_web'] = $baseTitle . ' – PJJ';
+    if     ($jenis === 'PJJ')    $this->data['title_web'] = $baseTitle . ' – PJJ';
     elseif ($jenis === 'PDWK')   $this->data['title_web'] = $baseTitle . ' – PDWK';
     elseif ($jenis === 'Latsar') $this->data['title_web'] = $baseTitle . ' – Latsar CPNS';
     else                         $this->data['title_web'] = $baseTitle;
 
-    // Render
     $this->load->view('header_view', $this->data);
     $this->load->view('sidebar_view', $this->data);
     $this->load->view('detail_pelatihan/edit_view', $this->data);
@@ -1652,7 +2171,16 @@ public function detailpelatihanedit()
 	public function dokumenpelatihan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$jenis = $this->input->get('jenis');
     	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+		// Terapkan filter berdasarkan jenis
+		if ($jenis == 'PJJ') {
+			$this->db->where('id_jenis_pelatihan', 1);
+		} elseif ($jenis == 'PDWK') {
+			$this->db->where('id_jenis_pelatihan', 2);
+		} elseif ($jenis == 'Latsar') {
+			$this->db->where('id_jenis_pelatihan', 3);
+		}
         $this->data['title_web'] = 'Data Pelatihan Lampiran Dokumen';
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
@@ -2251,8 +2779,17 @@ public function detailpelatihanedit()
 	public function dokumentasipelatihan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$jenis = $this->input->get('jenis');
     	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
-        $this->data['title_web'] = 'Data Kegiatan Pelatihan';
+		// Terapkan filter berdasarkan jenis
+		if ($jenis == 'PJJ') {
+			$this->db->where('id_jenis_pelatihan', 1);
+		} elseif ($jenis == 'PDWK') {
+			$this->db->where('id_jenis_pelatihan', 2);
+		} elseif ($jenis == 'Latsar') {
+			$this->db->where('id_jenis_pelatihan', 3);
+		}
+		$this->data['title_web'] = 'Data Kegiatan Pelatihan';
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
         $this->load->view('dokumentasi_pelatihan/list_pelatihan',$this->data);
@@ -2558,7 +3095,16 @@ public function pesertapelatihanjenis()
 	public function pesertapelatihan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
+    	$jenis = $this->input->get('jenis');
     	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+		// Terapkan filter berdasarkan jenis
+		if ($jenis == 'PJJ') {
+			$this->db->where('id_jenis_pelatihan', 1);
+		} elseif ($jenis == 'PDWK') {
+			$this->db->where('id_jenis_pelatihan', 2);
+		} elseif ($jenis == 'Latsar') {
+			$this->db->where('id_jenis_pelatihan', 3);
+		}
         $this->data['title_web'] = 'Data Peserta Pelatihan';
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
@@ -2704,16 +3250,17 @@ public function pesertapelatihanjenis()
         redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
     }
 
-   // === IMPORT EXCEL BATCH ===
+//   
+    // === IMPORT EXCEL BATCH ===
 if (!empty($this->input->post('import_excel'))) {
     $id_pelatihan = htmlentities($this->input->post('id_pelatihan'));
-    
-    $config['upload_path'] = './assets/excel/';
-    $config['allowed_types'] = 'xlsx|xls|csv';
-    $config['max_size'] = 2048;
-    $config['encrypt_name'] = TRUE;
 
-    $this->load->library('upload', $config);
+    $config['upload_path']   = './assets/excel/';
+    $config['allowed_types'] = 'xlsx|xls|csv';
+    $config['max_size']      = 4096;
+    $config['encrypt_name']  = TRUE;
+
+    $this->upload->initialize($config);
 
     if (!$this->upload->do_upload('file_excel')) {
         $error = $this->upload->display_errors();
@@ -2723,142 +3270,153 @@ if (!empty($this->input->post('import_excel'))) {
         redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
     }
 
-    $upload_data = $this->upload->data();
-    $file_path = $upload_data['full_path'];
+$upload_data = $this->upload->data();
+$file_path   = $upload_data['full_path'];
 
-    // Load library PhpSpreadsheet
-    require_once FCPATH . 'vendor/autoload.php'; // Sesuaikan path
+// Convert Excel → CSV using your helper
+$this->load->helper('excel');  // make sure helper loaded
+$csv_path = convert_excel_to_csv($file_path);
 
-    $success_count = 0;
-    $error_count = 0;
+if ($csv_path === false || !file_exists($csv_path)) {
+    @unlink($file_path);
+    $this->session->set_flashdata('pesan',
+        '<div class="alert alert-danger"><p>Gagal konversi Excel ke CSV.</p></div>');
+    redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
+}
+
+
+    // Baca CSV
+    $success_count  = 0;
+    $error_count    = 0;
     $error_messages = [];
 
-    try {
-        // Identifikasi reader berdasarkan tipe file
-        $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
-        
-        if ($file_extension == 'xlsx') {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-        } elseif ($file_extension == 'xls') {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
-        } else {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-        }
-
-        // Baca file Excel
-        $spreadsheet = $reader->load($file_path);
-        $worksheet = $spreadsheet->getActiveSheet();
-        $rows = $worksheet->toArray();
-
-        // Proses setiap baris
-        foreach ($rows as $row_number => $row) {
-            // Skip header (baris 1)
-            if ($row_number == 0) {
-                continue;
-            }
-
-            // Skip baris kosong
-            if (empty($row[0]) || trim($row[0]) === '') {
-                continue;
-            }
-
-            // Mapping data
-            $nama_peserta = isset($row[0]) ? trim($row[0]) : '';
-            $jenis_kelamin = isset($row[1]) ? trim($row[1]) : '';
-            $nip = isset($row[2]) ? trim($row[2]) : '';
-            $pangkatgol = isset($row[3]) ? trim($row[3]) : '';
-            $jabatan = isset($row[4]) ? trim($row[4]) : '';
-            $unit_kerja = isset($row[5]) ? trim($row[5]) : '';
-
-            // **FIX: Handle formula Excel untuk NIP**
-            // Jika NIP berisi formula, coba ekstrak nilai calculated-nya
-            if (strpos($nip, '=') === 0) {
-                // Ini adalah formula, coba ambil nilai calculated dari cell
-                $cell = $worksheet->getCellByColumnAndRow(3, $row_number + 1); // Kolom C (index 2)
-                $calculated_value = $cell->getCalculatedValue();
-                
-                if (!empty($calculated_value) && $calculated_value != $nip) {
-                    $nip = $calculated_value;
-                } else {
-                    // Jika tidak bisa dapat calculated value, skip atau generate NIP sementara
-                    $error_count++;
-                    $error_messages[] = "Baris " . ($row_number + 1) . ": NIP berisi formula yang tidak bisa diproses";
-                    continue;
-                }
-            }
-
-            // Validasi required fields
-            if (empty($nama_peserta)) {
-                $error_count++;
-                $error_messages[] = "Baris " . ($row_number + 1) . ": Nama peserta wajib diisi";
-                continue;
-            }
-
-            // Handle NIP yang mungkin masih kosong
-            if (empty($nip)) {
-                // Generate NIP sementara berdasarkan nama dan timestamp
-                $nip = 'TEMP_' . preg_replace('/[^a-zA-Z0-9]/', '', $nama_peserta) . '_' . time();
-            }
-
-            // Handle jenis_kelamin
-            $jk = 'L'; // default value
-            if (!empty($jenis_kelamin)) {
-                $jenis_kelamin_lower = strtolower(trim($jenis_kelamin));
-                if (strpos($jenis_kelamin_lower, 'laki') !== false || $jenis_kelamin_lower == 'l' || $jenis_kelamin_lower == 'laki-laki') {
-                    $jk = 'L';
-                } elseif (strpos($jenis_kelamin_lower, 'perempuan') !== false || $jenis_kelamin_lower == 'p') {
-                    $jk = 'P';
-                }
-            }
-
-            // Validasi NIP unik dalam pelatihan yang sama
-            if (strpos($nip, 'TEMP_') === false) { // Hanya validasi untuk NIP non-temporary
-                $cek_nip = $this->db->get_where('tbl_peserta_pelatihan', [
-                    'id_pelatihan' => $id_pelatihan,
-                    'nip' => $nip,
-                    'deleted_at' => NULL
-                ])->row();
-
-                if ($cek_nip) {
-                    $error_count++;
-                    $error_messages[] = "Baris " . ($row_number + 1) . ": NIP $nip sudah terdaftar dalam pelatihan ini";
-                    continue;
-                }
-            }
-
-            // Bersihkan data jabatan
-            $jabatan = $this->bersihkan_jabatan($jabatan);
-
-            $data_insert = array(
-                'id_pelatihan' => $id_pelatihan,
-                'nama_peserta' => $nama_peserta,
-                'jenis_kelamin' => $jk,
-                'nip' => $nip,
-                'pangkatgol' => $pangkatgol,
-                'jabatan' => $jabatan,
-                'unit_kerja' => $unit_kerja,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            );
-
-            if ($this->db->insert('tbl_peserta_pelatihan', $data_insert)) {
-                $success_count++;
-            } else {
-                $error_count++;
-                $db_error = $this->db->error();
-                $error_messages[] = "Baris " . ($row_number + 1) . ": Gagal menyimpan data - " . $db_error['message'];
-            }
-        }
-
-    } catch (Exception $e) {
-        $error_count++;
-        $error_messages[] = "Error membaca file: " . $e->getMessage();
+    // Deteksi delimiter dari header (koma vs titik koma)
+    $fp = fopen($csv_path, 'r');
+    if ($fp === false) {
+        @unlink($file_path);
+        @unlink($csv_path);
+        $this->session->set_flashdata('pesan', '<div class="alert alert-danger">
+            <p>Tidak bisa membuka CSV hasil konversi.</p>
+        </div>');
+        redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
     }
 
-    // Clean up file
-    @unlink($file_path);
+    // Baca baris pertama untuk deteksi delimiter & buang BOM jika ada
+    $firstLine = fgets($fp);
+    if ($firstLine === false) { $firstLine = ''; }
+    // Hilangkan BOM UTF-8
+    $firstLine = preg_replace('/^\xEF\xBB\xBF/', '', $firstLine);
 
-    // Prepare flash message
+    // Hitung kandidat delimiter
+    $commaCount = substr_count($firstLine, ',');
+    $semiCount  = substr_count($firstLine, ';');
+    $delim      = ($semiCount > $commaCount) ? ';' : ',';
+
+    // Kembalikan pointer ke awal file
+    rewind($fp);
+
+    // Gunakan fgetcsv dengan delimiter terdeteksi
+    $row_number = 0;
+    while (($row = fgetcsv($fp, 0, $delim)) !== false) {
+        $row_number++;
+
+        // Skip header (baris 1)
+        if ($row_number == 1) {
+            // buang BOM di kolom pertama jika masih ada
+            if (!empty($row[0])) {
+                $row[0] = preg_replace('/^\xEF\xBB\xBF/', '', $row[0]);
+            }
+            continue;
+        }
+
+        // Skip baris kosong (kolom 0 kosong)
+        if (!isset($row[0]) || trim($row[0]) === '') {
+            continue;
+        }
+
+        // Mapping kolom: [0]=nama_peserta, [1]=jenis_kelamin, [2]=nip, [3]=pangkatgol, [4]=jabatan, [5]=unit_kerja
+        $nama_peserta  = isset($row[0]) ? trim($row[0]) : '';
+        $jenis_kelamin = isset($row[1]) ? trim($row[1]) : '';
+        $nip_raw       = isset($row[2]) ? trim($row[2]) : '';
+        $pangkatgol    = isset($row[3]) ? trim($row[3]) : '';
+        $jabatan       = isset($row[4]) ? trim($row[4]) : '';
+        $unit_kerja    = isset($row[5]) ? trim($row[5]) : '';
+
+        // Normalisasi NIP (ambil bagian sebelum "/" bila format "NIP/NIK")
+        $nip = $this->extract_nip_before_slash($nip_raw);
+
+        // Validasi wajib nama
+        if ($nama_peserta === '') {
+            $error_count++;
+            $error_messages[] = "Baris $row_number: Nama peserta wajib diisi";
+            continue;
+        }
+
+        // Jenis kelamin normalisasi: default 'L'
+        $jk = 'L';
+        if ($jenis_kelamin !== '') {
+            $jk_lower = strtolower($jenis_kelamin);
+            if (strpos($jk_lower, 'perempuan') !== false || $jk_lower === 'p') {
+                $jk = 'P';
+            } elseif (strpos($jk_lower, 'laki') !== false || $jk_lower === 'l' || $jk_lower === 'laki-laki') {
+                $jk = 'L';
+            }
+        }
+
+        // Jika NIP kosong, generate sementara
+        if ($nip === '') {
+            $nip = 'TEMP_' . preg_replace('/[^a-zA-Z0-9]/', '', $nama_peserta) . '_' . time();
+        }
+
+        // Validasi unik NIP untuk pelatihan ini (abaikan TEMP_)
+        if (strpos($nip, 'TEMP_') !== 0) {
+            $cek_nip = $this->db->get_where('tbl_peserta_pelatihan', [
+                'id_pelatihan' => $id_pelatihan,
+                'nip'          => $nip,
+                'deleted_at'   => NULL
+            ])->row();
+
+            if ($cek_nip) {
+                $error_count++;
+                $error_messages[] = "Baris $row_number: NIP $nip sudah terdaftar dalam pelatihan ini";
+                continue;
+            }
+        }
+
+        // Bersihkan jabatan
+        $jabatan = $this->bersihkan_jabatan($jabatan);
+
+        $data_insert = [
+            'id_pelatihan'  => $id_pelatihan,
+            'nama_peserta'  => $nama_peserta,
+            'jenis_kelamin' => $jk,
+            'nip'           => $nip,
+            'pangkatgol'    => $pangkatgol,
+            'jabatan'       => $jabatan,
+            'unit_kerja'    => $unit_kerja,
+            'created_at'    => date('Y-m-d H:i:s'),
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ];
+
+        if ($this->db->insert('tbl_peserta_pelatihan', $data_insert)) {
+            $success_count++;
+        } else {
+            $error_count++;
+            $db_error = $this->db->error();
+            $error_messages[] = "Baris $row_number: Gagal simpan - " . $db_error['message'];
+        }
+    }
+
+    fclose($fp);
+
+    // Bersih-bersih file
+    @unlink($file_path);
+    // Jika CSV hasil konversi berbeda file, hapus juga
+    if ($csv_path !== $file_path && file_exists($csv_path)) {
+        @unlink($csv_path);
+    }
+
+    // Flash message ringkas
     $message = "<div class='alert alert-success'>
         <p>Import selesai! Berhasil: $success_count data, Gagal: $error_count data</p>";
 
@@ -2868,12 +3426,12 @@ if (!empty($this->input->post('import_excel'))) {
             $message .= "<br>... dan " . (count($error_messages) - 10) . " error lainnya";
         }
     }
-
     $message .= "</div>";
 
     $this->session->set_flashdata('pesan', $message);
     redirect(base_url('data/listpesertapelatihan/' . $id_pelatihan));
 }
+
 }
 
 // Function untuk membersihkan dan standardisasi jabatan
@@ -2897,9 +3455,643 @@ private function bersihkan_jabatan($jabatan) {
     return $jabatan;
 }
 
+	// Code LDK Pekanbaru Materi (Latsar)
+
+public function materi()
+{
+    // Wajib login (opsional jika diperlukan di halaman ini)
+    $this->data['idbo'] = $this->session->userdata('ses_id');
+
+    // a) Ambil daftar agenda beserta ringkasan total JP dan jumlah topik
+    $sqlAgenda = "
+        SELECT 
+            a.agenda_id,
+            a.agenda_title,
+            COALESCE(COUNT(t.topic_id), 0) AS total_topics,
+            COALESCE(SUM(t.jp_sync), 0)   AS total_jp_sync,
+            COALESCE(SUM(t.jp_async), 0)  AS total_jp_async
+        FROM tbl_agenda a
+        LEFT JOIN tbl_topik t ON t.agenda_id = a.agenda_id
+        GROUP BY a.agenda_id, a.agenda_title
+        ORDER BY a.agenda_id ASC
+    ";
+    $this->data['agenda'] = $this->db->query($sqlAgenda); // result object (untuk foreach di view)
+
+    // b) Ambil semua topik dan kelompokkan per agenda_id untuk kemudahan render nested list/table
+    $sqlTopik = "
+        SELECT 
+            t.topic_id, t.agenda_id, t.topic_no, t.topic_title, t.jp_sync, t.jp_async
+        FROM tbl_topik t
+        ORDER BY t.agenda_id ASC, t.topic_no ASC
+    ";
+    $allTopics = $this->db->query($sqlTopik)->result_array();
+
+    $topics_by_agenda = [];
+    foreach ($allTopics as $row) {
+        $topics_by_agenda[$row['agenda_id']][] = $row;
+    }
+    $this->data['topics_by_agenda'] = $topics_by_agenda;
+
+    // (opsional) peta agenda_id => agenda_title bila view butuh
+    $agenda_title_map = [];
+    foreach ($this->data['agenda']->result_array() as $ag) {
+        $agenda_title_map[(int)$ag['agenda_id']] = $ag['agenda_title'];
+    }
+    $this->data['agenda_title_map'] = $agenda_title_map;
+
+    // judul & render
+    $this->data['title_web'] = 'Data Materi (Agenda & Topik)';
+    $this->load->view('header_view', $this->data);
+    $this->load->view('sidebar_view', $this->data);
+    $this->load->view('materi_pengajar/list_materi', $this->data); // gunakan pola tampilan dokumenview
+    $this->load->view('footer_view', $this->data);
+}
+
+public function prosesmateri()
+{
+    // Wajib login
+    if ($this->session->userdata('masuk_perpus') != TRUE) {
+        redirect(base_url('login'));
+    }
+
+    // Helper redirect + flash
+    $redir = function($flash = null) {
+        if (!empty($flash)) {
+            $this->session->set_flashdata('pesan', $flash);
+        }
+        redirect(base_url('data/materi'));
+        exit;
+    };
+
+    // =============== CRUD AGENDA ===============
+
+    // Tambah Agenda
+    if (!empty($this->input->post('tambah_agenda'))) {
+        $post = $this->input->post();
+        $agenda_title = trim($post['agenda_title'] ?? '');
+
+        if ($agenda_title === '') {
+            return $redir('<div class="alert alert-danger">Judul Agenda wajib diisi.</div>');
+        }
+
+        $data = [
+            'agenda_title' => htmlentities($agenda_title, ENT_QUOTES, 'UTF-8')
+        ];
+
+        $this->db->insert('tbl_agenda', $data);
+        return $redir('<div class="alert alert-success">Agenda berhasil ditambahkan!</div>');
+    }
+
+    // Edit Agenda
+    if (!empty($this->input->post('edit_agenda'))) {
+        $post      = $this->input->post();
+        $agenda_id = (int)$post['edit_agenda'];
+        $title     = trim($post['agenda_title'] ?? '');
+
+        if (!$agenda_id) {
+            return $redir('<div class="alert alert-danger">Parameter Agenda tidak lengkap.</div>');
+        }
+        $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id])->row();
+        if (!$agenda) {
+            return $redir('<div class="alert alert-danger">Agenda tidak ditemukan.</div>');
+        }
+        if ($title === '') {
+            return $redir('<div class="alert alert-danger">Judul Agenda wajib diisi.</div>');
+        }
+
+        $data_update = [
+            'agenda_title' => htmlentities($title, ENT_QUOTES, 'UTF-8')
+        ];
+        $this->db->where('agenda_id', $agenda_id)->update('tbl_agenda', $data_update);
+
+        return $redir('<div class="alert alert-success">Agenda berhasil diperbarui!</div>');
+    }
+
+    // Hapus Agenda (beserta semua topiknya)
+    if (!empty($this->input->get('delete_agenda'))) {
+        $agenda_id = (int)$this->input->get('delete_agenda');
+
+        $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id])->row();
+        if (!$agenda) {
+            return $redir('<div class="alert alert-danger">Agenda tidak ditemukan.</div>');
+        }
+
+        $this->db->trans_begin();
+        // jika tidak ada FK ON DELETE CASCADE, hapus manual topik
+        $this->db->delete('tbl_topik', ['agenda_id' => $agenda_id]);
+        $this->db->delete('tbl_agenda', ['agenda_id' => $agenda_id]);
+
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return $redir('<div class="alert alert-danger">Terjadi kesalahan saat menghapus agenda.</div>');
+        } else {
+            $this->db->trans_commit();
+            return $redir('<div class="alert alert-warning">Agenda (beserta topik) berhasil dihapus!</div>');
+        }
+    }
+
+    // =============== CRUD TOPIK ===============
+
+    // Tambah Topik
+    if (!empty($this->input->post('tambah_topik'))) {
+        $post       = $this->input->post();
+        $agenda_id  = (int)($post['agenda_id'] ?? 0);
+        $topic_no   = (int)($post['topic_no'] ?? 0);
+        $topic_title= trim($post['topic_title'] ?? '');
+        $jp_async   = isset($post['jp_async']) ? (int)$post['jp_async'] : 0;
+        $jp_sync    = isset($post['jp_sync'])  ? (int)$post['jp_sync']  : 0;
+
+        if (!$agenda_id || !$topic_no || $topic_title === '') {
+            // open kembali modal topik di view
+            $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+            return $redir('<div class="alert alert-danger">Agenda, Topic No, dan Judul Topik wajib diisi.</div>');
+        }
+
+        // Validasi agenda ada
+        $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id])->row();
+        if (!$agenda) {
+            $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+            return $redir('<div class="alert alert-danger">Agenda tidak valid.</div>');
+        }
+
+        // Cegah duplikasi topic_no dalam satu agenda
+        $dup = $this->db->get_where('tbl_topik', [
+            'agenda_id' => $agenda_id,
+            'topic_no'  => $topic_no
+        ])->row();
+        if ($dup) {
+            $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+            return $redir('<div class="alert alert-danger">Topic No sudah digunakan pada agenda ini.</div>');
+        }
+
+        $data = [
+            'agenda_id'   => $agenda_id,
+            'topic_no'    => $topic_no,
+            'topic_title' => htmlentities($topic_title, ENT_QUOTES, 'UTF-8'),
+            'jp_async'    => $jp_async,
+            'jp_sync'     => $jp_sync
+        ];
+        $this->db->insert('tbl_topik', $data);
+
+        $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+        return $redir('<div class="alert alert-success">Topik berhasil ditambahkan!</div>');
+    }
+
+    // Edit Topik
+    if (!empty($this->input->post('edit_topik'))) {
+        $post        = $this->input->post();
+        $topic_id    = (int)($post['edit_topik'] ?? 0);
+        $agenda_id   = (int)($post['agenda_id'] ?? 0);
+        $topic_no    = (int)($post['topic_no'] ?? 0);
+        $topic_title = trim($post['topic_title'] ?? '');
+        $jp_async    = isset($post['jp_async']) ? (int)$post['jp_async'] : 0;
+        $jp_sync     = isset($post['jp_sync'])  ? (int)$post['jp_sync']  : 0;
+
+        if (!$topic_id || !$agenda_id || !$topic_no || $topic_title === '') {
+            $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+            return $redir('<div class="alert alert-danger">Parameter topik tidak lengkap.</div>');
+        }
+
+        $topic = $this->db->get_where('tbl_topik', ['topic_id' => $topic_id, 'agenda_id' => $agenda_id])->row();
+        if (!$topic) {
+            $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+            return $redir('<div class="alert alert-danger">Topik tidak ditemukan.</div>');
+        }
+
+        // Pastikan tidak bentrok topic_no lain dalam agenda yang sama
+        $dup = $this->db->where('agenda_id', $agenda_id)
+                        ->where('topic_no', $topic_no)
+                        ->where('topic_id !=', $topic_id)
+                        ->get('tbl_topik')->row();
+        if ($dup) {
+            $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+            return $redir('<div class="alert alert-danger">Topic No sudah digunakan pada agenda ini.</div>');
+        }
+
+        $data_update = [
+            'topic_no'    => $topic_no,
+            'topic_title' => htmlentities($topic_title, ENT_QUOTES, 'UTF-8'),
+            'jp_async'    => $jp_async,
+            'jp_sync'     => $jp_sync
+        ];
+        $this->db->where('topic_id', $topic_id)->update('tbl_topik', $data_update);
+
+        $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+        return $redir('<div class="alert alert-success">Topik berhasil diperbarui!</div>');
+    }
+
+    // Hapus Topik
+    if (!empty($this->input->get('delete_topik'))) {
+        $topic_id = (int)$this->input->get('delete_topik');
+
+        $topic = $this->db->get_where('tbl_topik', ['topic_id' => $topic_id])->row();
+        if (!$topic) {
+            return $redir('<div class="alert alert-danger">Topik tidak ditemukan.</div>');
+        }
+
+        $this->db->delete('tbl_topik', ['topic_id' => $topic_id]);
+
+        // Re-open modal topik pada agenda bersangkutan (opsional)
+        $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => (int)$topic->agenda_id]);
+        return $redir('<div class="alert alert-warning">Topik berhasil dihapus!</div>');
+    }
+
+    // Default: jika tidak ada aksi cocok, kembali ke list
+    return $redir();
+}
+
+
+// 	public function listmateripengajar($id_pelatihan)
+// {
+//     // Pastikan user sudah login
+//     if ($this->session->userdata('masuk_perpus') != TRUE) {
+//         redirect(base_url('login'));
+//     }
+
+//     // Sanitasi dasar
+//     $id_pelatihan = (int) $id_pelatihan;
+
+//     // Cek pelatihan eksis dan belum di-soft delete
+//     $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+//         'id_pelatihan' => $id_pelatihan,
+//         'deleted_at'   => NULL
+//     ])->row();
+
+//     if (!$cek_pelatihan) {
+//         echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/kegiatanpelatihan') . '"</script>';
+//         return;
+//     }
+
+//     $this->data['idbo']       = $this->session->userdata('ses_id');
+//     $this->data['pelatihan']  = $cek_pelatihan;
+//     $this->data['id_pelatihan']= $id_pelatihan;
+
+//     // ===== Daftar Materi & Pengajar (Agenda) =====
+// 	// Catatan: pakai ag.id_pelatihan (BUKAN ag.agenda_id) untuk mem-filter per pelatihan.
+// 	$this->data['materi_pengajar'] = $this->db->query("
+// 		SELECT 
+// 			ag.agenda_id,
+// 			ag.agenda_title,
+// 			ag.main_teacher_id,
+// 			pg.nama AS main_teacher_name,
+
+// 			COUNT(DISTINCT tp.topic_id) AS jumlah_topik,
+// 			COALESCE(SUM(tp.jp_async + tp.jp_sync), 0) AS total_jp,
+// 			COUNT(DISTINCT ga.teacher_id) AS jumlah_pengajar_kelompok
+
+// 		FROM tbl_agenda ag
+// 		LEFT JOIN tbl_topik tp 
+// 			ON tp.agenda_id = ag.agenda_id
+// 			-- Jika tbl_topik ada soft delete, aktifkan baris di bawah:
+// 			-- AND tp.deleted_at IS NULL
+// 		LEFT JOIN tbl_grup_agenda ga
+// 			ON ga.agenda_id = ag.agenda_id
+// 			-- Jika tbl_grup_agenda ada soft delete, aktifkan baris di bawah:
+// 			-- AND ga.deleted_at IS NULL
+// 		LEFT JOIN tbl_pegawai pg 
+// 			ON pg.id_pegawai = ag.main_teacher_id 
+// 			AND (pg.deleted_at IS NULL OR pg.deleted_at IS NULL) -- aman jika kolomnya ada
+
+// 		WHERE ag.id_pelatihan = ?
+// 		-- Jika tbl_agenda ada soft delete, aktifkan baris di bawah:
+// 		-- AND ag.deleted_at IS NULL
+
+// 		GROUP BY 
+// 			ag.agenda_id, ag.agenda_title, ag.main_teacher_id, pg.nama
+// 		ORDER BY ag.agenda_id ASC
+// 	", [$id_pelatihan])->result();
+
+
+//     // (Opsional) Daftar pegawai untuk assignment pengajar di UI
+//     $this->data['pegawai'] = $this->db
+//         ->where('deleted_at', NULL)
+//         ->order_by('nama', 'ASC')
+//         ->get('tbl_pegawai')
+//         ->result();
+
+//     // Title halaman
+// 	$judul = !empty($cek_pelatihan->nama_pelatihan) ? $cek_pelatihan->nama_pelatihan
+//        : (!empty($cek_pelatihan->nama_kegiatan) ? $cek_pelatihan->nama_kegiatan : 'Pelatihan');
+// 	$this->data['title_web'] = 'Materi & Pengajar - ' . htmlentities($judul);
+
+
+//     // Render view
+//     $this->load->view('header_view',  $this->data);
+//     $this->load->view('sidebar_view', $this->data);
+//     $this->load->view('materi_pengajar/list_materi_pengajar', $this->data);
+//     $this->load->view('footer_view',  $this->data);
+// }
+
+// public function prosesmateripengajar()
+// {
+//     // Wajib login
+//     if ($this->session->userdata('masuk_perpus') != TRUE) {
+//         redirect(base_url('login'));
+//     }
+
+//     // Helper kecil untuk redirect aman
+//     $redir = function($id_pelatihan, $flash = null) {
+//         if (!empty($flash)) {
+//             $this->session->set_flashdata('pesan', $flash);
+//         }
+//         redirect(base_url('data/listmateripengajar/' . (int)$id_pelatihan));
+//         exit;
+//     };
+
+//     // =========================
+//     // Tambah Agenda
+//     // =========================
+//     if (!empty($this->input->post('tambah_agenda'))) {
+//         $post = $this->input->post();
+
+//         if (empty($post['id_pelatihan']) || empty($post['agenda_title'])) {
+//             return $redir($post['id_pelatihan'] ?? 0, '<div class="alert alert-danger">ID Pelatihan dan Judul Agenda wajib diisi.</div>');
+//         }
+
+//         $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+//             'id_pelatihan' => (int)$post['id_pelatihan'],
+//             'deleted_at'   => NULL
+//         ])->row();
+
+//         if (!$cek_pelatihan) {
+//             $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Data pelatihan tidak ditemukan.</div>');
+//             redirect(base_url('data/kegiatanpelatihan'));
+//             return;
+//         }
+
+//         $data = [
+//             'id_pelatihan'    => (int)$post['id_pelatihan'],
+//             'agenda_title'    => htmlentities(trim($post['agenda_title'])),
+//             'main_teacher_id' => !empty($post['main_teacher_id']) ? (int)$post['main_teacher_id'] : NULL,
+//         ];
+
+//         $this->db->insert('tbl_agenda', $data);
+//         return $redir($post['id_pelatihan'], '<div class="alert alert-success">Agenda berhasil ditambahkan!</div>');
+//     }
+
+//     // =========================
+//     // Edit Agenda
+//     // =========================
+//     if (!empty($this->input->post('edit_agenda'))) {
+//         $post = $this->input->post();
+
+//         $agenda_id    = (int)$post['edit_agenda'];
+//         $id_pelatihan = (int)$post['id_pelatihan'];
+
+//         if (!$agenda_id || !$id_pelatihan) {
+//             $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Parameter tidak lengkap.</div>');
+//             redirect(base_url('data/kegiatanpelatihan'));
+//             return;
+//         }
+
+//         $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
+//             'id_pelatihan' => $id_pelatihan,
+//             'deleted_at'   => NULL
+//         ])->row();
+//         if (!$cek_pelatihan) {
+//             $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Data pelatihan tidak ditemukan.</div>');
+//             redirect(base_url('data/kegiatanpelatihan'));
+//             return;
+//         }
+
+//         $agenda = $this->db->get_where('tbl_agenda', [
+//             'agenda_id'    => $agenda_id,
+//             'id_pelatihan' => $id_pelatihan
+//         ])->row();
+//         if (!$agenda) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak ditemukan.</div>');
+//         }
+
+//         if (empty($post['agenda_title'])) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Judul Agenda wajib diisi.</div>');
+//         }
+
+//         $data_update = [
+//             'agenda_title'    => htmlentities(trim($post['agenda_title'])),
+//             'main_teacher_id' => !empty($post['main_teacher_id']) ? (int)$post['main_teacher_id'] : NULL,
+//         ];
+
+//         $this->db->where('agenda_id', $agenda_id);
+//         $this->db->update('tbl_agenda', $data_update);
+
+//         return $redir($id_pelatihan, '<div class="alert alert-success">Agenda berhasil diperbarui!</div>');
+//     }
+
+//     // =========================
+//     // Hapus Agenda (beserta turunan)
+//     // =========================
+//     if (!empty($this->input->get('delete_agenda'))) {
+//         $agenda_id    = (int)$this->input->get('delete_agenda');
+//         $id_pelatihan = (int)$this->input->get('id_pelatihan');
+
+//         $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id])->row();
+//         if (!$agenda) {
+//             $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Agenda tidak ditemukan.</div>');
+//             redirect(base_url('data/kegiatanpelatihan'));
+//             return;
+//         }
+//         if (!$id_pelatihan) $id_pelatihan = (int)$agenda->id_pelatihan;
+
+//         $this->db->trans_begin();
+//         $this->db->delete('tbl_topik',       ['agenda_id' => $agenda_id]);
+//         $this->db->delete('tbl_grup_agenda', ['agenda_id' => $agenda_id]);
+//         $this->db->delete('tbl_agenda',      ['agenda_id' => $agenda_id]);
+
+//         if ($this->db->trans_status() === FALSE) {
+//             $this->db->trans_rollback();
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Terjadi kesalahan saat menghapus agenda.</div>');
+//         } else {
+//             $this->db->trans_commit();
+//             return $redir($id_pelatihan, '<div class="alert alert-warning">Agenda berhasil dihapus!</div>');
+//         }
+//     }
+
+//     // ======================================================================
+//     // ========================  CRUD TOPIK  =================================
+//     // ======================================================================
+
+//     // Tambah Topik
+//     if (!empty($this->input->post('tambah_topik'))) {
+//         $post        = $this->input->post();
+//         $agenda_id   = (int)$post['agenda_id'];
+//         $id_pelatihan= (int)$post['id_pelatihan'];
+
+//         if (!$agenda_id || !$id_pelatihan || empty($post['topic_no']) || empty($post['topic_title'])) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda, Topic No, dan Judul Topik wajib diisi.</div>');
+//         }
+
+//         // Validasi agenda milik pelatihan
+//         $agenda = $this->db->get_where('tbl_agenda', [
+//             'agenda_id'    => $agenda_id,
+//             'id_pelatihan' => $id_pelatihan
+//         ])->row();
+//         if (!$agenda) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
+//         }
+
+//         $data = [
+//             'agenda_id'   => $agenda_id,
+//             'topic_no'    => (int)$post['topic_no'],
+//             'topic_title' => htmlentities(trim($post['topic_title'])),
+//             'jp_async'    => isset($post['jp_async']) ? (int)$post['jp_async'] : 0,
+//             'jp_sync'     => isset($post['jp_sync'])  ? (int)$post['jp_sync']  : 0,
+//         ];
+//         $this->db->insert('tbl_topik', $data);
+
+//         // opsional: buka kembali modal topik
+//         $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+
+//         return $redir($id_pelatihan, '<div class="alert alert-success">Topik berhasil ditambahkan!</div>');
+//     }
+
+//     // Edit Topik
+//     if (!empty($this->input->post('edit_topik'))) {
+//         $post         = $this->input->post();
+//         $topic_id     = (int)$post['edit_topik'];
+//         $agenda_id    = (int)$post['agenda_id'];
+//         $id_pelatihan = (int)$post['id_pelatihan'];
+
+//         if (!$topic_id || !$agenda_id || !$id_pelatihan || empty($post['topic_no']) || empty($post['topic_title'])) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Parameter topik tidak lengkap.</div>');
+//         }
+
+//         // Validasi kepemilikan topik -> agenda -> pelatihan
+//         $topic = $this->db->get_where('tbl_topik', ['topic_id' => $topic_id, 'agenda_id' => $agenda_id])->row();
+//         if (!$topic) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Topik tidak ditemukan.</div>');
+//         }
+
+//         $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id, 'id_pelatihan' => $id_pelatihan])->row();
+//         if (!$agenda) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
+//         }
+
+//         $data_update = [
+//             'topic_no'    => (int)$post['topic_no'],
+//             'topic_title' => htmlentities(trim($post['topic_title'])),
+//             'jp_async'    => isset($post['jp_async']) ? (int)$post['jp_async'] : 0,
+//             'jp_sync'     => isset($post['jp_sync'])  ? (int)$post['jp_sync']  : 0,
+//         ];
+//         $this->db->where('topic_id', $topic_id)->update('tbl_topik', $data_update);
+
+//         $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
+//         return $redir($id_pelatihan, '<div class="alert alert-success">Topik berhasil diperbarui!</div>');
+//     }
+
+//     // Hapus Topik
+//     if (!empty($this->input->get('delete_topik'))) {
+//         $topic_id     = (int)$this->input->get('delete_topik');
+//         $agenda_id    = (int)$this->input->get('agenda_id');
+//         $id_pelatihan = (int)$this->input->get('id_pelatihan');
+
+//         $topic = $this->db->get_where('tbl_topik', ['topic_id' => $topic_id])->row();
+//         if (!$topic) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Topik tidak ditemukan.</div>');
+//         }
+
+//         // Pastikan topik sesuai agenda & pelatihan
+//         $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $topic->agenda_id])->row();
+//         if (!$agenda || ($agenda_id && $agenda->agenda_id != $agenda_id)) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda topik tidak valid.</div>');
+//         }
+
+//         $this->db->delete('tbl_topik', ['topic_id' => $topic_id]);
+
+//         $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => (int)$agenda->agenda_id]);
+//         return $redir(($id_pelatihan ?: (int)$agenda->id_pelatihan), '<div class="alert alert-warning">Topik berhasil dihapus!</div>');
+//     }
+
+//     // ======================================================================
+//     // ====================  CRUD GRUP PENGAJAR  =============================
+//     // ======================================================================
+
+//     // Tambah Grup
+//     if (!empty($this->input->post('tambah_grup'))) {
+//         $post         = $this->input->post();
+//         $agenda_id    = (int)$post['agenda_id'];
+//         $id_pelatihan = (int)$post['id_pelatihan'];
+
+//         if (!$agenda_id || !$id_pelatihan || empty($post['group_no']) || empty($post['teacher_id'])) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda, Nomor Grup, dan Teacher wajib diisi.</div>');
+//         }
+
+//         // Validasi agenda milik pelatihan
+//         $agenda = $this->db->get_where('tbl_agenda', [
+//             'agenda_id'    => $agenda_id,
+//             'id_pelatihan' => $id_pelatihan
+//         ])->row();
+//         if (!$agenda) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
+//         }
+
+//         $data = [
+//             'agenda_id' => $agenda_id,
+//             'group_no'  => (int)$post['group_no'],
+//             'teacher_id'=> (int)$post['teacher_id'],
+//         ];
+//         $this->db->insert('tbl_grup_agenda', $data);
+
+//         $this->session->set_flashdata('open_modal', ['type' => 'grup', 'agenda_id' => $agenda_id]);
+//         return $redir($id_pelatihan, '<div class="alert alert-success">Grup pengajar berhasil ditambahkan!</div>');
+//     }
+
+//     // Edit Grup
+//     if (!empty($this->input->post('edit_grup'))) {
+//         $post            = $this->input->post();
+//         $agenda_group_id = (int)$post['edit_grup'];
+//         $agenda_id       = (int)$post['agenda_id'];
+//         $id_pelatihan    = (int)$post['id_pelatihan'];
+
+//         if (!$agenda_group_id || !$agenda_id || !$id_pelatihan || empty($post['group_no']) || empty($post['teacher_id'])) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Parameter grup tidak lengkap.</div>');
+//         }
+
+//         $gr = $this->db->get_where('tbl_grup_agenda', ['agenda_group_id' => $agenda_group_id, 'agenda_id' => $agenda_id])->row();
+//         if (!$gr) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Data grup tidak ditemukan.</div>');
+//         }
+
+//         $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id, 'id_pelatihan' => $id_pelatihan])->row();
+//         if (!$agenda) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
+//         }
+
+//         $data_update = [
+//             'group_no'  => (int)$post['group_no'],
+//             'teacher_id'=> (int)$post['teacher_id'],
+//         ];
+//         $this->db->where('agenda_group_id', $agenda_group_id)->update('tbl_grup_agenda', $data_update);
+
+//         $this->session->set_flashdata('open_modal', ['type' => 'grup', 'agenda_id' => $agenda_id]);
+//         return $redir($id_pelatihan, '<div class="alert alert-success">Grup pengajar berhasil diperbarui!</div>');
+//     }
+
+//     // Hapus Grup
+//     if (!empty($this->input->get('delete_grup_agenda'))) {
+//         $agenda_group_id = (int)$this->input->get('delete_grup_agenda');
+//         $agenda_id       = (int)$this->input->get('agenda_id');
+//         $id_pelatihan    = (int)$this->input->get('id_pelatihan');
+
+//         $gr = $this->db->get_where('tbl_grup_agenda', ['agenda_group_id' => $agenda_group_id])->row();
+//         if (!$gr) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Data grup tidak ditemukan.</div>');
+//         }
+
+//         // validasi agenda
+//         if ($agenda_id && $gr->agenda_id != $agenda_id) {
+//             return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda grup tidak valid.</div>');
+//         }
+
+//         $this->db->delete('tbl_grup_agenda', ['agenda_group_id' => $agenda_group_id]);
+
+//         $this->session->set_flashdata('open_modal', ['type' => 'grup', 'agenda_id' => (int)$gr->agenda_id]);
+//         return $redir(($id_pelatihan ?: (int)$this->db->get_where('tbl_agenda', ['agenda_id' => $gr->agenda_id])->row()->id_pelatihan), '<div class="alert alert-warning">Grup pengajar berhasil dihapus!</div>');
+//     }
+// }
+
 	// Code LDK Pekanbaru Materi dan Pengajar (Latsar)
 
-		public function materipengajar()
+		public function pengajar()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
     	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE id_jenis_pelatihan = 3 and deleted_at IS NULL ORDER BY id_pelatihan DESC");
@@ -2910,394 +4102,377 @@ private function bersihkan_jabatan($jabatan) {
         $this->load->view('footer_view',$this->data);
 	}
 
-
-	public function listmateripengajar($id_pelatihan)
-{
-    // Pastikan user sudah login
-    if ($this->session->userdata('masuk_perpus') != TRUE) {
-        redirect(base_url('login'));
-    }
-
-    // Sanitasi dasar
-    $id_pelatihan = (int) $id_pelatihan;
-
-    // Cek pelatihan eksis dan belum di-soft delete
-    $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
-        'id_pelatihan' => $id_pelatihan,
-        'deleted_at'   => NULL
-    ])->row();
-
-    if (!$cek_pelatihan) {
-        echo '<script>alert("Data pelatihan tidak ditemukan."); window.location="' . base_url('data/kegiatanpelatihan') . '"</script>';
-        return;
-    }
-
-    $this->data['idbo']       = $this->session->userdata('ses_id');
-    $this->data['pelatihan']  = $cek_pelatihan;
-    $this->data['id_pelatihan']= $id_pelatihan;
-
-    // ===== Daftar Materi & Pengajar (Agenda) =====
-	// Catatan: pakai ag.id_pelatihan (BUKAN ag.agenda_id) untuk mem-filter per pelatihan.
-	$this->data['materi_pengajar'] = $this->db->query("
-		SELECT 
-			ag.agenda_id,
-			ag.agenda_title,
-			ag.main_teacher_id,
-			pg.nama AS main_teacher_name,
-
-			COUNT(DISTINCT tp.topic_id) AS jumlah_topik,
-			COALESCE(SUM(tp.jp_async + tp.jp_sync), 0) AS total_jp,
-			COUNT(DISTINCT ga.teacher_id) AS jumlah_pengajar_kelompok
-
-		FROM tbl_agenda ag
-		LEFT JOIN tbl_topik tp 
-			ON tp.agenda_id = ag.agenda_id
-			-- Jika tbl_topik ada soft delete, aktifkan baris di bawah:
-			-- AND tp.deleted_at IS NULL
-		LEFT JOIN tbl_grup_agenda ga
-			ON ga.agenda_id = ag.agenda_id
-			-- Jika tbl_grup_agenda ada soft delete, aktifkan baris di bawah:
-			-- AND ga.deleted_at IS NULL
-		LEFT JOIN tbl_pegawai pg 
-			ON pg.id_pegawai = ag.main_teacher_id 
-			AND (pg.deleted_at IS NULL OR pg.deleted_at IS NULL) -- aman jika kolomnya ada
-
-		WHERE ag.id_pelatihan = ?
-		-- Jika tbl_agenda ada soft delete, aktifkan baris di bawah:
-		-- AND ag.deleted_at IS NULL
-
-		GROUP BY 
-			ag.agenda_id, ag.agenda_title, ag.main_teacher_id, pg.nama
-		ORDER BY ag.agenda_id ASC
-	", [$id_pelatihan])->result();
-
-
-    // (Opsional) Daftar pegawai untuk assignment pengajar di UI
-    $this->data['pegawai'] = $this->db
-        ->where('deleted_at', NULL)
-        ->order_by('nama', 'ASC')
-        ->get('tbl_pegawai')
-        ->result();
-
-    // Title halaman
-	$judul = !empty($cek_pelatihan->nama_pelatihan) ? $cek_pelatihan->nama_pelatihan
-       : (!empty($cek_pelatihan->nama_kegiatan) ? $cek_pelatihan->nama_kegiatan : 'Pelatihan');
-	$this->data['title_web'] = 'Materi & Pengajar - ' . htmlentities($judul);
-
-
-    // Render view
-    $this->load->view('header_view',  $this->data);
-    $this->load->view('sidebar_view', $this->data);
-    $this->load->view('materi_pengajar/list_materi_pengajar', $this->data);
-    $this->load->view('footer_view',  $this->data);
-}
-
-public function prosesmateripengajar()
+	public function listpengajar($id_pelatihan = null)
 {
     // Wajib login
     if ($this->session->userdata('masuk_perpus') != TRUE) {
         redirect(base_url('login'));
     }
 
-    // Helper kecil untuk redirect aman
-    $redir = function($id_pelatihan, $flash = null) {
+    // Ambil id_pelatihan dari parameter / URI seg3 bila null
+    if (!$id_pelatihan) {
+        $id_pelatihan = (int) $this->uri->segment(3);
+    }
+    $id_pelatihan = (int)$id_pelatihan;
+
+    // Validasi pelatihan
+    $pel = $this->db->get_where('tbl_pelatihan', [
+        'id_pelatihan' => $id_pelatihan,
+        'deleted_at'   => NULL
+    ])->row_array();
+
+    if (!$pel) {
+        $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Data pelatihan tidak ditemukan.</div>');
+        redirect(base_url('data/pengajar')); // kembali ke daftar pelatihan
+        return;
+    }
+
+    $this->data['idbo'] = $this->session->userdata('ses_id');
+    $this->data['pelatihan'] = $pel;
+
+    // a) Master agenda + ringkasan JP dan jumlah topik
+    $sqlAgenda = "
+        SELECT 
+            a.agenda_id,
+            a.agenda_title,
+            COALESCE(COUNT(t.topic_id), 0) AS total_topics,
+            COALESCE(SUM(t.jp_sync), 0)   AS total_jp_sync,
+            COALESCE(SUM(t.jp_async), 0)  AS total_jp_async
+        FROM tbl_agenda a
+        LEFT JOIN tbl_topik t ON t.agenda_id = a.agenda_id
+        GROUP BY a.agenda_id, a.agenda_title
+        ORDER BY a.agenda_id ASC
+    ";
+    $this->data['agenda'] = $this->db->query($sqlAgenda); // result()
+
+    // b) Semua topik, dikelompokkan per agenda
+    $sqlTopik = "
+        SELECT topic_id, agenda_id, topic_no, topic_title, jp_sync, jp_async
+        FROM tbl_topik
+        ORDER BY agenda_id ASC, topic_no ASC
+    ";
+    $topics = $this->db->query($sqlTopik)->result_array();
+    $topics_by_agenda = [];
+    foreach ($topics as $tp) {
+        $topics_by_agenda[(int)$tp['agenda_id']][] = $tp;
+    }
+    $this->data['topics_by_agenda'] = $topics_by_agenda;
+
+    // c) Pemetaan pelatihan-agenda (status main teacher per agenda untuk pelatihan ini)
+    $sqlPA = "
+        SELECT pa.pelatihan_agenda_id, pa.agenda_id, pa.main_teacher_id,
+               peg.nama AS main_teacher_name
+        FROM tbl_pelatihan_agenda pa
+        LEFT JOIN tbl_pegawai peg ON peg.id_pegawai = pa.main_teacher_id
+        WHERE pa.id_pelatihan = ?
+    ";
+    $pa_rows = $this->db->query($sqlPA, [$id_pelatihan])->result_array();
+    $pa_by_agenda = [];
+    $pa_ids = [];
+    foreach ($pa_rows as $r) {
+        $pa_by_agenda[(int)$r['agenda_id']] = $r;
+        $pa_ids[] = (int)$r['pelatihan_agenda_id'];
+    }
+    $this->data['pa_by_agenda'] = $pa_by_agenda;
+
+    // d) Grup pengajar per pelatihan-agenda
+    $groups_by_agenda = [];
+    if (!empty($pa_ids)) {
+        $in = implode(',', array_map('intval', $pa_ids));
+        $sqlGroups = "
+            SELECT ga.agenda_group_id, ga.pelatihan_agenda_id, ga.group_no, ga.teacher_id,
+                   pa.agenda_id, peg.nama AS teacher_name
+            FROM tbl_grup_agenda ga
+            JOIN tbl_pelatihan_agenda pa ON pa.pelatihan_agenda_id = ga.pelatihan_agenda_id
+            LEFT JOIN tbl_pegawai peg ON peg.id_pegawai = ga.teacher_id
+            WHERE ga.pelatihan_agenda_id IN ($in)
+            ORDER BY pa.agenda_id ASC, ga.group_no ASC
+        ";
+        $gr = $this->db->query($sqlGroups)->result_array();
+        foreach ($gr as $row) {
+            $aid = (int)$row['agenda_id'];
+            $groups_by_agenda[$aid][] = $row;
+        }
+    }
+    $this->data['groups_by_agenda'] = $groups_by_agenda;
+
+    // e) Daftar pegawai untuk dropdown pemilihan pengajar
+    $this->data['pegawai'] = $this->db->query("
+        SELECT id_pegawai, nama FROM tbl_pegawai ORDER BY nama ASC
+    ")->result_array();
+
+    // untuk reopen UI
+    $this->data['open_modal'] = $this->session->flashdata('open_modal');
+
+    // judul & render
+    $this->data['title_web'] = 'Data Pengajar Pelatihan Dasar CPNS';
+    $this->load->view('header_view', $this->data);
+    $this->load->view('sidebar_view', $this->data);
+    // View pakai pola dokumenview: baris agenda -> collapse topik -> area aksi (set main teacher, tambah grup)
+    $this->load->view('materi_pengajar/list_pengajar', $this->data);
+    $this->load->view('footer_view', $this->data);
+}
+
+
+public function prosespengajar()
+{
+    // Wajib login
+    if ($this->session->userdata('masuk_perpus') != TRUE) {
+        redirect(base_url('login'));
+    }
+
+    // Helper redirect ke halaman listpengajar/id_pelatihan
+    $redir = function($id_pelatihan, $flash = null, $open = null) {
         if (!empty($flash)) {
             $this->session->set_flashdata('pesan', $flash);
         }
-        redirect(base_url('data/listmateripengajar/' . (int)$id_pelatihan));
+        if (!empty($open)) {
+            $this->session->set_flashdata('open_modal', $open);
+        }
+        redirect(base_url('data/listpengajar/' . (int)$id_pelatihan));
         exit;
     };
 
-    // =========================
-    // Tambah Agenda
-    // =========================
-    if (!empty($this->input->post('tambah_agenda'))) {
-        $post = $this->input->post();
+    // Helper: ambil atau buat tbl_pelatihan_agenda, return pelatihan_agenda_id
+    $get_or_create_pa = function($id_pelatihan, $agenda_id) {
+        $row = $this->db->get_where('tbl_pelatihan_agenda', [
+            'id_pelatihan' => (int)$id_pelatihan,
+            'agenda_id'    => (int)$agenda_id
+        ])->row_array();
 
-        if (empty($post['id_pelatihan']) || empty($post['agenda_title'])) {
-            return $redir($post['id_pelatihan'] ?? 0, '<div class="alert alert-danger">ID Pelatihan dan Judul Agenda wajib diisi.</div>');
-        }
+        if ($row) return (int)$row['pelatihan_agenda_id'];
 
-        $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
-            'id_pelatihan' => (int)$post['id_pelatihan'],
+        $this->db->insert('tbl_pelatihan_agenda', [
+            'id_pelatihan'    => (int)$id_pelatihan,
+            'agenda_id'       => (int)$agenda_id,
+            'main_teacher_id' => NULL
+        ]);
+        return (int)$this->db->insert_id();
+    };
+
+    // =========================
+    // Validasi dasar entitas
+    // =========================
+    $require_pel = function($id_pel) {
+        $pel = $this->db->get_where('tbl_pelatihan', [
+            'id_pelatihan' => (int)$id_pel,
             'deleted_at'   => NULL
-        ])->row();
+        ])->row_array();
+        return $pel ? true : false;
+    };
+    $require_agenda = function($agenda_id) {
+        return $this->db->get_where('tbl_agenda', ['agenda_id' => (int)$agenda_id])->row_array() ? true : false;
+    };
+    $require_pegawai = function($id_pegawai) {
+        if (!$id_pegawai) return true; // boleh NULL utk clear main teacher
+        return $this->db->get_where('tbl_pegawai', ['id_pegawai' => (int)$id_pegawai])->row_array() ? true : false;
+    };
 
-        if (!$cek_pelatihan) {
-            $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Data pelatihan tidak ditemukan.</div>');
-            redirect(base_url('data/kegiatanpelatihan'));
-            return;
+    // =========================
+    // Set / Update Main Teacher
+    // =========================
+    if (!empty($this->input->post('set_main_teacher'))) {
+        $post           = $this->input->post();
+        $id_pelatihan   = (int)($post['id_pelatihan'] ?? 0);
+        $agenda_id      = (int)($post['agenda_id'] ?? 0);
+        $main_teacher_id= (int)($post['main_teacher_id'] ?? 0);
+
+        if (!$id_pelatihan || !$agenda_id) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Parameter tidak lengkap (pelatihan/agenda).</div>');
+        }
+        if (!$require_pel($id_pelatihan) || !$require_agenda($agenda_id)) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Pelatihan/Agenda tidak valid.</div>');
+        }
+        if (!$require_pegawai($main_teacher_id)) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Main teacher tidak ditemukan.</div>', ['type'=>'main','agenda_id'=>$agenda_id]);
         }
 
-        $data = [
-            'id_pelatihan'    => (int)$post['id_pelatihan'],
-            'agenda_title'    => htmlentities(trim($post['agenda_title'])),
-            'main_teacher_id' => !empty($post['main_teacher_id']) ? (int)$post['main_teacher_id'] : NULL,
-        ];
+        // Upsert: ada -> update, tidak ada -> insert
+        $pa_id = $get_or_create_pa($id_pelatihan, $agenda_id);
+        $this->db->where('pelatihan_agenda_id', $pa_id)
+                 ->update('tbl_pelatihan_agenda', ['main_teacher_id' => ($main_teacher_id ?: NULL)]);
 
-        $this->db->insert('tbl_agenda', $data);
-        return $redir($post['id_pelatihan'], '<div class="alert alert-success">Agenda berhasil ditambahkan!</div>');
+        return $redir($id_pelatihan, '<div class="alert alert-success">Main teacher berhasil disimpan.</div>', ['type'=>'main','agenda_id'=>$agenda_id]);
     }
 
-    // =========================
-    // Edit Agenda
-    // =========================
-    if (!empty($this->input->post('edit_agenda'))) {
-        $post = $this->input->post();
-
-        $agenda_id    = (int)$post['edit_agenda'];
-        $id_pelatihan = (int)$post['id_pelatihan'];
-
-        if (!$agenda_id || !$id_pelatihan) {
-            $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Parameter tidak lengkap.</div>');
-            redirect(base_url('data/kegiatanpelatihan'));
-            return;
-        }
-
-        $cek_pelatihan = $this->db->get_where('tbl_pelatihan', [
-            'id_pelatihan' => $id_pelatihan,
-            'deleted_at'   => NULL
-        ])->row();
-        if (!$cek_pelatihan) {
-            $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Data pelatihan tidak ditemukan.</div>');
-            redirect(base_url('data/kegiatanpelatihan'));
-            return;
-        }
-
-        $agenda = $this->db->get_where('tbl_agenda', [
-            'agenda_id'    => $agenda_id,
-            'id_pelatihan' => $id_pelatihan
-        ])->row();
-        if (!$agenda) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak ditemukan.</div>');
-        }
-
-        if (empty($post['agenda_title'])) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Judul Agenda wajib diisi.</div>');
-        }
-
-        $data_update = [
-            'agenda_title'    => htmlentities(trim($post['agenda_title'])),
-            'main_teacher_id' => !empty($post['main_teacher_id']) ? (int)$post['main_teacher_id'] : NULL,
-        ];
-
-        $this->db->where('agenda_id', $agenda_id);
-        $this->db->update('tbl_agenda', $data_update);
-
-        return $redir($id_pelatihan, '<div class="alert alert-success">Agenda berhasil diperbarui!</div>');
-    }
-
-    // =========================
-    // Hapus Agenda (beserta turunan)
-    // =========================
-    if (!empty($this->input->get('delete_agenda'))) {
-        $agenda_id    = (int)$this->input->get('delete_agenda');
+    // Hapus main teacher (set NULL); bila tanpa grup -> opsional hapus baris pa
+    if (!empty($this->input->get('clear_main_teacher'))) {
         $id_pelatihan = (int)$this->input->get('id_pelatihan');
+        $agenda_id    = (int)$this->input->get('agenda_id');
 
-        $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id])->row();
-        if (!$agenda) {
-            $this->session->set_flashdata('pesan', '<div class="alert alert-danger">Agenda tidak ditemukan.</div>');
-            redirect(base_url('data/kegiatanpelatihan'));
-            return;
+        if (!$id_pelatihan || !$agenda_id) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Parameter tidak lengkap.</div>');
         }
-        if (!$id_pelatihan) $id_pelatihan = (int)$agenda->id_pelatihan;
+        $pa = $this->db->get_where('tbl_pelatihan_agenda', [
+            'id_pelatihan' => $id_pelatihan, 'agenda_id' => $agenda_id
+        ])->row_array();
+        if (!$pa) {
+            return $redir($id_pelatihan, '<div class="alert alert-warning">Penugasan belum ada.</div>');
+        }
+
+        $this->db->where('pelatihan_agenda_id', (int)$pa['pelatihan_agenda_id'])
+                 ->update('tbl_pelatihan_agenda', ['main_teacher_id' => NULL]);
+
+        // Cek orphan: jika tidak ada grup & main_teacher NULL -> hapus pa (opsional)
+        $has_group = $this->db->get_where('tbl_grup_agenda', [
+            'pelatihan_agenda_id' => (int)$pa['pelatihan_agenda_id']
+        ])->row_array();
+
+        if (!$has_group) {
+            $this->db->delete('tbl_pelatihan_agenda', ['pelatihan_agenda_id' => (int)$pa['pelatihan_agenda_id']]);
+        }
+
+        return $redir($id_pelatihan, '<div class="alert alert-warning">Main teacher dihapus.</div>', ['type'=>'main','agenda_id'=>$agenda_id]);
+    }
+
+    // =========================
+    // Tambah Grup Pengajar
+    // =========================
+    if (!empty($this->input->post('tambah_grup'))) {
+        $post         = $this->input->post();
+        $id_pelatihan = (int)($post['id_pelatihan'] ?? 0);
+        $agenda_id    = (int)($post['agenda_id'] ?? 0);
+        $group_no     = (int)($post['group_no'] ?? 0);
+        $teacher_id   = (int)($post['teacher_id'] ?? 0);
+
+        if (!$id_pelatihan || !$agenda_id || !$group_no || !$teacher_id) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Pelatihan, Agenda, No Grup, dan Teacher wajib diisi.</div>', ['type'=>'grup','agenda_id'=>$agenda_id]);
+        }
+        if (!$require_pel($id_pelatihan) || !$require_agenda($agenda_id) || !$require_pegawai($teacher_id)) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Entitas tidak valid.</div>', ['type'=>'grup','agenda_id'=>$agenda_id]);
+        }
 
         $this->db->trans_begin();
-        $this->db->delete('tbl_topik',       ['agenda_id' => $agenda_id]);
-        $this->db->delete('tbl_grup_agenda', ['agenda_id' => $agenda_id]);
-        $this->db->delete('tbl_agenda',      ['agenda_id' => $agenda_id]);
+
+        // Pastikan pa ada
+        $pa_id = $get_or_create_pa($id_pelatihan, $agenda_id);
+
+        // Cek duplikasi group_no pada pa yang sama
+        $dup = $this->db->get_where('tbl_grup_agenda', [
+            'pelatihan_agenda_id' => $pa_id,
+            'group_no'            => $group_no
+        ])->row_array();
+        if ($dup) {
+            $this->db->trans_rollback();
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Nomor grup sudah ada untuk agenda ini.</div>', ['type'=>'grup','agenda_id'=>$agenda_id]);
+        }
+
+        $this->db->insert('tbl_grup_agenda', [
+            'pelatihan_agenda_id' => $pa_id,
+            'group_no'            => $group_no,
+            'teacher_id'          => $teacher_id
+        ]);
 
         if ($this->db->trans_status() === FALSE) {
             $this->db->trans_rollback();
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Terjadi kesalahan saat menghapus agenda.</div>');
-        } else {
-            $this->db->trans_commit();
-            return $redir($id_pelatihan, '<div class="alert alert-warning">Agenda berhasil dihapus!</div>');
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Gagal menambahkan grup.</div>', ['type'=>'grup','agenda_id'=>$agenda_id]);
         }
+        $this->db->trans_commit();
+
+        return $redir($id_pelatihan, '<div class="alert alert-success">Grup pengajar berhasil ditambahkan.</div>', ['type'=>'grup','agenda_id'=>$agenda_id]);
     }
 
-    // ======================================================================
-    // ========================  CRUD TOPIK  =================================
-    // ======================================================================
-
-    // Tambah Topik
-    if (!empty($this->input->post('tambah_topik'))) {
-        $post        = $this->input->post();
-        $agenda_id   = (int)$post['agenda_id'];
-        $id_pelatihan= (int)$post['id_pelatihan'];
-
-        if (!$agenda_id || !$id_pelatihan || empty($post['topic_no']) || empty($post['topic_title'])) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda, Topic No, dan Judul Topik wajib diisi.</div>');
-        }
-
-        // Validasi agenda milik pelatihan
-        $agenda = $this->db->get_where('tbl_agenda', [
-            'agenda_id'    => $agenda_id,
-            'id_pelatihan' => $id_pelatihan
-        ])->row();
-        if (!$agenda) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
-        }
-
-        $data = [
-            'agenda_id'   => $agenda_id,
-            'topic_no'    => (int)$post['topic_no'],
-            'topic_title' => htmlentities(trim($post['topic_title'])),
-            'jp_async'    => isset($post['jp_async']) ? (int)$post['jp_async'] : 0,
-            'jp_sync'     => isset($post['jp_sync'])  ? (int)$post['jp_sync']  : 0,
-        ];
-        $this->db->insert('tbl_topik', $data);
-
-        // opsional: buka kembali modal topik
-        $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
-
-        return $redir($id_pelatihan, '<div class="alert alert-success">Topik berhasil ditambahkan!</div>');
-    }
-
-    // Edit Topik
-    if (!empty($this->input->post('edit_topik'))) {
-        $post         = $this->input->post();
-        $topic_id     = (int)$post['edit_topik'];
-        $agenda_id    = (int)$post['agenda_id'];
-        $id_pelatihan = (int)$post['id_pelatihan'];
-
-        if (!$topic_id || !$agenda_id || !$id_pelatihan || empty($post['topic_no']) || empty($post['topic_title'])) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Parameter topik tidak lengkap.</div>');
-        }
-
-        // Validasi kepemilikan topik -> agenda -> pelatihan
-        $topic = $this->db->get_where('tbl_topik', ['topic_id' => $topic_id, 'agenda_id' => $agenda_id])->row();
-        if (!$topic) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Topik tidak ditemukan.</div>');
-        }
-
-        $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id, 'id_pelatihan' => $id_pelatihan])->row();
-        if (!$agenda) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
-        }
-
-        $data_update = [
-            'topic_no'    => (int)$post['topic_no'],
-            'topic_title' => htmlentities(trim($post['topic_title'])),
-            'jp_async'    => isset($post['jp_async']) ? (int)$post['jp_async'] : 0,
-            'jp_sync'     => isset($post['jp_sync'])  ? (int)$post['jp_sync']  : 0,
-        ];
-        $this->db->where('topic_id', $topic_id)->update('tbl_topik', $data_update);
-
-        $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => $agenda_id]);
-        return $redir($id_pelatihan, '<div class="alert alert-success">Topik berhasil diperbarui!</div>');
-    }
-
-    // Hapus Topik
-    if (!empty($this->input->get('delete_topik'))) {
-        $topic_id     = (int)$this->input->get('delete_topik');
-        $agenda_id    = (int)$this->input->get('agenda_id');
-        $id_pelatihan = (int)$this->input->get('id_pelatihan');
-
-        $topic = $this->db->get_where('tbl_topik', ['topic_id' => $topic_id])->row();
-        if (!$topic) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Topik tidak ditemukan.</div>');
-        }
-
-        // Pastikan topik sesuai agenda & pelatihan
-        $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $topic->agenda_id])->row();
-        if (!$agenda || ($agenda_id && $agenda->agenda_id != $agenda_id)) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda topik tidak valid.</div>');
-        }
-
-        $this->db->delete('tbl_topik', ['topic_id' => $topic_id]);
-
-        $this->session->set_flashdata('open_modal', ['type' => 'topik', 'agenda_id' => (int)$agenda->agenda_id]);
-        return $redir(($id_pelatihan ?: (int)$agenda->id_pelatihan), '<div class="alert alert-warning">Topik berhasil dihapus!</div>');
-    }
-
-    // ======================================================================
-    // ====================  CRUD GRUP PENGAJAR  =============================
-    // ======================================================================
-
-    // Tambah Grup
-    if (!empty($this->input->post('tambah_grup'))) {
-        $post         = $this->input->post();
-        $agenda_id    = (int)$post['agenda_id'];
-        $id_pelatihan = (int)$post['id_pelatihan'];
-
-        if (!$agenda_id || !$id_pelatihan || empty($post['group_no']) || empty($post['teacher_id'])) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda, Nomor Grup, dan Teacher wajib diisi.</div>');
-        }
-
-        // Validasi agenda milik pelatihan
-        $agenda = $this->db->get_where('tbl_agenda', [
-            'agenda_id'    => $agenda_id,
-            'id_pelatihan' => $id_pelatihan
-        ])->row();
-        if (!$agenda) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
-        }
-
-        $data = [
-            'agenda_id' => $agenda_id,
-            'group_no'  => (int)$post['group_no'],
-            'teacher_id'=> (int)$post['teacher_id'],
-        ];
-        $this->db->insert('tbl_grup_agenda', $data);
-
-        $this->session->set_flashdata('open_modal', ['type' => 'grup', 'agenda_id' => $agenda_id]);
-        return $redir($id_pelatihan, '<div class="alert alert-success">Grup pengajar berhasil ditambahkan!</div>');
-    }
-
-    // Edit Grup
+    // =========================
+    // Edit Grup Pengajar
+    // =========================
     if (!empty($this->input->post('edit_grup'))) {
         $post            = $this->input->post();
-        $agenda_group_id = (int)$post['edit_grup'];
-        $agenda_id       = (int)$post['agenda_id'];
-        $id_pelatihan    = (int)$post['id_pelatihan'];
+        $agenda_group_id = (int)($post['edit_grup'] ?? 0);
+        $id_pelatihan    = (int)($post['id_pelatihan'] ?? 0);
+        $group_no        = (int)($post['group_no'] ?? 0);
+        $teacher_id      = (int)($post['teacher_id'] ?? 0);
 
-        if (!$agenda_group_id || !$agenda_id || !$id_pelatihan || empty($post['group_no']) || empty($post['teacher_id'])) {
+        if (!$agenda_group_id || !$id_pelatihan || !$group_no || !$teacher_id) {
             return $redir($id_pelatihan, '<div class="alert alert-danger">Parameter grup tidak lengkap.</div>');
         }
+        if (!$require_pel($id_pelatihan) || !$require_pegawai($teacher_id)) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Entitas tidak valid.</div>');
+        }
 
-        $gr = $this->db->get_where('tbl_grup_agenda', ['agenda_group_id' => $agenda_group_id, 'agenda_id' => $agenda_id])->row();
+        $gr = $this->db->get_where('tbl_grup_agenda', [
+            'agenda_group_id' => $agenda_group_id
+        ])->row_array();
         if (!$gr) {
             return $redir($id_pelatihan, '<div class="alert alert-danger">Data grup tidak ditemukan.</div>');
         }
 
-        $agenda = $this->db->get_where('tbl_agenda', ['agenda_id' => $agenda_id, 'id_pelatihan' => $id_pelatihan])->row();
-        if (!$agenda) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda tidak valid.</div>');
+        // Pastikan grup ini memang milik pelatihan yang sama
+        $pa = $this->db->get_where('tbl_pelatihan_agenda', [
+            'pelatihan_agenda_id' => (int)$gr['pelatihan_agenda_id']
+        ])->row_array();
+        if (!$pa || (int)$pa['id_pelatihan'] !== $id_pelatihan) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Grup tidak sesuai pelatihan.</div>');
         }
 
-        $data_update = [
-            'group_no'  => (int)$post['group_no'],
-            'teacher_id'=> (int)$post['teacher_id'],
-        ];
-        $this->db->where('agenda_group_id', $agenda_group_id)->update('tbl_grup_agenda', $data_update);
+        // Cek bentrok group_no lain pada PA yang sama
+        $dup = $this->db->where('pelatihan_agenda_id', (int)$gr['pelatihan_agenda_id'])
+                        ->where('group_no', $group_no)
+                        ->where('agenda_group_id !=', $agenda_group_id)
+                        ->get('tbl_grup_agenda')->row_array();
+        if ($dup) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Nomor grup sudah digunakan.</div>', ['type'=>'grup','agenda_id'=>$pa['agenda_id']]);
+        }
 
-        $this->session->set_flashdata('open_modal', ['type' => 'grup', 'agenda_id' => $agenda_id]);
-        return $redir($id_pelatihan, '<div class="alert alert-success">Grup pengajar berhasil diperbarui!</div>');
+        $this->db->where('agenda_group_id', $agenda_group_id)
+                 ->update('tbl_grup_agenda', [
+                     'group_no'   => $group_no,
+                     'teacher_id' => $teacher_id
+                 ]);
+
+        return $redir($id_pelatihan, '<div class="alert alert-success">Grup pengajar berhasil diperbarui.</div>', ['type'=>'grup','agenda_id'=>$pa['agenda_id']]);
     }
 
-    // Hapus Grup
+    // =========================
+    // Hapus Grup Pengajar
+    // =========================
     if (!empty($this->input->get('delete_grup_agenda'))) {
         $agenda_group_id = (int)$this->input->get('delete_grup_agenda');
-        $agenda_id       = (int)$this->input->get('agenda_id');
         $id_pelatihan    = (int)$this->input->get('id_pelatihan');
 
-        $gr = $this->db->get_where('tbl_grup_agenda', ['agenda_group_id' => $agenda_group_id])->row();
+        $gr = $this->db->get_where('tbl_grup_agenda', ['agenda_group_id' => $agenda_group_id])->row_array();
         if (!$gr) {
             return $redir($id_pelatihan, '<div class="alert alert-danger">Data grup tidak ditemukan.</div>');
         }
 
-        // validasi agenda
-        if ($agenda_id && $gr->agenda_id != $agenda_id) {
-            return $redir($id_pelatihan, '<div class="alert alert-danger">Agenda grup tidak valid.</div>');
+        $pa = $this->db->get_where('tbl_pelatihan_agenda', [
+            'pelatihan_agenda_id' => (int)$gr['pelatihan_agenda_id']
+        ])->row_array();
+        if (!$pa || (int)$pa['id_pelatihan'] !== $id_pelatihan) {
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Grup tidak sesuai pelatihan.</div>');
         }
 
+        $this->db->trans_begin();
         $this->db->delete('tbl_grup_agenda', ['agenda_group_id' => $agenda_group_id]);
 
-        $this->session->set_flashdata('open_modal', ['type' => 'grup', 'agenda_id' => (int)$gr->agenda_id]);
-        return $redir(($id_pelatihan ?: (int)$this->db->get_where('tbl_agenda', ['agenda_id' => $gr->agenda_id])->row()->id_pelatihan), '<div class="alert alert-warning">Grup pengajar berhasil dihapus!</div>');
+        // Bersihkan PA bila orphan (tanpa main teacher & tanpa grup)
+        $pa = $this->db->get_where('tbl_pelatihan_agenda', [
+            'pelatihan_agenda_id' => (int)$gr['pelatihan_agenda_id']
+        ])->row_array();
+
+        if ($pa) {
+            $has_group = $this->db->get_where('tbl_grup_agenda', [
+                'pelatihan_agenda_id' => (int)$pa['pelatihan_agenda_id']
+            ])->row_array();
+
+            if (!$has_group && empty($pa['main_teacher_id'])) {
+                $this->db->delete('tbl_pelatihan_agenda', ['pelatihan_agenda_id' => (int)$pa['pelatihan_agenda_id']]);
+            }
+        }
+
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return $redir($id_pelatihan, '<div class="alert alert-danger">Terjadi kesalahan saat menghapus grup.</div>');
+        }
+        $this->db->trans_commit();
+
+        return $redir($id_pelatihan, '<div class="alert alert-warning">Grup pengajar berhasil dihapus.</div>', ['type'=>'grup','agenda_id'=>$pa['agenda_id'] ?? null]);
     }
+
+    // Default fallback
+    $id_pel = (int)($this->input->post('id_pelatihan') ?? $this->input->get('id_pelatihan') ?? 0);
+    return $redir($id_pel);
 }
+
 
 
 	// Code LDK Pekanbaru Controller Cetak Laporan
@@ -3367,7 +4542,16 @@ public function prosesmateripengajar()
 		public function cetaklampiranlaporan()
 	{
 		$this->data['idbo'] = $this->session->userdata('ses_id');
-    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL and id_jenis_pelatihan = 1 ORDER BY id_pelatihan DESC");
+		$jenis = $this->input->get('jenis');
+    	$this->data['pelatihan'] = $this->db->query("SELECT * FROM tbl_pelatihan WHERE deleted_at IS NULL ORDER BY id_pelatihan DESC");
+		// Terapkan filter berdasarkan jenis
+		if ($jenis == 'PJJ') {
+			$this->db->where('id_jenis_pelatihan', 1);
+		} elseif ($jenis == 'PDWK') {
+			$this->db->where('id_jenis_pelatihan', 2);
+		} elseif ($jenis == 'Latsar') {
+			$this->db->where('id_jenis_pelatihan', 3);
+		}
         $this->data['title_web'] = 'Cetak Lampiran Dokumen Pelatihan';
         $this->load->view('header_view',$this->data);
         $this->load->view('sidebar_view',$this->data);
@@ -3644,63 +4828,218 @@ public function exportFotoPelatihan($id_pelatihan)
 //     ]);
 // }
 
+// Backup
+// public function exportLampiranPelatihan($id_pelatihan)
+// {
+//     $pelatihan = $this->db->get_where('tbl_pelatihan', [
+//         'id_pelatihan' => $id_pelatihan,
+//         'deleted_at' => NULL
+//     ])->row_array();
+
+//     if (!$pelatihan) {
+//         show_404();
+//     }
+
+//     // Get all documents for this training
+//     $documents = $this->db->query("
+//         SELECT pd.*, d.id_dokumen, d.nama_dokumen, d.deskripsi
+//         FROM tbl_pelatihan_dokumen pd
+//         JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
+//         WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
+//         ORDER BY pd.tanggal_upload ASC
+//     ", [$id_pelatihan])->result_array();
+    
+//     // Define the custom order of document types
+//     $customOrder = [
+//         'Susunan Acara Pembukaan' => 1,
+//         'Susunan Acara Penutupan' => 2,
+//         'Surat Tanda Tamat Pelatihan (STTP)' => 3,
+//         'Daftar Hadir Rapat Persiapan' => 4,
+//         'Daftar Hadir Pelaksanaan Kegiatan Pelatihan' => 5,
+//         'Daftar Hadir Rapat Evaluasi' => 6,
+//         'Notulen Rapat Persiapan' => 7,
+//         'Notulen Rapat Evaluasi' => 8,
+//         'Surat Permohonan Widyaiswara' => 9,
+//         'Surat Pemberitahuan' => 10,
+//         'Jadwal Kegiatan' => 11,
+//         'Buku Panduan' => 12,
+//         'Bahan Tayang Widyaiswara' => 13,
+//         'Bahan Ajar Widyaiswara' => 14
+//     ];
+    
+//     // Sort documents according to custom order
+//     usort($documents, function($a, $b) use ($customOrder) {
+//         $orderA = $customOrder[$a['nama_dokumen']] ?? PHP_INT_MAX;
+//         $orderB = $customOrder[$b['nama_dokumen']] ?? PHP_INT_MAX;
+        
+//         return $orderA <=> $orderB;
+//     });
+    
+//     // Add full path to each document
+//     foreach ($documents as &$doc) {
+//         $doc['full_path'] = FCPATH . 'assets_style/assets/dokumen/' . $doc['file_path'];
+//     }
+    
+//     // Pass data to view
+//     $this->load->view('cetak_laporan/export_lampiran_pelatihan', [
+//         'pelatihan' => $pelatihan,
+//         'documents' => $documents
+//     ]);
+// }
+
 public function exportLampiranPelatihan($id_pelatihan)
 {
     $pelatihan = $this->db->get_where('tbl_pelatihan', [
         'id_pelatihan' => $id_pelatihan,
-        'deleted_at' => NULL
+        'deleted_at'   => NULL
     ])->row_array();
 
     if (!$pelatihan) {
         show_404();
     }
 
-    // Get all documents for this training
+    // Ambil dokumen
     $documents = $this->db->query("
         SELECT pd.*, d.id_dokumen, d.nama_dokumen, d.deskripsi
         FROM tbl_pelatihan_dokumen pd
         JOIN tbl_dokumen d ON pd.id_dokumen = d.id_dokumen
         WHERE pd.id_pelatihan = ? AND pd.deleted_at IS NULL
-        ORDER BY pd.tanggal_upload ASC
+        ORDER BY pd.tanggal_upload ASC, pd.id_pelatihan_dokumen ASC
     ", [$id_pelatihan])->result_array();
-    
-    // Define the custom order of document types
-    $customOrder = [
-        'Susunan Acara Pembukaan' => 1,
-        'Susunan Acara Penutupan' => 2,
-        'Surat Tanda Tamat Pelatihan (STTP)' => 3,
-        'Daftar Hadir Rapat Persiapan' => 4,
-        'Daftar Hadir Pelaksanaan Kegiatan Pelatihan' => 5,
-        'Daftar Hadir Rapat Evaluasi' => 6,
-        'Notulen Rapat Persiapan' => 7,
-        'Notulen Rapat Evaluasi' => 8,
-        'Surat Permohonan Widyaiswara' => 9,
-        'Surat Pemberitahuan' => 10,
-        'Jadwal Kegiatan' => 11,
-        'Buku Panduan' => 12,
-        'Bahan Tayang Widyaiswara' => 13,
-        'Bahan Ajar Widyaiswara' => 14
+
+    // ========= 1) Definisi URUTAN =========
+    // Urutan DEFAULT (non-Latsar).
+    $defaultOrder = [
+        'Susunan Acara Pembukaan',
+        'Susunan Acara Penutupan',
+        'Surat Tanda Tamat Pelatihan (STTP)',
+        'Daftar Hadir Rapat Persiapan',
+        'Daftar Hadir Pelaksanaan Kegiatan Pelatihan',
+        'Daftar Hadir Rapat Evaluasi',
+        'Notulen Rapat Persiapan',
+        'Notulen Rapat Evaluasi',
+        'Surat Permohonan Widyaiswara',
+        'Surat Pemberitahuan',
+        'Jadwal Kegiatan',
+        'Buku Panduan',
+        'Bahan Tayang Widyaiswara',
+        'Bahan Ajar Widyaiswara',
     ];
-    
-    // Sort documents according to custom order
-    usort($documents, function($a, $b) use ($customOrder) {
-        $orderA = $customOrder[$a['nama_dokumen']] ?? PHP_INT_MAX;
-        $orderB = $customOrder[$b['nama_dokumen']] ?? PHP_INT_MAX;
-        
-        return $orderA <=> $orderB;
-    });
-    
-    // Add full path to each document
-    foreach ($documents as &$doc) {
-        $doc['full_path'] = FCPATH . 'assets_style/assets/dokumen/' . $doc['file_path'];
+
+    // Urutan LATSAR (id_jenis_pelatihan = 3).
+    $latsarOrder = [
+        'Notulensi Hasil Rapat Persiapan Latsar',
+        'Daftar Hadir dan Dokumentasi Rapat Persiapan',
+        'Laporan Persiapan Penyelenggaraan Pelatihan',
+        'Struktur Kurikulum',
+        'TOR',
+        'Panduan',
+        'Jadwal Kegiatan',
+        'Realisasi Jadwal Kegiatan',
+        'Susunan Acara Pembukaan',
+        'Laporan Ketua pada Pembukaan',
+        'Surat Permintaan Penceramah/Pengajar',
+        'Surat Pemanggilan Mentor',
+        'Surat Permintaan Penguji',
+        'Surat Panggilan Peserta',
+        'SK Panitia Penyelenggara',
+        'Surat Keputusan Penunjukkan Pengajar dan Peserta serta Lampirannya',
+        'Lampiran SK Penunjukkan Panitia',
+        'Lampiran SK Penunjukkan Pengajar',
+        'Lampiran SK Penunjukkan Coach',
+        'Lampiran SK Penunjukkan Mentor',
+        'Lampiran SK Penunjukkan Penguji',
+        'Lampiran SK Penunjukkan Peserta',
+        'Biodata Peserta',
+        'Biodata Pengajar/Narasumber',
+        'Daftar Hadir Peserta',
+        'Daftar Hadir Pengajar/Narasumber',
+        'Daftar Hadir Seminar RA dan Aktualisasi',
+        'Undangan Rapat Penyamaan Persepsi Evaluasi RA',
+        'Notulen Rapat Penyamaan Persepsi Evaluasi RA',
+        'DH dan Dokumentasi Rapat Penyamaan Persepsi Evaluasi RA',
+        'Undangan Rapat Penyamaan Persepsi Evaluasi Aktualisasi',
+        'Notulen Rapat Penyamaan Persepsi Evaluasi Aktualisasi',
+        'DH dan Dokumentasi Rapat Penyamaan Persepsi Aktualisasi',
+        'Notulen Rapat Evaluasi Akhir',
+        'DH dan Dokumentasi Rapat Evaluasi Akhir',
+        'Bertita Acara Kelulusan Peserta',
+        'SK Penetapan Kelulusan Peserta',
+        'Hasil Evaluasi Peserta Terhadap Penyelenggara',
+        'Hasil Evaluasi Peserta Terhadap Pengajar/Narasumber',
+        'Hasil Evaluasi Terhadap Peserta',
+        'Analisis Hasil Evaluasi',
+        'Susunan Acara Penutupan',
+        'Laporan Ketua pada Penutupan',
+        'STPP/Sertifikat/Surat Keterangan Pelatihan',
+        'Surat Pengembalian Peserta',
+        'Dokumentasi',
+        'Undangan Pembekalan Mentor',
+        'DH dan Dokumentasi Pembekalan Mentor',
+        'Materi Pembekalan Mentor',
+    ];
+
+    // ========= 2) Normalisasi & Kamus Sinonim =========
+    $normalize = function (string $s): string {
+        // lowercase, hapus spasi ganda, buang karakter non-alfanum (kecuali spasi), trim
+        $s = strtolower($s);
+        $s = preg_replace('/\s+/', ' ', $s);
+        $s = preg_replace('/[^a-z0-9\s\/\-\(\)]+/u', '', $s);
+        $s = trim($s);
+        // standarisasi beberapa istilah umum
+        $s = str_replace(['stpp', 'sttp'], 'stpp', $s);        // samakan STTP↔STPP
+        $s = str_replace(['dh ', ' dh'], ' daftar hadir ', $s); // “DH” → “daftar hadir”
+        $s = str_replace('notulensi', 'notulen', $s);           // selaraskan “notulensi”→“notulen”
+        return $s;
+    };
+
+    $buildOrderIndex = function (array $orderedNames) use ($normalize): array {
+        $idx = [];
+        $i = 1;
+        foreach ($orderedNames as $name) {
+            $idx[$normalize($name)] = $i++;
+        }
+        return $idx;
+    };
+
+    // Pilih urutan sesuai jenis pelatihan
+    $isLatsar   = ((int)($pelatihan['id_jenis_pelatihan'] ?? 0) === 3);
+    $orderIndex = $buildOrderIndex($isLatsar ? $latsarOrder : $defaultOrder);
+
+    // ========= 3) Sort dokumen sesuai urutan kustom =========
+    // Beri ranking: jika tidak ditemukan di kamus, letakkan di bagian akhir (PHP_INT_MAX) namun tetap stabil.
+    foreach ($documents as $k => &$doc) {
+        $normName            = $normalize($doc['nama_dokumen'] ?? '');
+        $doc['__order_rank'] = $orderIndex[$normName] ?? PHP_INT_MAX;
+        $doc['__orig_idx']   = $k; // untuk menjaga stabilitas urutan awal jika sama
     }
-    
-    // Pass data to view
+    unset($doc);
+
+    usort($documents, function ($a, $b) {
+        if ($a['__order_rank'] === $b['__order_rank']) {
+            // stabil: pertahankan urutan input
+            return $a['__orig_idx'] <=> $b['__orig_idx'];
+        }
+        return $a['__order_rank'] <=> $b['__order_rank'];
+    });
+
+    // ========= 4) Tambahkan full_path (opsional: cek keberadaan file) =========
+    foreach ($documents as &$doc) {
+        $safePath = ltrim(str_replace(['..', '\\'], ['','/'], $doc['file_path']), '/');
+        $doc['full_path'] = FCPATH . 'assets_style/assets/dokumen/' . $safePath;
+        // Jika perlu: tandai bila file tidak ditemukan
+        $doc['exists'] = is_file($doc['full_path']);
+    }
+    unset($doc);
+
+    // ========= 5) Kirim ke view =========
     $this->load->view('cetak_laporan/export_lampiran_pelatihan', [
         'pelatihan' => $pelatihan,
-        'documents' => $documents
+        'documents' => $documents,
+        'is_latsar' => $isLatsar,
     ]);
 }
+
 
 // public function exportLampiranPelatihan($id_pelatihan)
 // {
@@ -4673,6 +6012,75 @@ public function get_peserta_by_pelatihan()
     return $this->output
         ->set_content_type('application/json')
         ->set_output(json_encode($rows));
+}
+
+/**
+ * Ambil mapping pengajar per pelatihan dari tabel baru.
+ * Return:
+ * [
+ *   'wi_ids'          => [int, ...],
+ *   'wi_names'        => [string, ...],
+ *   'wi_rapat_id'     => int|null,
+ *   'wi_rapat_name'   => string|null,
+ *   'pengajar_ids'    => [int, ...],
+ *   'pengajar_names'  => [string, ...],
+ * ]
+ */
+private function _get_pengajar_assignments($id_pelatihan)
+{
+    $rows = $this->db->select('pp.id_pegawai, pp.tipe_peran, pg.nama')
+        ->from('tbl_pelatihan_pengajar pp')
+        ->join('tbl_pegawai pg', 'pg.id_pegawai = pp.id_pegawai', 'left')
+        ->where('pp.id_pelatihan', (int)$id_pelatihan)
+        ->where('pp.deleted_at IS NULL', NULL, FALSE)
+        ->get()->result_array();
+
+    $res = [
+        'wi_ids'         => [], 'wi_names' => [],
+        'wi_rapat_id'    => NULL, 'wi_rapat_name' => NULL,
+        'pengajar_ids'   => [], 'pengajar_names' => [],
+    ];
+
+    foreach ($rows as $r) {
+        $idp   = (int)$r['id_pegawai'];
+        $nama  = $r['nama'];
+        $tipe  = $r['tipe_peran'];
+
+        if ($tipe === 'Widyaiswara') {
+            $res['wi_ids'][$idp] = true;
+            if ($nama !== NULL) $res['wi_names'][] = $nama;
+        } elseif ($tipe === 'Widyaiswara Rapat Kelulusan') {
+            $res['wi_rapat_id']   = $idp;
+            $res['wi_rapat_name'] = $nama;
+        } elseif ($tipe === 'Pengajar') {
+            $res['pengajar_ids'][$idp] = true;
+            if ($nama !== NULL) $res['pengajar_names'][] = $nama;
+        }
+    }
+
+    // konversi set → array indexed
+    $res['wi_ids']       = array_map('intval', array_keys($res['wi_ids']));
+    $res['pengajar_ids'] = array_map('intval', array_keys($res['pengajar_ids']));
+    return $res;
+}
+
+// Ambil NIP sebelum tanda "/"; juga hilangkan spasi yang sering terselip sebelum/ sesudah "/"
+private function extract_nip_before_slash($raw) {
+    if ($raw === null) return '';
+    $v = trim($raw);
+    if ($v === '') return '';
+
+    // contoh input yang perlu distandarkan:
+    // "199708282025052002/ 1404016808970004"  -> ambil kiri sebelum "/"
+    // "199404152025052004/ 1403055504945069"
+    // "199402262025052001/1471096602940021"
+    // jika tidak ada "/", kembalikan apa adanya
+    $pos = strpos($v, '/');
+    if ($pos === false) {
+        return preg_replace('/\s+/', '', $v); // hilangkan spasi di dalam NIP
+    }
+    $left = substr($v, 0, $pos);
+    return preg_replace('/\s+/', '', trim($left));
 }
 
 }

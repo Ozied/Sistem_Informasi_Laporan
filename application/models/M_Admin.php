@@ -238,6 +238,26 @@ class M_Admin extends CI_Model
         }
     }
 
+    // --- NEW: attach WI/Pengajar for non-Latsar from tbl_pelatihan_pengajar
+if (in_array((int)$pelatihan->id_jenis_pelatihan, [1,2], true)) { // 1=PJJ, 2=PDWK
+    $asgn = $this->_get_pengajar_assignments((int)$pelatihan->id_pelatihan);
+
+    // full objects (id, nama, NIP, asal_satker, jabatan)
+    $pelatihan->wi_list       = $asgn['wi_list'];
+    $pelatihan->pengajar_list = $asgn['pengajar_list'];
+    $pelatihan->wi_rapat      = $asgn['wi_rapat'];
+
+    // simple name arrays for views
+    $pelatihan->wi_names        = $asgn['wi_names'];
+    $pelatihan->pengajar_names  = $asgn['pengajar_names'];
+    $pelatihan->wi_rapat_name   = $asgn['wi_rapat_name'];
+
+    // computed headcount (read-only)
+    $pelatihan->jumlah_wi_pengajar_auto =
+        count($asgn['wi_list']) + count($asgn['pengajar_list']) + ($asgn['wi_rapat'] ? 1 : 0);
+}
+
+
     // 3) MATERI (tetap seperti sebelumnya)
     $materi = $this->db->get_where('tbl_materi_pelatihan', ['id_pelatihan' => (int)$id_pelatihan])->result();
     $kolom_materi = [
@@ -285,121 +305,154 @@ class M_Admin extends CI_Model
     $pelatihan->peringkat_3 = !empty($pelatihan->peserta_peringkat_3) && isset($peserta_map[$pelatihan->peserta_peringkat_3])
         ? $peserta_map[$pelatihan->peserta_peringkat_3] : null;
 
-    // 6) AGENDA + nested TOPIK + GRUP (dengan teacher)
-    //    a) ambil daftar agenda untuk id_pelatihan
-    $this->db->select('agenda_id, id_pelatihan, agenda_title, main_teacher_id');
-    $this->db->from('tbl_agenda');
-    $this->db->where('id_pelatihan', (int)$id_pelatihan);
-    $this->db->order_by('agenda_id', 'asc');
-    $agenda_rows = $this->db->get()->result();
 
-    // Kumpulkan id guru (main teacher & grup) untuk 1x fetch
-    $teacher_ids = [];
-    foreach ($agenda_rows as $a) if (!empty($a->main_teacher_id)) $teacher_ids[] = (int)$a->main_teacher_id;
+        // 6) AGENDA + TOPIK + GRUP (skema BARU: via tbl_pelatihan_agenda & tbl_grup_agenda)
+/*
+   Prinsip:
+   - Ambil daftar agenda yang MEMANG di-assign ke pelatihan ini (tbl_pelatihan_agenda).
+   - Ambil topik per agenda (untuk sum JP dan tampilan rinci).
+   - Ambil grup pengajar via tbl_grup_agenda yang now berelasi ke pelatihan_agenda_id.
+   - Ambil semua pengajar (main/grup) sekali query (join role utk label jabatan).
+*/
+$pa_rows = $this->db
+    ->select('pa.pelatihan_agenda_id, pa.id_pelatihan, pa.agenda_id, pa.main_teacher_id, a.agenda_title')
+    ->from('tbl_pelatihan_agenda pa')
+    ->join('tbl_agenda a', 'a.agenda_id = pa.agenda_id', 'inner')
+    ->where('pa.id_pelatihan', (int)$id_pelatihan)
+    ->order_by('a.agenda_id', 'asc')
+    ->get()->result();
 
-    // Ambil grup per agenda lalu kumpulkan teacher_id juga
-    $agenda_ids = array_column($agenda_rows, 'agenda_id');
-    $grup_by_agenda = [];
-    if ($agenda_ids) {
-        $this->db->select('agenda_group_id, agenda_id, group_no, teacher_id');
-        $this->db->from('tbl_grup_agenda');
-        $this->db->where_in('agenda_id', $agenda_ids);
-        $this->db->order_by('group_no', 'asc');
-        $grup_rows = $this->db->get()->result();
-        foreach ($grup_rows as $g) {
-            $grup_by_agenda[$g->agenda_id][] = $g;
-            if (!empty($g->teacher_id)) $teacher_ids[] = (int)$g->teacher_id;
+$agenda_ids  = [];
+$pa_ids      = [];
+$teacher_ids = [];
+foreach ($pa_rows as $r) {
+    $agenda_ids[] = (int)$r->agenda_id;
+    $pa_ids[]     = (int)$r->pelatihan_agenda_id;
+    if (!empty($r->main_teacher_id)) $teacher_ids[] = (int)$r->main_teacher_id;
+}
+$agenda_ids = array_values(array_unique($agenda_ids));
+$pa_ids     = array_values(array_unique($pa_ids));
+
+// -- Topik per agenda + ringkasan JP
+$topics_by_agenda = [];
+$sum_by_agenda    = []; // [agenda_id] => ['sum_jp_async'=>X, 'sum_jp_sync'=>Y, 'total_topics'=>Z]
+if (!empty($agenda_ids)) {
+    $topik_rows = $this->db
+        ->select('topic_id, agenda_id, topic_no, topic_title, jp_async, jp_sync')
+        ->from('tbl_topik')
+        ->where_in('agenda_id', $agenda_ids)
+        ->order_by('agenda_id ASC, topic_no ASC')
+        ->get()->result();
+    foreach ($topik_rows as $t) {
+        $aid = (int)$t->agenda_id;
+        $topics_by_agenda[$aid][] = $t;
+        if (!isset($sum_by_agenda[$aid])) {
+            $sum_by_agenda[$aid] = ['sum_jp_async'=>0,'sum_jp_sync'=>0,'total_topics'=>0];
+        }
+        $sum_by_agenda[$aid]['sum_jp_async'] += (int)($t->jp_async ?? 0);
+        $sum_by_agenda[$aid]['sum_jp_sync']  += (int)($t->jp_sync  ?? 0);
+        $sum_by_agenda[$aid]['total_topics']++;
+    }
+}
+
+// -- Grup per pelatihan_agenda (bukan lagi per agenda)
+$groups_by_pa = []; // [pelatihan_agenda_id] => [ {agenda_group_id, group_no, teacher_id}, ... ]
+if (!empty($pa_ids)) {
+    $gr_rows = $this->db
+        ->select('agenda_group_id, pelatihan_agenda_id, group_no, teacher_id')
+        ->from('tbl_grup_agenda')
+        ->where_in('pelatihan_agenda_id', $pa_ids)
+        ->order_by('pelatihan_agenda_id ASC, group_no ASC')
+        ->get()->result();
+    foreach ($gr_rows as $g) {
+        $groups_by_pa[(int)$g->pelatihan_agenda_id][] = $g;
+        if (!empty($g->teacher_id)) $teacher_ids[] = (int)$g->teacher_id;
+    }
+}
+
+// -- Peta data pengajar (once)
+$teacher_map = [];
+$teacher_ids = array_values(array_unique(array_filter($teacher_ids)));
+if (!empty($teacher_ids)) {
+    $trows = $this->db
+        ->select('p.*, r.nama_role as jabatan')
+        ->from('tbl_pegawai p')
+        ->join('tbl_role r', 'p.jabatan = r.id_role', 'left')
+        ->where_in('p.id_pegawai', $teacher_ids)
+        ->get()->result();
+    $teacher_map = array_column($trows, null, 'id_pegawai');
+}
+
+// sort grup per pelatihan_agenda_id tanpa closure
+foreach ($groups_by_pa as $k => $arr) {
+    if (!is_array($arr)) { $arr = [$arr]; }
+    $ord = [];
+    foreach ($arr as $i => $g) { $ord[$i] = (int)($g->group_no ?? 0); }
+    array_multisort($ord, SORT_ASC, $arr);
+    $groups_by_pa[$k] = array_values($arr);
+}
+
+
+// --- Rakit struktur final per agenda (unchanged) ---
+$agenda_final = [];
+foreach ($pa_rows as $row) {
+    $aid   = (int)$row->agenda_id;
+    $pa_id = (int)$row->pelatihan_agenda_id;
+
+    $sumA = (int)($sum_by_agenda[$aid]['sum_jp_async'] ?? 0);
+    $sumS = (int)($sum_by_agenda[$aid]['sum_jp_sync']  ?? 0);
+
+    $obj = (object)[
+        'agenda_id'     => $aid,
+        'agenda_title'  => $row->agenda_title,
+        'sum_jp_async'  => $sumA,
+        'sum_jp_sync'   => $sumS,
+        'total_topics'  => (int)($sum_by_agenda[$aid]['total_topics'] ?? 0),
+        'main_teacher'  => (!empty($row->main_teacher_id) && isset($teacher_map[$row->main_teacher_id])) ? $teacher_map[$row->main_teacher_id] : null,
+        'topik'         => $topics_by_agenda[$aid] ?? [],
+        'grup'          => []
+    ];
+
+    if (!empty($groups_by_pa[$pa_id])) {
+        foreach ($groups_by_pa[$pa_id] as $g) {
+            $obj->grup[] = (object)[
+                'agenda_group_id' => (int)$g->agenda_group_id,
+                'group_no'        => (int)$g->group_no,
+                'teacher'         => (!empty($g->teacher_id) && isset($teacher_map[$g->teacher_id])) ? $teacher_map[$g->teacher_id] : null,
+            ];
         }
     }
 
-    // Ambil topik per agenda
-    $topik_by_agenda = [];
-    if ($agenda_ids) {
-        $this->db->select('topic_id, agenda_id, topic_no, topic_title, jp_async, jp_sync');
-        $this->db->from('tbl_topik');
-        $this->db->where_in('agenda_id', $agenda_ids);
-        $this->db->order_by('topic_no', 'asc');
-        $topik_rows = $this->db->get()->result();
-        foreach ($topik_rows as $t) {
-            $topik_by_agenda[$t->agenda_id][] = $t;
-        }
-    }
+    $agenda_final[] = $obj;
+}
+$pelatihan->agenda = $agenda_final;
 
-    // 1x fetch untuk semua teacher yang diperlukan (main teacher & grup teacher)
-    $teacher_map = [];
-    $teacher_ids = array_values(array_unique(array_filter($teacher_ids)));
-    if ($teacher_ids) {
-        $this->db->select('p.*, r.nama_role as jabatan');
-        $this->db->from('tbl_pegawai p');
-        $this->db->join('tbl_role r', 'p.jabatan = r.id_role', 'left');
-        $this->db->where_in('p.id_pegawai', $teacher_ids);
-        $trows = $this->db->get()->result();
-        $teacher_map = array_column($trows, null, 'id_pegawai');
-    }
 
-    // Rakit struktur agenda final
-    $agenda_final = [];
-    foreach ($agenda_rows as $a) {
-        $obj = (object)[
-            'agenda_id'      => (int)$a->agenda_id,
-            'agenda_title'   => $a->agenda_title,
-            'main_teacher'   => (!empty($a->main_teacher_id) && isset($teacher_map[$a->main_teacher_id])) ? $teacher_map[$a->main_teacher_id] : null,
-            'topik'          => isset($topik_by_agenda[$a->agenda_id]) ? $topik_by_agenda[$a->agenda_id] : [],
-            'grup'           => [],
+// 7) Flatten opsional (tetap boleh dipakai bagian lain), namun TIDAK dipakai untuk tabel B
+$tenaga_pengajar = [];
+foreach ($pelatihan->agenda as $ag) {
+    $rows = $ag->grup;
+    if (empty($rows)) {
+        $tenaga_pengajar[] = (object)[
+            'agenda'        => $ag->agenda_title,
+            'jp_async'      => (int)$ag->sum_jp_async,
+            'jp_sync'       => (int)$ag->sum_jp_sync,
+            'kel'           => null,
+            'nama_pengajar' => $ag->main_teacher->nama ?? '-'
         ];
-
-        // Tambahkan teacher object untuk tiap grup
-        if (isset($grup_by_agenda[$a->agenda_id])) {
-            foreach ($grup_by_agenda[$a->agenda_id] as $g) {
-                $obj->grup[] = (object)[
-                    'agenda_group_id' => (int)$g->agenda_group_id,
-                    'group_no'        => (int)$g->group_no,
-                    'teacher'         => (!empty($g->teacher_id) && isset($teacher_map[$g->teacher_id])) ? $teacher_map[$g->teacher_id] : null,
-                ];
-            }
-        }
-
-        $agenda_final[] = $obj;
-    }
-    $pelatihan->agenda = $agenda_final;
-
-    // 7) Bentuk flatten "tenaga_pengajar" agar kompatibel dengan Word template Anda
-    //    Aturan: satu baris per (agenda_title, topik) x setiap group_no yang ada.
-    //    nama_pengajar = teacher pada grup jika ada; jika tidak ada grup, pakai main_teacher.
-    $tenaga_pengajar = [];
-    foreach ($pelatihan->agenda as $ag) {
-        $topiks = $ag->topik ?: [];
-        $grups  = $ag->grup  ?: [];
-
-        // Jika tidak ada grup sama sekali → buat satu entri tanpa "kel", nama_pengajar main_teacher
-        if (!$grups) {
-            foreach ($topiks as $tp) {
-                $tenaga_pengajar[] = (object)[
-                    'agenda'        => $ag->agenda_title,
-                    'jp_async'      => (int)$tp->jp_async,
-                    'jp_sync'       => (int)$tp->jp_sync,
-                    'kel'           => null,
-                    'nama_pengajar' => $ag->main_teacher->nama ?? '-', // fallback '-'
-                ];
-            }
-            continue;
-        }
-
-        // Ada grup → duplikasi per group_no
-        foreach ($grups as $gr) {
-            $nama_pengajar = $gr->teacher->nama ?? ($ag->main_teacher->nama ?? '-');
-            foreach ($topiks as $tp) {
-                $tenaga_pengajar[] = (object)[
-                    'agenda'        => $ag->agenda_title,
-                    'jp_async'      => (int)$tp->jp_async,
-                    'jp_sync'       => (int)$tp->jp_sync,
-                    'kel'           => (int)$gr->group_no,
-                    'nama_pengajar' => $nama_pengajar,
-                ];
-            }
+    } else {
+        foreach ($rows as $gr) {
+            $tenaga_pengajar[] = (object)[
+                'agenda'        => $ag->agenda_title,
+                'jp_async'      => (int)$ag->sum_jp_async,
+                'jp_sync'       => (int)$ag->sum_jp_sync,
+                'kel'           => (int)$gr->group_no,
+                'nama_pengajar' => $gr->teacher->nama ?? ($ag->main_teacher->nama ?? '-'),
+            ];
         }
     }
-    $pelatihan->tenaga_pengajar = $tenaga_pengajar;
+}
+$pelatihan->tenaga_pengajar = $tenaga_pengajar;
 
     // Susun tim_penyelenggara dari pegawai yang sudah dipetakan
 $tim = [];
@@ -438,6 +491,45 @@ $pelatihan->jumlah_peserta_riil = (int)$this->db
 
 
     return $pelatihan;
+}
+
+// --- NEW: collect WI/Pengajar mapping for PJJ/PDWK from tbl_pelatihan_pengajar
+private function _get_pengajar_assignments($id_pelatihan)
+{
+    $rows = $this->db
+        ->select('pp.id_pegawai, pp.tipe_peran, pg.nama, pg.NIP, pg.asal_satker, r.nama_role AS jabatan')
+        ->from('tbl_pelatihan_pengajar pp')
+        ->join('tbl_pegawai pg', 'pg.id_pegawai = pp.id_pegawai', 'left')
+        ->join('tbl_role r', 'pg.jabatan = r.id_role', 'left')
+        ->where('pp.id_pelatihan', (int)$id_pelatihan)
+        ->where('pp.deleted_at IS NULL', null, false)
+        // order: WI → WI Rapat → Pengajar, then by name
+        ->order_by('FIELD(pp.tipe_peran,"Widyaiswara","Widyaiswara Rapat Kelulusan","Pengajar")', '', false)
+        ->order_by('pg.nama', 'asc')
+        ->get()->result();
+
+    $wi_list = [];
+    $pengajar_list = [];
+    $wi_rapat = null;
+
+    foreach ($rows as $r) {
+        if ($r->tipe_peran === 'Widyaiswara') {
+            $wi_list[] = $r;
+        } elseif ($r->tipe_peran === 'Pengajar') {
+            $pengajar_list[] = $r;
+        } elseif ($r->tipe_peran === 'Widyaiswara Rapat Kelulusan' && !$wi_rapat) {
+            $wi_rapat = $r;
+        }
+    }
+
+    return [
+        'wi_list'        => $wi_list,
+        'pengajar_list'  => $pengajar_list,
+        'wi_rapat'       => $wi_rapat,
+        'wi_names'       => array_map(function($o){ return $o->nama; }, $wi_list),
+        'pengajar_names' => array_map(function($o){ return $o->nama; }, $pengajar_list),
+        'wi_rapat_name'  => $wi_rapat ? $wi_rapat->nama : null,
+    ];
 }
 
 

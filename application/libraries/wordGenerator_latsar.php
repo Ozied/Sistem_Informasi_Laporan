@@ -194,7 +194,7 @@ class wordGenerator_latsar {
             
             $section1->addText("Pelatihan Dasar Calon Pegawai Negeri Sipil adalah syarat bagi Calon Pegawai Negeri Sipil (CPNS) untuk dapat diangkat menjadi Pegawai Negeri Sipil (PNS). Pelatihan Dasar CPNS dilaksanakan untuk memberikan pengetahuan dalam pembentukan wawasan kebangsaan, kepribadian dan etika Pegawai Negeri Sipil, pengetahuan dasar tentang sistem penyelenggaraan pemerintah negara, bidang tugas dan budaya organisasinya supaya mampu melaksanakan tugas dan perannya sebagai pelayan masyarakat.", $fontstyle, $paragraphstyle);
             
-            $section1->addText("Sejalan dengan Peraturan Pemerintah Nomor 17 Tahun 2020 tentang perubahan atas Peraturan Pemerintah Nomor 11 Tahun 2017 tentang Manajemen Pegawai Negeri Sipil disebutkan bahwa CPNS wajib menjalani masa percobaan selama 1 tahun yang merupakan masa prajabatan. Selama masa prajabatan tersebut, CPNS wajib mengikuti pendidikan dan pelatihan atau yang lebih dikenal dengan sebutan Pelatihan Dasar. Oleh karena itu, pelaksanaan Pelatihan Dasar CPNS Golongan III Angkatan I pada tahun 2025 menjadi salah satu prioritas kegiatan yang harus dilaksanakan oleh Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru. Pada pelaksanaan Pelatihan Dasar CPNS Golongan III Angkatan I pada tahun 2025, Balai Diklat Keagamaan Padang berperan sebagai lembaga penjaminan mutu.", $fontstyle, $paragraphstyle);
+            $section1->addText("Sejalan dengan Peraturan Pemerintah Nomor 17 Tahun 2020 tentang perubahan atas Peraturan Pemerintah Nomor 11 Tahun 2017 tentang Manajemen Pegawai Negeri Sipil disebutkan bahwa CPNS wajib menjalani masa percobaan selama 1 tahun yang merupakan masa prajabatan. Selama masa prajabatan tersebut, CPNS wajib mengikuti pendidikan dan pelatihan atau yang lebih dikenal dengan sebutan Pelatihan Dasar. Oleh karena itu, pelaksanaan {namaKegiatan} pada tahun 2025 menjadi salah satu prioritas kegiatan yang harus dilaksanakan oleh Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru. Pada pelaksanaan {namaKegiatan} pada tahun 2025, Balai Diklat Keagamaan Padang berperan sebagai lembaga penjaminan mutu.", $fontstyle, $paragraphstyle);
             
             $section1->addText("Berdasarkan Peraturan Lembaga Administrasi Negara Nomor 1 Tahun 2021 tentang Pelatihan Dasar Calon Pegawai Negeri Sipil sebagaimana diubah dengan Peraturan Lembaga Administrasi Negara Nomor 10 Tahun 2021 tentang perubahan atas Peraturan Lembaga Administrasi Negara Nomor 1 Tahun 2021 tentang Pelatihan Dasar Calon Pegawai Negeri Sipil. Kurikulum pembelajaran Pelatihan Dasar CPNS menekankan pada nilai-nilai ASN yaitu Berorientasi Pelayanan, Akuntabel, Kompeten, Harmonis, Loyal, Adaptif, dan Kolaboratif atau lebih dikenal dengan singkatan BerAKHLAK. Selain dituntut untuk memahami nilai-nilai dasar ASN tersebut, setiap CPNS yang mengikuti Pelatihan Dasar CPNS juga dituntut untuk menjalankan perannya sebagai pelaksana kebijakan publik, pelayan publik dan perekat serta pemersatu bangsa.", $fontstyle, $paragraphstyle);
 
@@ -229,7 +229,7 @@ class wordGenerator_latsar {
             $section1->addListItem("Surat Penugasan dari Pejabat Pembina Kepegawaian", 0, $fontstyle, $style);
             $section1->addListItem("Surat pernyataan kesediaan mematuhi ketentuan yang berlaku dalam penyelenggaraan Pelatihan Dasar CPNS", 0, $fontstyle, $style);
             
-            $section1->addText("Adapun peserta Pelatihan Dasar CPNS Golongan III Angkatan I berjumlah $pelatihan->jumlah_peserta_riil peserta dengan rincian sebagai berikut:", $fontstyle, $paragraphstyle);
+            $section1->addText("Adapun peserta {namaKegiatan} berjumlah $pelatihan->jumlah_peserta_riil peserta dengan rincian sebagai berikut:", $fontstyle, $paragraphstyle);
             
             // Create table for participant list
             $table = $section1->addTable([
@@ -262,17 +262,18 @@ class wordGenerator_latsar {
                 }
             }
 
+            // B. Tenaga Pengajar
             $section1->addTitle("B. Tenaga Pengajar", 2);
             $section1->addText(
-            "Tenaga pengajar Pelatihan Dasar CPNS Golongan III Angkatan I tahun 2025 merupakan tenaga-tenaga ahli yang berkompeten di bidangnya sesuai dengan mata pelatihan yang diajarkan dalam Pelatihan Dasar CPNS. Rincian tenaga pengajar sebagai berikut:",
-            $fontstyle, $paragraphstyle
+                "Tenaga pengajar {$namaKegiatan} tahun {$tahun} merupakan tenaga-tenaga ahli yang berkompeten di bidangnya sesuai dengan mata pelatihan yang diajarkan. Rincian tenaga pengajar sebagai berikut:",
+                $fontstyle, $paragraphstyle
             );
 
-            // table header
+            // Tabel header
             $table2 = $section1->addTable([
-                'borderSize' => 6,
+                'borderSize'  => 6,
                 'borderColor' => '000000',
-                'cellMargin' => 50
+                'cellMargin'  => 50
             ]);
             $table2->addRow();
             $table2->addCell(900)->addText('No', ['bold'=>true], ['align'=>'center']);
@@ -283,24 +284,191 @@ class wordGenerator_latsar {
             $table2->addCell(2600)->addText('Pengajar', ['bold'=>true]);
 
             $no = 1;
-            foreach (($pelatihan->agenda ?? []) as $ag) {
-                // kalau tidak ada grup: satu baris saja, gunakan main teacher
-                $groups = $ag->grup ?: [ (object)[
-                    'group_no' => null,
-                    'teacher'  => $ag->main_teacher ?? null
-                ]];
+            $agendas = (isset($pelatihan->agenda) && is_array($pelatihan->agenda)) ? $pelatihan->agenda : [];
 
-                foreach ($groups as $gr) {
-                    $teacherName = $gr->teacher->nama ?? ($ag->main_teacher->nama ?? '');
+            foreach ($agendas as $ag) {
+                // --- total JP (fallback dari topik bila sum kosong) ---
+                $sum_async = (int)($ag->sum_jp_async ?? 0);
+                $sum_sync  = (int)($ag->sum_jp_sync  ?? 0);
+                if ($sum_async === 0 && $sum_sync === 0 && !empty($ag->topik) && is_array($ag->topik)) {
+                    foreach ($ag->topik as $tp) {
+                        $sum_async += (int)($tp->jp_async ?? 0);
+                        $sum_sync  += (int)($tp->jp_sync  ?? 0);
+                    }
+                }
+
+                // --- normalisasi grup (kalau kosong, pakai main teacher) ---
+                $groups = (!empty($ag->grup) && is_array($ag->grup))
+                    ? $ag->grup
+                    : [ (object)['group_no'=>null, 'teacher'=>($ag->main_teacher ?? null)] ];
+
+                // --- ambil data Kel & Pengajar utk baris pertama ---
+                $g0 = $groups[0];
+                $kel0 = isset($g0->group_no) ? (string)$g0->group_no : '';
+                $peng0 = '-';
+                if (isset($g0->teacher) && is_object($g0->teacher) && !empty($g0->teacher->nama)) {
+                    $peng0 = (string)$g0->teacher->nama;
+                } elseif (isset($ag->main_teacher) && is_object($ag->main_teacher) && !empty($ag->main_teacher->nama)) {
+                    $peng0 = (string)$ag->main_teacher->nama;
+                }
+
+                // --- BARIS UTAMA AGENDA (ditampilkan sekali) ---
+                $table2->addRow();
+                $table2->addCell(900)->addText((string)$no++, null, ['align'=>'center']);
+                $table2->addCell(5400)->addText((string)($ag->agenda_title ?? ''));
+                $table2->addCell(1200)->addText((string)$sum_async, null, ['align'=>'center']);
+                $table2->addCell(1200)->addText((string)$sum_sync,  null, ['align'=>'center']);
+                $table2->addCell(900)->addText($kel0, null, ['align'=>'center']);
+                $table2->addCell(2600)->addText($peng0);
+
+                // --- BARIS GRUP TAMBAHAN: hanya Kel. & Pengajar, kolom lain kosong ---
+                $gcount = count($groups);
+                for ($i = 1; $i < $gcount; $i++) {
+                    $kel = isset($groups[$i]->group_no) ? (string)$groups[$i]->group_no : '';
+                    $nm  = '-';
+                    if (isset($groups[$i]->teacher) && is_object($groups[$i]->teacher) && !empty($groups[$i]->teacher->nama)) {
+                        $nm = (string)$groups[$i]->teacher->nama;
+                    } elseif (isset($ag->main_teacher) && is_object($ag->main_teacher) && !empty($ag->main_teacher->nama)) {
+                        $nm = (string)$ag->main_teacher->nama;
+                    }
+
                     $table2->addRow();
-                    $table2->addCell(900)->addText($no++, null, ['align'=>'center']);
-                    $table2->addCell(5400)->addText($ag->agenda_title);
-                    $table2->addCell(1200)->addText((int)($ag->sum_jp_async ?? 0), null, ['align'=>'center']);
-                    $table2->addCell(1200)->addText((int)($ag->sum_jp_sync  ?? 0), null, ['align'=>'center']);
-                    $table2->addCell(900)->addText(isset($gr->group_no) ? (string)(int)$gr->group_no : '', null, ['align'=>'center']);
-                    $table2->addCell(2600)->addText($teacherName);
+                    $table2->addCell(900)->addText('');      // No kosong
+                    $table2->addCell(5400)->addText('');     // Agenda kosong
+                    $table2->addCell(1200)->addText('');     // JP Async kosong
+                    $table2->addCell(1200)->addText('');     // JP Sync kosong
+                    $table2->addCell(900)->addText($kel, null, ['align'=>'center']);
+                    $table2->addCell(2600)->addText($nm);
                 }
             }
+
+//             // helper to keep Word XML safe
+// $safe = function($v) {
+//     if ($v === null) return '';
+//     if (!is_string($v)) $v = (string)$v;
+//     // remove invalid UTF-8 bytes
+//     $v = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+//     // strip control chars except tab/newline/CR
+//     $v = preg_replace('/[^\P{C}\t\n\r]/u', '', $v);
+//     return $v;
+// };
+
+// // Tabel header
+// $table2 = $section1->addTable([
+//     'borderSize'  => 6,
+//     'borderColor' => '000000',
+//     'cellMargin'  => 50
+// ]);
+// $table2->addRow();
+// $table2->addCell(900)->addText('No', ['bold'=>true], ['align'=>'center']);
+// $table2->addCell(5400)->addText('Agenda/Mata Pelatihan', ['bold'=>true]);
+// $table2->addCell(1200)->addText('JP Async', ['bold'=>true], ['align'=>'center']);
+// $table2->addCell(1200)->addText('JP Sync',  ['bold'=>true], ['align'=>'center']);
+// $table2->addCell(900)->addText('Kel.',     ['bold'=>true], ['align'=>'center']);
+// $table2->addCell(2600)->addText('Pengajar', ['bold'=>true]);
+
+// $no = 1;
+// $agendas = (isset($pelatihan->agenda) && is_array($pelatihan->agenda)) ? $pelatihan->agenda : [];
+
+// foreach ($agendas as $ag) {
+//     // --- topics as array + sort by topic_no ---
+//     $topics = [];
+//     if (!empty($ag->topik) && is_array($ag->topik)) {
+//         $topics = array_values($ag->topik);
+//         $topicNos = [];
+//         foreach ($topics as $k => $tp) { $topicNos[$k] = (int)($tp->topic_no ?? 0); }
+//         array_multisort($topicNos, SORT_ASC, $topics);
+//     }
+
+//     // --- total JP (fallback hitung dari topik) ---
+//     $sum_async = (int)($ag->sum_jp_async ?? 0);
+//     $sum_sync  = (int)($ag->sum_jp_sync  ?? 0);
+//     if ($sum_async === 0 && $sum_sync === 0 && !empty($topics)) {
+//         foreach ($topics as $tp) {
+//             $sum_async += (int)($tp->jp_async ?? 0);
+//             $sum_sync  += (int)($tp->jp_sync  ?? 0);
+//         }
+//     }
+
+//     // --- groups normalized (fallback to main teacher) ---
+//     $groups = (!empty($ag->grup) && is_array($ag->grup))
+//         ? $ag->grup
+//         : [ (object)['group_no'=>null, 'teacher'=>($ag->main_teacher ?? null)] ];
+
+//     // --- first row (agenda summary) ---
+//     $g0     = $groups[0];
+//     $kel0   = isset($g0->group_no) ? (string)$g0->group_no : '';
+//     $peng0  = '-';
+//     if (isset($g0->teacher) && is_object($g0->teacher) && !empty($g0->teacher->nama)) {
+//         $peng0 = (string)$g0->teacher->nama;
+//     } elseif (isset($ag->main_teacher) && is_object($ag->main_teacher) && !empty($ag->main_teacher->nama)) {
+//         $peng0 = (string)$ag->main_teacher->nama;
+//     }
+
+//     $table2->addRow();
+//     $table2->addCell(900)->addText((string)$no++, null, ['align'=>'center']);
+//     $table2->addCell(5400)->addText($safe($ag->agenda_title ?? ''));
+//     $table2->addCell(1200)->addText((string)$sum_async, null, ['align'=>'center']);
+//     $table2->addCell(1200)->addText((string)$sum_sync,  null, ['align'=>'center']);
+//     $table2->addCell(900)->addText($safe($kel0), null, ['align'=>'center']);
+//     $table2->addCell(2600)->addText($safe($peng0));
+
+//     // --- map topics onto the extra group rows, then continue topics until done ---
+//     $tcount = count($topics);
+//     $gcount = count($groups);
+//     $tidx   = 0; // topic pointer
+
+//     for ($i = 1; $i < $gcount; $i++) {
+//         $kel = isset($groups[$i]->group_no) ? (string)$groups[$i]->group_no : '';
+//         $nm  = '-';
+//         if (isset($groups[$i]->teacher) && is_object($groups[$i]->teacher) && !empty($groups[$i]->teacher->nama)) {
+//             $nm = (string)$groups[$i]->teacher->nama;
+//         } elseif (isset($ag->main_teacher) && is_object($ag->main_teacher) && !empty($ag->main_teacher->nama)) {
+//             $nm = (string)$ag->main_teacher->nama;
+//         }
+
+//         $table2->addRow();
+//         $table2->addCell(900)->addText(''); // No
+
+//         if ($tidx < $tcount) {
+//             $tp  = $topics[$tidx++];
+//             $ttl = $safe($tp->topic_title ?? '');
+//             $jpA = (int)($tp->jp_async ?? 0);
+//             $jpS = (int)($tp->jp_sync  ?? 0);
+
+//             $table2->addCell(5400)->addText('- ' . $ttl);
+//             $table2->addCell(1200)->addText((string)$jpA, null, ['align'=>'center']);
+//             $table2->addCell(1200)->addText((string)$jpS, null, ['align'=>'center']);
+//         } else {
+//             // no more topics for this agenda on group rows
+//             $table2->addCell(5400)->addText('');
+//             $table2->addCell(1200)->addText('');
+//             $table2->addCell(1200)->addText('');
+//         }
+
+//         $table2->addCell(900)->addText($safe($kel), null, ['align'=>'center']);
+//         $table2->addCell(2600)->addText($safe($nm));
+//     }
+
+//     // remaining topics (if any)
+//     while ($tidx < $tcount) {
+//         $tp  = $topics[$tidx++];
+//         $ttl = $safe($tp->topic_title ?? '');
+//         $jpA = (int)($tp->jp_async ?? 0);
+//         $jpS = (int)($tp->jp_sync  ?? 0);
+
+//         $table2->addRow();
+//         $table2->addCell(900)->addText('');               // No
+//         $table2->addCell(5400)->addText('- ' . $ttl);     // topic title
+//         $table2->addCell(1200)->addText((string)$jpA, null, ['align'=>'center']);
+//         $table2->addCell(1200)->addText((string)$jpS, null, ['align'=>'center']);
+//         $table2->addCell(900)->addText('', null, ['align'=>'center']); // Kel
+//         $table2->addCell(2600)->addText('');                            // Pengajar
+//     }
+// }
+
+
+
                         
             $section1->addTitle("C. Tim Penyelenggara", 2);
             $section1->addText("Persyaratan panitia tim penyelenggara Pelatihan Dasar CPNS pada wilayah kerja Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru tahun 2025 adalah sebagai berikut:", $fontstyle, $paragraphstyle);
@@ -309,7 +477,7 @@ class wordGenerator_latsar {
             $section1->addListItem("Telah memiliki sertifikat Pelatihan Management of Training (MOT) dan/atau pelatihan lain yang dipersyaratkan bagi Pengelola Pelatihan.", 0, $fontstyle, $style);
             $section1->addListItem("Telah memiliki sertifikat Training Officer Course (TOC) dan/atau pelatihan lain yang Penyelenggara Pelatihan.", 0, $fontstyle, $style);
             
-            $section1->addText("Adapun panitia Pelatihan Dasar CPNS Golongan III Angkatan I berjumlah 4 orang dengan rincian sebagai berikut:", $fontstyle, $paragraphstyle);
+            $section1->addText("Adapun panitia {namaKegiatan} berjumlah 4 orang dengan rincian sebagai berikut:", $fontstyle, $paragraphstyle);
             
             // Create table for committee
             $table3 = $section1->addTable([
@@ -591,7 +759,7 @@ class wordGenerator_latsar {
             $writer = IOFactory::createWriter($phpword, 'Word2007');
             $writer->save($tempFile);
 
-            $filename = "LAPORAN_PENYELENGGARAAN_LATSAR_CPNS_ANGKATAN_I_TAHUN_{$tahun}.docx";
+            $filename = "Laporan Penyelenggaraan {$namaKegiatan} Tahun {$tahun}.docx";
             $target = FCPATH . 'downloads/' . $filename;
             rename($tempFile, $target);
             

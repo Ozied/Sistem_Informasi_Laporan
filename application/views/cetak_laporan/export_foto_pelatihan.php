@@ -125,13 +125,6 @@ foreach ($activitiesByDay as $dayActivities) {
     $section->addTextBreak(1);
 }
 
-// Penutup
-$section->addTextBreak(2);
-$section->addText("Mengetahui,", ['bold' => true], ['align' => 'right']);
-$section->addTextBreak(2);
-$section->addText("........................................", ['underline' => 'single'], ['align' => 'right']);
-$section->addText("Penanggung Jawab", [], ['align' => 'right']);
-
 // Output
 $filename = 'Lampiran_Dokumentasi_Pelatihan_' . $pelatihan['nama_pelatihan'] . '_' . date('Ymd_His') . '.docx';
 header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');

@@ -1,126 +1,138 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-if (!function_exists('excel_to_csv')) {
-    function excel_to_csv($excel_path, $csv_path) {
-        // Simple XLSX to CSV converter (for basic files)
-        $zip = new ZipArchive;
-        
-        if ($zip->open($excel_path) === TRUE) {
-            // Get shared strings
-            $sharedStrings = array();
-            if (($sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml')) !== FALSE) {
-                preg_match_all('/<t>(.*?)<\/t>/s', $sharedStringsXml, $matches);
-                $sharedStrings = $matches[1];
-            }
-            
-            // Get sheet data
-            $sheetData = array();
-            if (($workbookXml = $zip->getFromName('xl/workbook.xml')) !== FALSE) {
-                preg_match('/<sheet name="([^"]+)" sheetId="1"/', $workbookXml, $sheetMatch);
-                $sheetName = isset($sheetMatch[1]) ? $sheetMatch[1] : 'Sheet1';
-            }
-            
-            if (($sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml')) !== FALSE) {
-                preg_match_all('/<row.*?>(.*?)<\/row>/s', $sheetXml, $rows);
-                
-                $csv_content = '';
-                $row_count = 0;
-                
-                foreach ($rows[1] as $row) {
-                    preg_match_all('/<c[^>]*>(.*?)<\/c>/s', $row, $cells);
-                    $row_data = array();
-                    
-                    foreach ($cells[1] as $cell_index => $cell) {
-                        if (preg_match('/<v>(.*?)<\/v>/s', $cell, $value)) {
-                            $cell_value = $value[1];
-                            
-                            // Check if it's a shared string
-                            if (strpos($cells[0][$cell_index], 't="s"') !== FALSE) {
-                                $cell_value = isset($sharedStrings[intval($cell_value)]) ? 
-                                    $sharedStrings[intval($cell_value)] : $cell_value;
-                            }
-                            
-                            $row_data[] = '"' . str_replace('"', '""', $cell_value) . '"';
-                        } else {
-                            $row_data[] = '""';
-                        }
-                    }
-                    
-                    $csv_content .= implode(',', $row_data) . "\n";
-                    $row_count++;
-                    
-                    // Safety limit to prevent memory issues
-                    if ($row_count > 1000) {
-                        break;
-                    }
-                }
-                
-                file_put_contents($csv_path, $csv_content);
-            }
-            
-            $zip->close();
-            return true;
-        }
-        
-        return false;
-    }
-}
-
+/**
+ * Convert Excel (XLSX/XLS/CSV) to a clean UTF-8 CSV with fixed columns.
+ */
 if (!function_exists('convert_excel_to_csv')) {
     function convert_excel_to_csv($file_path) {
-        $extension = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
-        $csv_path = str_replace('.' . $extension, '.csv', $file_path);
-        
-        if ($extension == 'csv') {
-            return $file_path; // Already CSV
+        $ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+        $csv_path = str_replace('.' . $ext, '.csv', $file_path);
+
+        if ($ext === 'csv') {
+            return clean_csv_file($file_path);
+        } elseif ($ext === 'xlsx') {
+            return excel_xlsx_to_csv($file_path, $csv_path) ? $csv_path : false;
+        } elseif ($ext === 'xls') {
+            return excel_xls_to_csv($file_path, $csv_path);
         }
-        
-        if ($extension == 'xlsx') {
-            return excel_to_csv($file_path, $csv_path) ? $csv_path : false;
-        }
-        
-        // For XLS files, we'll use a simpler approach or shell command
-        if ($extension == 'xls') {
-            // Try using shell command if available
-            if (function_exists('shell_exec')) {
-                $command = "libreoffice --headless --convert-to csv --outdir " . dirname($file_path) . " " . escapeshellarg($file_path);
-                @shell_exec($command);
-                
-                $converted_file = str_replace('.xls', '.csv', $file_path);
-                if (file_exists($converted_file)) {
-                    return $converted_file;
-                }
-            }
-            
-            // Fallback: try simple text extraction
-            return simple_xls_to_csv($file_path, $csv_path);
-        }
-        
         return false;
     }
 }
 
+/**
+ * XLSX Reader preserving empty cells.
+ */
+if (!function_exists('excel_xlsx_to_csv')) {
+    function excel_xlsx_to_csv($xlsx_path, $csv_path) {
+        $zip = new ZipArchive();
+        if ($zip->open($xlsx_path) !== TRUE) return false;
+
+        // Load shared strings
+        $sharedStrings = [];
+        if (($xml = $zip->getFromName('xl/sharedStrings.xml')) !== FALSE) {
+            preg_match_all('/<t[^>]*>(.*?)<\/t>/s', $xml, $m);
+            $sharedStrings = $m[1];
+        }
+
+        // Load first sheet (usually sheet1.xml)
+        $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+        if ($sheetXml === FALSE) return false;
+
+        // Extract rows
+        preg_match_all('/<row[^>]*>(.*?)<\/row>/s', $sheetXml, $rows);
+        $csv = '';
+        foreach ($rows[1] as $rowXml) {
+            // Build array for up to 6 columns
+            $cells = array_fill(0, 6, '');
+            preg_match_all('/<c[^>]*r="([A-Z]+)(\d+)"[^>]*>(.*?)<\/c>/s', $rowXml, $cols, PREG_SET_ORDER);
+
+            foreach ($cols as $cell) {
+                list($all, $colLetter, $rowNum, $cellContent) = $cell;
+                $index = ord($colLetter) - 65; // A=0
+                if ($index < 0 || $index >= 6) continue;
+
+                // Get value
+                if (strpos($cellContent, 't="s"') !== FALSE || strpos($cellContent, '<v>') !== FALSE) {
+                    if (preg_match('/<v>(.*?)<\/v>/', $cellContent, $v)) {
+                        $val = $v[1];
+                        // shared string
+                        if (preg_match('/t="s"/', $cell[0])) {
+                            $val = isset($sharedStrings[intval($val)]) ? $sharedStrings[intval($val)] : $val;
+                        }
+                    } else {
+                        $val = '';
+                    }
+                } elseif (preg_match('/<t[^>]*>(.*?)<\/t>/', $cellContent, $v)) {
+                    $val = $v[1];
+                } else {
+                    $val = '';
+                }
+
+                // Normalize whitespace and remove zero-width chars
+                $val = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $val);
+                $val = trim(preg_replace("/\s+/", ' ', $val));
+                $cells[$index] = $val;
+            }
+
+            // Join row, quote each field
+            $quoted = array_map(function ($v) {
+                $v = str_replace('"', '""', $v);
+                return '"' . $v . '"';
+            }, $cells);
+            $csv .= implode(',', $quoted) . "\n";
+        }
+        $zip->close();
+
+        file_put_contents($csv_path, "\xEF\xBB\xBF" . $csv);
+        return true;
+    }
+}
+
+/**
+ * Handle XLS via LibreOffice or basic fallback.
+ */
+if (!function_exists('excel_xls_to_csv')) {
+    function excel_xls_to_csv($xls_path, $csv_path) {
+        if (function_exists('shell_exec')) {
+            $cmd = "libreoffice --headless --convert-to csv --outdir " . dirname($xls_path) . " " . escapeshellarg($xls_path);
+            @shell_exec($cmd);
+            $converted = str_replace('.xls', '.csv', $xls_path);
+            if (file_exists($converted)) return clean_csv_file($converted);
+        }
+        return simple_xls_to_csv($xls_path, $csv_path);
+    }
+}
+
+/**
+ * Basic binary XLS fallback (rarely used).
+ */
 if (!function_exists('simple_xls_to_csv')) {
     function simple_xls_to_csv($xls_path, $csv_path) {
-        // Very basic XLS reader using file reading
-        $handle = fopen($xls_path, 'rb');
-        $content = fread($handle, filesize($xls_path));
-        fclose($handle);
-        
-        // Extract text content (very basic)
-        preg_match_all('/[^\x00-\x1F\x7F-\xFF]{3,}/', $content, $matches);
-        
-        $rows = array_chunk($matches[0], 6); // Assuming 6 columns
-        $csv_content = '';
-        
-        foreach ($rows as $row) {
-            $csv_content .= '"' . implode('","', array_map(function($value) {
-                return str_replace('"', '""', $value);
-            }, $row)) . '"' . "\n";
+        $bin = @file_get_contents($xls_path);
+        if ($bin === false) return false;
+        preg_match_all('/[^\x00-\x1F\x7F-\xFF]{3,}/', $bin, $matches);
+        $rows = array_chunk($matches[0], 6);
+        $csv = '';
+        foreach ($rows as $r) {
+            $csv .= '"' . implode('","', array_map(function($v){
+                return str_replace('"', '""', trim($v));
+            }, $r)) . '"' . "\n";
         }
-        
-        file_put_contents($csv_path, $csv_content);
+        file_put_contents($csv_path, "\xEF\xBB\xBF" . $csv);
         return $csv_path;
     }
 }
+
+/**
+ * Clean CSV of zero-width & non-printable chars.
+ */
+if (!function_exists('clean_csv_file')) {
+    function clean_csv_file($path) {
+        $content = @file_get_contents($path);
+        $content = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $content);
+        file_put_contents($path, $content);
+        return $path;
+    }
+}
+?>
