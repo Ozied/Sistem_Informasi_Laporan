@@ -18,7 +18,7 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if ($this->session->userdata('level') == 'Admin' || $this->session->userdata('level') == 'Panitia') { ?>
               <a href="<?= base_url('data/pegawaitambah'); ?>">
                 <button class="btn btn-primary">
                   <i class="fa fa-plus"></i> Tambah Pegawai
@@ -48,7 +48,7 @@
                       <td><?= htmlentities($row['NIP']); ?></td>
                       <td><?= htmlentities($row['asal_satker']); ?></td>
                       <td>
-                        <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                        <?php if ($this->session->userdata('level') == 'Admin' || $this->session->userdata('level') == 'Panitia') { ?>
                           <a href="<?= base_url('data/pegawaiedit/' . $row['id_pegawai']); ?>">
                             <button class="btn btn-success"><i class="fa fa-edit"></i></button>
                           </a>

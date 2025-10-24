@@ -16,7 +16,7 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if($this->session->userdata('level') == 'Petugas'){ ?>
+            <?php if($this->session->userdata('level') == 'Admin' || $this->session->userdata('level') == 'Panitia'){ ?>
               <a href="<?= base_url('data/roletambah'); ?>">
                 <button class="btn btn-primary">
                   <i class="fa fa-plus"></i> Tambah Role
@@ -42,7 +42,7 @@
                       <td><?= $no; ?></td>
                       <td><?= htmlentities($isi['nama_role']); ?></td>
                       <td>
-                        <?php if($this->session->userdata('level') == 'Petugas'){ ?>
+                        <?php if($this->session->userdata('level') == 'Admin' || $this->session->userdata('level') == 'Panitia'){ ?>
                           <a href="<?= base_url('data/roleedit/'.$isi['id_role']); ?>">
                             <button class="btn btn-success"><i class="fa fa-edit"></i></button>
                           </a>

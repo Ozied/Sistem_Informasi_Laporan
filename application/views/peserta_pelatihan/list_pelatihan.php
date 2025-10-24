@@ -63,20 +63,12 @@
                     <td><?= htmlentities($isi['tanggal_mulai_pelatihan']); ?></td>
                     <td><?= htmlentities($isi['tanggal_selesai_pelatihan']); ?></td>
                     <td><?= htmlentities($isi['tahun']); ?></td>
-                   <td>
-                    <?php if($this->session->userdata('level') == 'Petugas'){ ?>
-                        <a href="<?= base_url('data/listpesertapelatihan/'.$isi['id_pelatihan']); ?>">
-                        <button class="btn btn-warning">
-                            <i class="fa fa-users"></i> Tambah Peserta
-                        </button>
-                        </a>
-                    <?php } else { ?>
-                        <a href="<?= base_url('data/listpesertapelatihan/'.$isi['id_pelatihan']); ?>">
-                        <button class="btn btn-warning">
-                            <i class="fa fa-users"></i> Tambah Peserta
-                        </button>
-                        </a>
-                    <?php } ?>
+                    <td>
+                      <a href="<?= base_url('data/listpesertapelatihan/'.$isi['id_pelatihan']); ?>">
+                      <button class="btn btn-warning">
+                          <i class="fa fa-users"></i> Tambah Peserta
+                      </button>
+                      </a>
                     </td>
                   </tr>
                   <?php $no++; } ?>

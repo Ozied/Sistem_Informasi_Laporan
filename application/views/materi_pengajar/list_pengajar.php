@@ -64,7 +64,7 @@ $id_pelatihan = isset($pelatihan['id_pelatihan']) ? (int)$pelatihan['id_pelatiha
                       <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#collapseAgenda<?= $aid; ?>">
                         <i class="fa fa-list"></i> Topik & Grup
                       </button>
-                      <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                      <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                         <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalSetMain<?= $aid; ?>" title="Set/Update Main Teacher">
                           <i class="fa fa-user-plus"></i>
                         </button>
@@ -120,7 +120,7 @@ $id_pelatihan = isset($pelatihan['id_pelatihan']) ? (int)$pelatihan['id_pelatiha
                             <h4 class="pull-left" style="margin:5px 0;">
                               <i class="fa fa-users"></i> Grup Pengajar
                             </h4>
-                            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                               <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="modal" data-target="#modalTambahGrup<?= $aid; ?>">
                                 <i class="fa fa-plus"></i> Tambah Grup
                               </button>
@@ -144,7 +144,7 @@ $id_pelatihan = isset($pelatihan['id_pelatihan']) ? (int)$pelatihan['id_pelatiha
                                     <td class="text-center"><?= (int)$gr['group_no']; ?></td>
                                     <td><i class="fa fa-user"></i> <?= htmlentities($gr['teacher_name'] ?: '-'); ?></td>
                                     <td class="text-right">
-                                      <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                                      <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                                         <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#modalEditGrup<?= (int)$gr['agenda_group_id']; ?>">
                                           <i class="fa fa-edit"></i> Edit
                                         </button>

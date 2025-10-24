@@ -22,7 +22,7 @@ $open_modal = $this->session->flashdata('open_modal');
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
               <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalTambahAgenda">
                 <i class="fa fa-plus"></i> Tambah Agenda
               </button>
@@ -54,7 +54,7 @@ $open_modal = $this->session->flashdata('open_modal');
                       <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#collapseTopik<?= (int)$ag['agenda_id']; ?>">
                         <i class="fa fa-list"></i> Topik
                       </button>
-                      <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                      <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                         <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalEditAgenda<?= (int)$ag['agenda_id']; ?>" title="Edit Agenda">
                           <i class="fa fa-edit"></i>
                         </button>
@@ -75,7 +75,7 @@ $open_modal = $this->session->flashdata('open_modal');
                             <h4 class="pull-left" style="margin:5px 0;">
                               <i class="fa fa-list"></i> Topik untuk: <strong><?= htmlentities($ag['agenda_title']); ?></strong>
                             </h4>
-                            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                               <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="modal" data-target="#modalTambahTopik<?= (int)$ag['agenda_id']; ?>">
                                 <i class="fa fa-plus"></i> Tambah Topik
                               </button>
@@ -108,7 +108,7 @@ $open_modal = $this->session->flashdata('open_modal');
                                     <td class="text-center"><?= (int)$tp['jp_sync']; ?></td>
                                     <td class="text-center"><?= (int)$tp['jp_async']; ?></td>
                                     <td class="text-right">
-                                      <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                                      <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                                         <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#modalEditTopik<?= (int)$tp['topic_id']; ?>" title="Edit Topik">
                                           <i class="fa fa-edit"></i> Edit
                                         </button>

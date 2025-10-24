@@ -50,7 +50,7 @@ $MODALS = [];
 
     <div class="box box-primary">
       <div class="box-header with-border">
-        <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+        <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
           <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambahAgenda">
             <i class="fa fa-plus"></i> Tambah Agenda
           </button>
@@ -81,7 +81,7 @@ $MODALS = [];
                 <td><span class="badge-pill badge-green"><?= (int)($ag->total_jp ?? 0); ?></span></td>
                 <td><span class="badge-pill badge-purple"><?= (int)($ag->jumlah_pengajar_kelompok ?? 0); ?></span></td>
                 <td>
-                  <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                  <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Aksi">
                       <button class="btn btn-success" data-toggle="modal" data-target="#modalEditAgenda<?= $ag->agenda_id; ?>"><i class="fa fa-edit"></i> Edit</button>
                       <button class="btn btn-info"    data-toggle="modal" data-target="#modalTopik<?= $ag->agenda_id; ?>"><i class="fa fa-list"></i> Topik</button>

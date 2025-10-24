@@ -36,23 +36,32 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Username</label>
-                                    <input type="text" class="form-control" readonly value="<?= $user->user;?>"  name="user" required="required" placeholder="Username">
+                                    <input type="text" class="form-control" value="<?= $user->user;?>"  name="user" required="required" placeholder="Username">
                                 </div>
                                 <div class="form-group">
                                     <label>Password (opsional)</label>
                                     <input type="password" class="form-control" name="pass" placeholder="Isi Password Jika di Perlukan Ganti">
                                 </div>
-                                <div class="form-group">
-                                    <label>Level</label>
-                                    <select name="level" class="form-control" required="required">
-									<?php if($this->session->userdata('level') == 'Petugas'){?>
-										<option <?php if($user->level == 'Petugas'){ echo 'selected';}?>>Petugas</option>
-										<option <?php if($user->level == 'Anggota'){ echo 'selected';}?>>Anggota</option>
-									<?php }elseif($this->session->userdata('level') == 'Anggota'){?>
-										<option <?php if($user->level == 'Anggota'){ echo 'selected';}?>>Anggota</option>
-									<?php }?>
-                                    </select>
-                                </div>
+                                <?php if ($user->level == 'Admin') { ?>
+                                    <div class="form-group">
+                                        <label>Level</label>
+                                        <select name="level" class="form-control" required="required">
+                                        <?php if($this->session->userdata('level') == 'Panitia'){?>
+                                            <option <?php if($user->level == 'Panitia'){ echo 'selected';}?>>Panitia</option>
+                                            <option <?php if($user->level == 'Admin'){ echo 'selected';}?>>Admin</option>
+                                        <?php }elseif($this->session->userdata('level') == 'Admin'){?>
+                                            <option <?php if($user->level == 'Admin'){ echo 'selected';}?>>Admin</option>
+                                            <option <?php if($user->level == 'Panitia'){ echo 'selected';}?>>Panitia</option>
+                                        <?php }?>
+                                        </select>
+                                    </div>
+
+                                <?php } elseif ($user->level == 'Panitia') { ?>
+                                    <div class="form-group">
+                                        <label>Level</label>
+                                        <input type="level" class="form-control" name="level" value="<?= $user->level;?>" readonly placeholder="Isi Password Jika di Perlukan Ganti">
+                                    </div>
+                                <?php } ?>
                                 <div class="form-group">
                                     <label>Jenis Kelamin</label>
                                     <br/>
@@ -63,12 +72,16 @@
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
+                                    <label>NIP</label>
+                                    <input id="uintTextBox" class="form-control" value="<?= $user->nip;?>" name="nip" required="required" placeholder="Contoh : 200102202025051001">
+                                </div>
+                                <div class="form-group">
                                     <label>Telepon</label>
                                     <input id="uintTextBox" class="form-control" value="<?= $user->telepon;?>" name="telepon" required="required" placeholder="Contoh : 089618173609">
                                 </div>
                                 <div class="form-group">
                                     <label>E-mail</label>
-                                    <input type="email"  value="<?= $user->email;?>" readonly class="form-control" name="email" required="required" placeholder="Contoh : fauzan1892@codekop.com">
+                                    <input type="email"  value="<?= $user->email;?>" class="form-control" name="email" required="required" placeholder="Contoh : fauzan1892@codekop.com">
                                 </div>
                                 <div class="form-group">
                                     <label>Pas Foto</label>
@@ -88,11 +101,11 @@
                         <div class="pull-right">
                             <button type="submit" class="btn btn-primary btn-md">Edit Data</button> 
 						</form>
-						<?php if($this->session->userdata('level') == 'Petugas'){?>
-							<a href="<?= base_url('user');?>" class="btn btn-danger btn-md">Kembali</a>
-						<?php }elseif($this->session->userdata('level') == 'Anggota'){?>
-							<a href="<?= base_url('transaksi');?>" class="btn btn-danger btn-md">Kembali</a>
-						<?php }?>
+                        <?php if ($user->level == 'Admin'){ ?>
+                            <a href="<?= base_url('user');?>" class="btn btn-danger btn-md">Kembali</a>
+                        <?php } elseif ($user->level == 'Panitia') { ?>
+                            <a href="<?= base_url('dashboard');?>" class="btn btn-danger btn-md">Kembali</a>
+                        <?php } ?>
                         </div>
 		        </div>
 	        </div>

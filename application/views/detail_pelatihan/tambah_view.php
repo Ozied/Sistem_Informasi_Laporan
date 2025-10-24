@@ -81,88 +81,88 @@
                       </label>
                       <select class="form-control select2" name="<?= $name; ?>">
                         <option disabled selected>-- Pilih Pegawai --</option>
-                        <?php foreach($pegawais as $isi): ?>
+                        <?php foreach($panitia as $isi): ?>
                           <option value="<?= $isi['id_pegawai']; ?>"><?= $isi['nama']; ?></option>
                         <?php endforeach; ?>
                       </select>
                     </div>
                   <?php endforeach; ?>
                 </div>
-             <?php else: ?>
-  <!-- PJJ/PDWK: Struktur Tim + Widyaiswara & Pengajar (pakai tabel baru) -->
-  <div class="row">
-    <!-- Struktur Tim Kegiatan (tetap single-select) -->
-    <?php
-      $positions = [
-        'id_ketua_panitia' => ['label' => 'Ketua Panitia', 'desc' => 'Pilih ketua panitia pelaksana kegiatan'],
-        'id_akademis'      => ['label' => 'Akademis', 'desc' => 'Pilih penanggung jawab akademik kegiatan'],
-        'id_keuangan'      => ['label' => 'Keuangan', 'desc' => 'Pilih penanggung jawab keuangan kegiatan'],
-        'id_administrasi'  => ['label' => 'Administrasi', 'desc' => 'Pilih penanggung jawab administrasi kegiatan'],
-      ];
-    ?>
-    <?php foreach ($positions as $name => $data): ?>
-      <div class="form-group col-md-3">
-        <label><?= $data['label'] ?> <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i></label>
-        <select class="form-control select2" name="<?= $name; ?>">
-          <option disabled selected>-- Pilih Pegawai --</option>
-          <?php foreach($pegawais as $isi): ?>
-            <option value="<?= $isi['id_pegawai']; ?>"><?= $isi['nama']; ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-    <?php endforeach; ?>
-  </div>
+              <?php else: ?>
+                <!-- PJJ/PDWK: Struktur Tim + Widyaiswara & Pengajar (pakai tabel baru) -->
+                <div class="row">
+                  <!-- Struktur Tim Kegiatan (tetap single-select) -->
+                  <?php
+                    $positions = [
+                      'id_ketua_panitia' => ['label' => 'Ketua Panitia', 'desc' => 'Pilih ketua panitia pelaksana kegiatan'],
+                      'id_akademis'      => ['label' => 'Akademis', 'desc' => 'Pilih penanggung jawab akademik kegiatan'],
+                      'id_keuangan'      => ['label' => 'Keuangan', 'desc' => 'Pilih penanggung jawab keuangan kegiatan'],
+                      'id_administrasi'  => ['label' => 'Administrasi', 'desc' => 'Pilih penanggung jawab administrasi kegiatan'],
+                    ];
+                  ?>
+                  <?php foreach ($positions as $name => $data): ?>
+                    <div class="form-group col-md-3">
+                      <label><?= $data['label'] ?> <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i></label>
+                      <select class="form-control select2" name="<?= $name; ?>">
+                        <option disabled selected>-- Pilih Pegawai --</option>
+                        <?php foreach($panitia as $isi): ?>
+                          <option value="<?= $isi['id_pegawai']; ?>"><?= $isi['nama']; ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
 
-  <!-- Widyaiswara & Pengajar -->
-  <div class="row">
-    <!-- Widyaiswara (multi) -->
-    <div class="form-group col-md-4">
-      <label>Widyaiswara (multi)
-        <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih satu atau lebih Widyaiswara. Data disimpan ke tbl_pelatihan_pengajar dengan tipe_peran = 'Widyaiswara'."></i>
-      </label>
-      <select class="form-control select2" name="wi_ids[]" id="wi_ids" multiple>
-        <?php foreach($pegawais as $pg): ?>
-          <option value="<?= $pg['id_pegawai']; ?>"
-            <?= in_array((int)$pg['id_pegawai'], $wi_selected ?? []) ? 'selected' : '' ?>>
-            <?= $pg['nama']; ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-      <small class="text-muted">Tekan Ctrl/⌘ untuk memilih banyak (atau gunakan Select2).</small>
-    </div>
+                <!-- Widyaiswara & Pengajar -->
+                <div class="row">
+                  <!-- Widyaiswara (multi) -->
+                  <div class="form-group col-md-4">
+                    <label>Widyaiswara (multi)
+                      <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih satu atau lebih Widyaiswara. Data disimpan ke tbl_pelatihan_pengajar dengan tipe_peran = 'Widyaiswara'."></i>
+                    </label>
+                    <select class="form-control select2" name="wi_ids[]" id="wi_ids" multiple>
+                      <?php foreach($pegawais as $pg): ?>
+                        <option value="<?= $pg['id_pegawai']; ?>"
+                          <?= in_array((int)$pg['id_pegawai'], $wi_selected ?? []) ? 'selected' : '' ?>>
+                          <?= $pg['nama']; ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">Tekan Ctrl/⌘ untuk memilih banyak (atau gunakan Select2).</small>
+                  </div>
 
-    <!-- WI Rapat Kelulusan (single) -->
-    <div class="form-group col-md-4">
-      <label>WI Rapat Kelulusan
-        <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Opsional: Widyaiswara yang hadir pada rapat kelulusan. Disimpan sebagai 'Widyaiswara Rapat Kelulusan'."></i>
-      </label>
-      <select class="form-control select2" name="wi_rapat_kelulusan" id="wi_rapat_kelulusan">
-        <option value="">-- Pilih Pegawai (opsional) --</option>
-        <?php foreach($pegawais as $pg): ?>
-          <option value="<?= $pg['id_pegawai']; ?>"
-            <?= isset($wi_rapat_selected) && (int)$wi_rapat_selected === (int)$pg['id_pegawai'] ? 'selected' : '' ?>>
-            <?= $pg['nama']; ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-    </div>
+                  <!-- WI Rapat Kelulusan (single) -->
+                  <div class="form-group col-md-4">
+                    <label>WI Rapat Kelulusan
+                      <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Opsional: Widyaiswara yang hadir pada rapat kelulusan. Disimpan sebagai 'Widyaiswara Rapat Kelulusan'."></i>
+                    </label>
+                    <select class="form-control select2" name="wi_rapat_kelulusan" id="wi_rapat_kelulusan">
+                      <option value="">-- Pilih Pegawai (opsional) --</option>
+                      <?php foreach($pegawais as $pg): ?>
+                        <option value="<?= $pg['id_pegawai']; ?>"
+                          <?= isset($wi_rapat_selected) && (int)$wi_rapat_selected === (int)$pg['id_pegawai'] ? 'selected' : '' ?>>
+                          <?= $pg['nama']; ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
 
-    <!-- Pengajar (multi) -->
-    <div class="form-group col-md-4">
-      <label>Pengajar (multi)
-        <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih satu atau lebih Pengajar. Data disimpan ke tbl_pelatihan_pengajar dengan tipe_peran = 'Pengajar'."></i>
-      </label>
-      <select class="form-control select2" name="pengajar_ids[]" id="pengajar_ids" multiple>
-        <?php foreach($pegawais as $pg): ?>
-          <option value="<?= $pg['id_pegawai']; ?>"
-            <?= in_array((int)$pg['id_pegawai'], $pengajar_selected ?? []) ? 'selected' : '' ?>>
-            <?= $pg['nama']; ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-  </div>
-<?php endif; ?>
+                  <!-- Pengajar (multi) -->
+                  <div class="form-group col-md-4">
+                    <label>Pengajar (multi)
+                      <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Pilih satu atau lebih Pengajar. Data disimpan ke tbl_pelatihan_pengajar dengan tipe_peran = 'Pengajar'."></i>
+                    </label>
+                    <select class="form-control select2" name="pengajar_ids[]" id="pengajar_ids" multiple>
+                      <?php foreach($pegawais as $pg): ?>
+                        <option value="<?= $pg['id_pegawai']; ?>"
+                          <?= in_array((int)$pg['id_pegawai'], $pengajar_selected ?? []) ? 'selected' : '' ?>>
+                          <?= $pg['nama']; ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                </div>
+              <?php endif; ?>
 
             </div>
           </div>

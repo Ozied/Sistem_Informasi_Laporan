@@ -18,7 +18,7 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
             <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambahKegiatanPelatihan">
                 <i class="fa fa-plus"> </i> Tambah Kegiatan Pelatihan
             </button>
@@ -54,7 +54,7 @@
                       <td><?= date('H:i', strtotime($kegiatan['jam_mulai'])); ?></td>
                       <td><?= date('H:i', strtotime($kegiatan['jam_selesai'])); ?></td>
                       <td>
-                        <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                        <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                             <!-- Tombol Edit -->
                             <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalEditKegiatanPelatihan<?= $kegiatan['id_activity']; ?>">
                             <i class="fa fa-edit"></i> Edit

@@ -16,7 +16,7 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if($this->session->userdata('level') == 'Petugas'){
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin'){
                 $current_jenis = $this->input->get('jenis');
                 $tambah_url = base_url('data/pelatihantambah');
 
@@ -61,7 +61,7 @@
                     <td><?= htmlentities($isi['tanggal_selesai_pelatihan']); ?></td>
                     <td><?= htmlentities($isi['tahun']); ?></td>
                     <td>
-                      <?php if($this->session->userdata('level') == 'Petugas'){ ?>
+                      <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin'){ ?>
                         <a href="<?= base_url('data/pelatihanedit/'.$isi['id_pelatihan']); ?>"><button class="btn btn-success"><i class="fa fa-edit"></i></button></a>
                         <a href="<?= base_url('data/pelatihandetail/'.$isi['id_pelatihan']); ?>"><button class="btn btn-primary"><i class="fa fa-sign-in"></i> Detail</button></a>
                         <a href="<?= base_url('data/prosespelatihan?id_pelatihan='.$isi['id_pelatihan']); ?>" onclick="return confirm('Anda yakin pelatihan ini akan dihapus?');">

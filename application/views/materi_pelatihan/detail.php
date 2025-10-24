@@ -108,7 +108,7 @@
             </table>
 
             <div class="text-right">
-              <a href="<?= base_url('data/materipelatihan?jenis=PDWK'); ?>" class="btn btn-danger btn-md">
+              <a href="<?= base_url('data/materipelatihan'). (!empty($jenis) ? '?jenis=' . urlencode($jenis) : ''); ?>" class="btn btn-danger btn-md">
                 <i class="fa fa-arrow-left"></i> Kembali
               </a>
             </div>

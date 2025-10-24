@@ -20,7 +20,7 @@
         <div class="box box-primary">
           <div class="box-header with-border">
             <h3 class="box-title">Pelatihan: <?= htmlentities($pelatihan->nama_pelatihan); ?></h3>
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
             <div class="box-tools pull-right">
               <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambahPeserta">
                   <i class="fa fa-plus"> </i> Tambah Peserta
@@ -61,7 +61,7 @@
                       <td><?= htmlentities($peserta->unit_kerja); ?></td>
                       <td><?= date('d-m-Y', strtotime($peserta->created_at)); ?></td>
                       <td>
-                        <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                        <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                             <!-- Tombol Edit -->
                             <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalEditPeserta<?= $peserta->id_peserta; ?>">
                             <i class="fa fa-edit"></i> Edit

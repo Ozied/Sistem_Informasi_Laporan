@@ -82,7 +82,7 @@
                       </label>
                       <select class="form-control select2" name="<?= $name; ?>">
                         <option disabled <?= is_null($detail_pelatihan->$name) ? 'selected' : ''; ?>>-- Pilih Pegawai --</option>
-                        <?php foreach($pegawais as $isi): ?>
+                        <?php foreach($panitia as $isi): ?>
                           <option value="<?= $isi['id_pegawai']; ?>"
                             <?= ($isi['id_pegawai'] == $detail_pelatihan->$name) ? 'selected' : ''; ?>>
                             <?= $isi['nama']; ?>
@@ -93,86 +93,86 @@
                   <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-  <!-- PJJ/PDWK: Struktur Tim + Widyaiswara & Pengajar (pakai tabel baru) -->
-  <div class="row">
-    <?php
-      $positions = [
-        'id_ketua_panitia' => ['label' => 'Ketua Panitia', 'desc' => 'Pilih ketua panitia pelaksana kegiatan'],
-        'id_akademis'      => ['label' => 'Akademis', 'desc' => 'Pilih penanggung jawab akademik kegiatan'],
-        'id_keuangan'      => ['label' => 'Keuangan', 'desc' => 'Pilih penanggung jawab keuangan kegiatan'],
-        'id_administrasi'  => ['label' => 'Administrasi', 'desc' => 'Pilih penanggung jawab administrasi kegiatan'],
-      ];
-    ?>
-    <?php foreach ($positions as $name => $data): ?>
-      <div class="form-group col-md-3">
-        <label><?= $data['label'] ?>
-          <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i>
-        </label>
-        <select class="form-control select2" name="<?= $name; ?>">
-          <option disabled <?= is_null($detail_pelatihan->$name) ? 'selected' : ''; ?>>-- Pilih Pegawai --</option>
-          <?php foreach($pegawais as $isi): ?>
-            <option value="<?= $isi['id_pegawai']; ?>"
-              <?= ($isi['id_pegawai'] == $detail_pelatihan->$name) ? 'selected' : ''; ?>>
-              <?= $isi['nama']; ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-    <?php endforeach; ?>
-  </div>
+                <!-- PJJ/PDWK: Struktur Tim + Widyaiswara & Pengajar (pakai tabel baru) -->
+                <div class="row">
+                  <?php
+                    $positions = [
+                      'id_ketua_panitia' => ['label' => 'Ketua Panitia', 'desc' => 'Pilih ketua panitia pelaksana kegiatan'],
+                      'id_akademis'      => ['label' => 'Akademis', 'desc' => 'Pilih penanggung jawab akademik kegiatan'],
+                      'id_keuangan'      => ['label' => 'Keuangan', 'desc' => 'Pilih penanggung jawab keuangan kegiatan'],
+                      'id_administrasi'  => ['label' => 'Administrasi', 'desc' => 'Pilih penanggung jawab administrasi kegiatan'],
+                    ];
+                  ?>
+                  <?php foreach ($positions as $name => $data): ?>
+                    <div class="form-group col-md-3">
+                      <label><?= $data['label'] ?>
+                        <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="<?= $data['desc'] ?>"></i>
+                      </label>
+                      <select class="form-control select2" name="<?= $name; ?>">
+                        <option disabled <?= is_null($detail_pelatihan->$name) ? 'selected' : ''; ?>>-- Pilih Pegawai --</option>
+                        <?php foreach($panitia as $isi): ?>
+                          <option value="<?= $isi['id_pegawai']; ?>"
+                            <?= ($isi['id_pegawai'] == $detail_pelatihan->$name) ? 'selected' : ''; ?>>
+                            <?= $isi['nama']; ?>
+                          </option>
+                        <?php endforeach; ?>
+                      </select>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
 
-  <div class="row">
-    <!-- Widyaiswara (multi) -->
-    <div class="form-group col-md-4">
-      <label>Widyaiswara (multi)
-        <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
-           title="Pilih satu atau lebih Widyaiswara. Tersimpan ke tbl_pelatihan_pengajar (tipe_peran = 'Widyaiswara')."></i>
-      </label>
-      <select class="form-control select2" name="wi_ids[]" id="wi_ids" multiple>
-        <?php foreach($pegawais as $pg): ?>
-          <option value="<?= $pg['id_pegawai']; ?>"
-            <?= in_array((int)$pg['id_pegawai'], $wi_selected ?? []) ? 'selected' : '' ?>>
-            <?= $pg['nama']; ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-      <small class="text-muted">Tekan Ctrl/⌘ untuk memilih banyak (atau gunakan Select2).</small>
-    </div>
+                <div class="row">
+                  <!-- Widyaiswara (multi) -->
+                  <div class="form-group col-md-4">
+                    <label>Widyaiswara (multi)
+                      <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
+                        title="Pilih satu atau lebih Widyaiswara. Tersimpan ke tbl_pelatihan_pengajar (tipe_peran = 'Widyaiswara')."></i>
+                    </label>
+                    <select class="form-control select2" name="wi_ids[]" id="wi_ids" multiple>
+                      <?php foreach($pegawais as $pg): ?>
+                        <option value="<?= $pg['id_pegawai']; ?>"
+                          <?= in_array((int)$pg['id_pegawai'], $wi_selected ?? []) ? 'selected' : '' ?>>
+                          <?= $pg['nama']; ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">Tekan Ctrl/⌘ untuk memilih banyak (atau gunakan Select2).</small>
+                  </div>
 
-    <!-- WI Rapat Kelulusan (single) -->
-    <div class="form-group col-md-4">
-      <label>WI Rapat Kelulusan
-        <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
-           title="Opsional: Widyaiswara yang hadir pada rapat kelulusan (tipe_peran = 'Widyaiswara Rapat Kelulusan')."></i>
-      </label>
-      <select class="form-control select2" name="wi_rapat_kelulusan" id="wi_rapat_kelulusan">
-        <option value="">-- Pilih Pegawai (opsional) --</option>
-        <?php foreach($pegawais as $pg): ?>
-          <option value="<?= $pg['id_pegawai']; ?>"
-            <?= isset($wi_rapat_selected) && (int)$wi_rapat_selected === (int)$pg['id_pegawai'] ? 'selected' : '' ?>>
-            <?= $pg['nama']; ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-    </div>
+                  <!-- WI Rapat Kelulusan (single) -->
+                  <div class="form-group col-md-4">
+                    <label>WI Rapat Kelulusan
+                      <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
+                        title="Opsional: Widyaiswara yang hadir pada rapat kelulusan (tipe_peran = 'Widyaiswara Rapat Kelulusan')."></i>
+                    </label>
+                    <select class="form-control select2" name="wi_rapat_kelulusan" id="wi_rapat_kelulusan">
+                      <option value="">-- Pilih Pegawai (opsional) --</option>
+                      <?php foreach($pegawais as $pg): ?>
+                        <option value="<?= $pg['id_pegawai']; ?>"
+                          <?= isset($wi_rapat_selected) && (int)$wi_rapat_selected === (int)$pg['id_pegawai'] ? 'selected' : '' ?>>
+                          <?= $pg['nama']; ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
 
-    <!-- Pengajar (multi) -->
-    <div class="form-group col-md-4">
-      <label>Pengajar (multi)
-        <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
-           title="Pilih satu atau lebih Pengajar. Tersimpan ke tbl_pelatihan_pengajar (tipe_peran = 'Pengajar')."></i>
-      </label>
-      <select class="form-control select2" name="pengajar_ids[]" id="pengajar_ids" multiple>
-        <?php foreach($pegawais as $pg): ?>
-          <option value="<?= $pg['id_pegawai']; ?>"
-            <?= in_array((int)$pg['id_pegawai'], $pengajar_selected ?? []) ? 'selected' : '' ?>>
-            <?= $pg['nama']; ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-  </div>
-<?php endif; ?>
+                  <!-- Pengajar (multi) -->
+                  <div class="form-group col-md-4">
+                    <label>Pengajar (multi)
+                      <i class="fa fa-info-circle text-blue" data-toggle="tooltip"
+                        title="Pilih satu atau lebih Pengajar. Tersimpan ke tbl_pelatihan_pengajar (tipe_peran = 'Pengajar')."></i>
+                    </label>
+                    <select class="form-control select2" name="pengajar_ids[]" id="pengajar_ids" multiple>
+                      <?php foreach($pegawais as $pg): ?>
+                        <option value="<?= $pg['id_pegawai']; ?>"
+                          <?= in_array((int)$pg['id_pegawai'], $pengajar_selected ?? []) ? 'selected' : '' ?>>
+                          <?= $pg['nama']; ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                </div>
+              <?php endif; ?>
 
             </div>
           </div>
@@ -236,56 +236,56 @@
           <?php else: ?>
 
             <!-- Default Section 3 & 4 (Statistik & Data Peserta) -->
-<div class="box box-warning">
-  <div class="box-header with-border"><h4 class="box-title">Statistik Widyaiswara & Pengajar</h4></div>
-  <div class="box-body row">
-    <?php
-      // Daftar field statistik (tetap)
-      $stat_fields = [
-        'jumlah_wi_pengajar'       => 'Jumlah WI & Pengajar',
-        'jumlah_pendidikan_wi_d2'  => 'WI D2/D3',
-        'jumlah_pendidikan_wi_s1'  => 'WI S1',
-        'jumlah_pendidikan_wi_s2'  => 'WI S2',
-        'jumlah_pendidikan_wi_s3'  => 'WI S3',
-      ];
+            <div class="box box-warning">
+              <div class="box-header with-border"><h4 class="box-title">Statistik Widyaiswara & Pengajar</h4></div>
+              <div class="box-body row">
+                <?php
+                  // Daftar field statistik (tetap)
+                  $stat_fields = [
+                    'jumlah_wi_pengajar'       => 'Jumlah WI & Pengajar',
+                    'jumlah_pendidikan_wi_d2'  => 'WI D2/D3',
+                    'jumlah_pendidikan_wi_s1'  => 'WI S1',
+                    'jumlah_pendidikan_wi_s2'  => 'WI S2',
+                    'jumlah_pendidikan_wi_s3'  => 'WI S3',
+                  ];
 
-      // Hitung prefill khusus untuk "Jumlah WI & Pengajar"
-      $init_wi_pengajar = (int)(
-        (!empty($wi_selected)       ? count($wi_selected)       : 0)
-        + (!empty($pengajar_selected) ? count($pengajar_selected) : 0)
-      );
-      if ($init_wi_pengajar <= 0) {
-        // fallback ke nilai existing di DB jika prefill kosong
-        $init_wi_pengajar = (int)$detail_pelatihan->jumlah_wi_pengajar;
-      }
-    ?>
+                  // Hitung prefill khusus untuk "Jumlah WI & Pengajar"
+                  $init_wi_pengajar = (int)(
+                    (!empty($wi_selected)       ? count($wi_selected)       : 0)
+                    + (!empty($pengajar_selected) ? count($pengajar_selected) : 0)
+                  );
+                  if ($init_wi_pengajar <= 0) {
+                    // fallback ke nilai existing di DB jika prefill kosong
+                    $init_wi_pengajar = (int)$detail_pelatihan->jumlah_wi_pengajar;
+                  }
+                ?>
 
-    <?php foreach ($stat_fields as $name => $label): ?>
-      <?php if ($name === 'jumlah_wi_pengajar'): ?>
-        <!-- KHUSUS: readonly + prefill -->
-        <div class="form-group col-md-4">
-          <label><?= $label ?></label>
-          <input type="number"
-                 name="jumlah_wi_pengajar"
-                 id="jumlah_wi_pengajar"
-                 class="form-control"
-                 min="0"
-                 value="<?= $init_wi_pengajar; ?>"
-                 readonly>
-          <small class="text-muted">Terisi otomatis dari pilihan Widyaiswara & Pengajar.</small>
-        </div>
-      <?php else: ?>
-        <!-- Field statistik lain (seperti semula) -->
-        <div class="form-group col-md-4">
-          <label><?= $label ?></label>
-          <input type="number"
-                 name="<?= $name ?>"
-                 class="form-control"
-                 min="0"
-                 value="<?= (int)$detail_pelatihan->$name; ?>">
-        </div>
-      <?php endif; ?>
-    <?php endforeach; ?>
+                <?php foreach ($stat_fields as $name => $label): ?>
+                  <?php if ($name === 'jumlah_wi_pengajar'): ?>
+                    <!-- KHUSUS: readonly + prefill -->
+                    <div class="form-group col-md-4">
+                      <label><?= $label ?></label>
+                      <input type="number"
+                            name="jumlah_wi_pengajar"
+                            id="jumlah_wi_pengajar"
+                            class="form-control"
+                            min="0"
+                            value="<?= $init_wi_pengajar; ?>"
+                            readonly>
+                      <small class="text-muted">Terisi otomatis dari pilihan Widyaiswara & Pengajar.</small>
+                    </div>
+                  <?php else: ?>
+                    <!-- Field statistik lain (seperti semula) -->
+                    <div class="form-group col-md-4">
+                      <label><?= $label ?></label>
+                      <input type="number"
+                            name="<?= $name ?>"
+                            class="form-control"
+                            min="0"
+                            value="<?= (int)$detail_pelatihan->$name; ?>">
+                    </div>
+                  <?php endif; ?>
+                <?php endforeach; ?>
               </div>
             </div>
 
@@ -312,7 +312,7 @@
                   <div class="form-group col-md-4">
                     <label><?= $label ?></label>
                     <input type="number" name="<?= $name ?>" class="form-control" min="0"
-                           value="<?= (int)$detail_pelatihan->$name; ?>">
+                          value="<?= (int)$detail_pelatihan->$name; ?>">
                   </div>
                 <?php endforeach; ?>
                 <div class="form-group col-md-3">
@@ -326,41 +326,41 @@
 
           <?php endif; ?>
 
-          <!-- Section Anggaran (semua jenis) -->
-          <div class="box box-danger">
-            <div class="box-header with-border"><h4 class="box-title">Informasi Anggaran</h4></div>
-            <div class="box-body row">
-              <div class="form-group col-md-6">
-                <label>RAB (Rp)
-                  <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Rencana Anggaran Biaya kegiatan"></i>
-                </label>
-                <input type="number" name="rab" class="form-control" step="0.01" min="0"
-                       value="<?= (float)$detail_pelatihan->rab; ?>">
-              </div>
-              <div class="form-group col-md-6">
-                <label>Realisasi (Rp)
-                  <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Realisasi anggaran yang digunakan"></i>
-                </label>
-                <input type="number" name="realisasi" class="form-control" step="0.01" min="0"
-                       value="<?= (float)$detail_pelatihan->realisasi; ?>">
-              </div>
+                      <!-- Section Anggaran (semua jenis) -->
+                      <div class="box box-danger">
+                        <div class="box-header with-border"><h4 class="box-title">Informasi Anggaran</h4></div>
+                        <div class="box-body row">
+                          <div class="form-group col-md-6">
+                            <label>RAB (Rp)
+                              <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Rencana Anggaran Biaya kegiatan"></i>
+                            </label>
+                            <input type="number" name="rab" class="form-control" step="0.01" min="0"
+                                  value="<?= (float)$detail_pelatihan->rab; ?>">
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label>Realisasi (Rp)
+                              <i class="fa fa-info-circle text-blue" data-toggle="tooltip" title="Realisasi anggaran yang digunakan"></i>
+                            </label>
+                            <input type="number" name="realisasi" class="form-control" step="0.01" min="0"
+                                  value="<?= (float)$detail_pelatihan->realisasi; ?>">
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Submit -->
+                      <div class="box-footer text-right">
+                        <input type="hidden" name="edit" value="<?= (int)$detail_pelatihan->id_detail_pelatihan; ?>">
+                        <!-- jaga konteks tab -->
+                        <input type="hidden" name="jenis" value="<?= isset($jenis) ? htmlspecialchars($jenis) : ''; ?>">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <a href="<?= base_url('data/detailpelatihan' . (!empty($jenis) ? '?jenis='.urlencode($jenis) : '')); ?>" class="btn btn-danger">Kembali</a>
+                      </div>
+
+                    </div>
+                  </div>
+                </form>
+              </section>
             </div>
-          </div>
-
-          <!-- Submit -->
-          <div class="box-footer text-right">
-            <input type="hidden" name="edit" value="<?= (int)$detail_pelatihan->id_detail_pelatihan; ?>">
-            <!-- jaga konteks tab -->
-            <input type="hidden" name="jenis" value="<?= isset($jenis) ? htmlspecialchars($jenis) : ''; ?>">
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <a href="<?= base_url('data/detailpelatihan' . (!empty($jenis) ? '?jenis='.urlencode($jenis) : '')); ?>" class="btn btn-danger">Kembali</a>
-          </div>
-
-        </div>
-      </div>
-    </form>
-  </section>
-</div>
 
 <script>
 $(document).ready(function(){

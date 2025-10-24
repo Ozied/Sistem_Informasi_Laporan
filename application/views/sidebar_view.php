@@ -30,7 +30,7 @@
         <br/>
 		</div>
         <ul class="sidebar-menu" data-widget="tree">
-			<?php if($this->session->userdata('level') == 'Petugas'){?>
+			<?php if($this->session->userdata('level') == 'admin' || $this->session->userdata('level') == 'Admin' || $this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'panitia'){?>
             <!-- sidebar menu: : style can be found in sidebar.less -->
             <li class="header">MAIN NAVIGATION</li>
             <li class="<?php if($this->uri->uri_string() == 'dashboard'){ echo 'active';}?>">
@@ -38,13 +38,15 @@
                     <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                 </a>
             </li>
+
+            <?php if ($this->session->userdata('level') == 'Admin') {?>
             <li class="<?php if($this->uri->uri_string() == 'user'){ echo 'active';}?>
                 <?php if($this->uri->uri_string() == 'user/tambah'){ echo 'active';}?>
                 <?php if($this->uri->uri_string() == 'user/edit/'.$this->uri->segment('3')){ echo 'active';}?>">
                 <a href="<?php echo base_url('user');?>" class="cursor">
                     <i class="fa fa-user"></i> <span>Data Pengguna</span></a>
 			</li>
-
+            <?php } ?>
             
             <!-- Code LDK Pekanbaru Menu Laporan PJJ-->
 
@@ -136,13 +138,13 @@
                             
                         </a>
                     </li>
-                    <li class=" <?php if($this->uri->uri_string() == 'data/materi'){ echo 'active';}?>">
-                        <a href="<?php echo base_url("data/materi");?>" class="cursor">
+                    <li class=" <?= ($this->uri->uri_string() == 'data/materi' && $this->input->get('jenis') == 'Latsar') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/materi?jenis=Latsar");?>" class="cursor">
                             <span class="fa fa-book"></span> Materi
                         </a>
                     </li>
-                    <li class=" <?php if($this->uri->uri_string() == 'data/pengajar'){ echo 'active';}?>">
-                        <a href="<?php echo base_url("data/pengajar");?>" class="cursor">
+                    <li class=" <?= ($this->uri->uri_string() == 'data/pengajar' && $this->input->get('jenis') == 'Latsar') ? 'active' : '' ?>">
+                        <a href="<?php echo base_url("data/pengajar?jenis=Latsar");?>" class="cursor">
                             <span class="fa fa-users"></span> Pengajar
                         </a>
                     </li>

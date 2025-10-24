@@ -47,7 +47,7 @@
                     <td><?= htmlentities($isi['tanggal_selesai_pelatihan']); ?></td>
                     <td><?= htmlentities($isi['tahun']); ?></td>
                    <td>
-                    <?php if($this->session->userdata('level') == 'Petugas'){ ?>
+                    <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin'){ ?>
                         <a href="<?= base_url('data/listpengajar/'.$isi['id_pelatihan']); ?>">
                         <button class="btn btn-warning">
                             <i class="fa fa-users"></i> Tambah Materi & Pengajar

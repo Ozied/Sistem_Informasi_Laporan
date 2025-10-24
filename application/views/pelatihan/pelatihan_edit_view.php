@@ -148,7 +148,21 @@
               <div class="pull-right">
                 <input type="hidden" name="edit" value="<?= $pelatihan->id_pelatihan; ?>">
                 <button type="submit" class="btn btn-primary btn-md">Submit</button>
-                <a href="<?= base_url('data?jenis=PDWK'); ?>" class="btn btn-danger btn-md">Kembali</a>
+                <?php 
+                $mapJenis = function ($id) {
+                    switch ((int)$id) {
+                        case 1: return 'PJJ';
+                        case 2: return 'PDWK';
+                        case 3: return 'Latsar';
+                        default: return 'PDWK';
+                    }
+                };
+                $redirJenis = isset($pelatihan->id_jenis_pelatihan) ? $mapJenis($pelatihan->id_jenis_pelatihan) : 'PDWK';
+                
+                ?>
+                <a href="<?= base_url('data?jenis=' . $redirJenis); ?>" class="btn btn-danger btn-md">
+                  <i class="fa fa-arrow-left"></i> Kembali
+                </a>
               </div>
 
             </form>

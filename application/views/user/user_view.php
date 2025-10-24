@@ -31,6 +31,7 @@
                                 <th>Nama</th>
                                 <th>User</th>
                                 <th>Jenkel</th>
+                                <th>NIP</th>
                                 <th>Telepon</th>
                                 <th>Level</th>
                                 <th>Alamat</th>
@@ -56,6 +57,7 @@
                                 <td><?= $isi['nama'];?></td>
                                 <td><?= $isi['user'];?></td>
                                 <td><?= $isi['jenkel'];?></td>
+                                <td><?= $isi['nip'];?></td>
                                 <td><?= $isi['telepon'];?></td>
                                 <td><?= $isi['level'];?></td>
                                 <td><?= $isi['alamat'];?></td>

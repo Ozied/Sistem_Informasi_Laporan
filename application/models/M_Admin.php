@@ -142,70 +142,159 @@ class M_Admin extends CI_Model
     // 1) Ambil baris induk + detail + pejabat pembuka/penutup + jenis
     $this->db->select('
         p.*,
-        d.id_detail_pelatihan,
-        d.id_penanggung_jawab,
-        d.id_ketua_panitia,
-        d.id_akademis,
-        d.id_keuangan,
-        d.id_administrasi,
-        d.id_wi_1,
-        d.id_wi_2,
-        d.id_wi_3,
-        d.id_wi_rapat_kelulusan,
-        d.id_wi_4,
-        d.id_pengajar_1,
-        d.id_pengajar_2,
-        d.id_pengajar_3,
-        d.jumlah_wi_pengajar,
-        d.jumlah_pendidikan_wi_s1,
-        d.jumlah_pendidikan_wi_s2,
-        d.jumlah_pendidikan_wi_s3,
-        d.jumlah_peserta,
-        d.jumlah_lulus,
-        d.jumlah_tidak_lulus,
-        d.jabatan_peserta,
-        d.jumlah_peserta_asn,
-        d.jumlah_peserta_non_asn,
-        d.jumlah_peserta_laki,
-        d.jumlah_peserta_wanita,
-        d.jumlah_pendidikan_peserta_sma,
-        d.jumlah_pendidikan_wi_d2,
-        d.jumlah_pendidikan_peserta_d3,
-        d.jumlah_pendidikan_peserta_s1,
-        d.jumlah_pendidikan_peserta_s2,
-        d.jumlah_pendidikan_peserta_s3,
-        d.rab,
-        d.realisasi,
-        d.pic_smartbangkom,
-        d.jml_peserta_nilai_sm,
-        d.jml_peserta_nilai_m,
-        d.jml_peserta_nilai_cm,
-        d.jml_peserta_nilai_dl,
-        d.jml_peserta_tm,
-        d.peserta_peringkat_1,
-        d.peserta_peringkat_2,
-        d.peserta_peringkat_3,
-
+        d.*,
         j.nama_jenis_pelatihan,
 
-        pembuka.nama         AS nama_pejabat_pembuka,
-        pembuka.NIP          AS nip_pejabat_pembuka,
-        pembuka.jabatan      AS jabatan_pejabat_pembuka,
-        pembuka.asal_satker  AS satker_pejabat_pembuka,
+        pembuka.nama        AS nama_pejabat_pembuka,
+        pembuka.NIP         AS nip_pejabat_pembuka,
+        pembuka.jabatan     AS jabatan_pejabat_pembuka,
+        pembuka.asal_satker AS satker_pejabat_pembuka,
 
-        penutup.nama         AS nama_pejabat_penutup,
-        penutup.NIP          AS nip_pejabat_penutup,
-        penutup.jabatan      AS jabatan_pejabat_penutup,
-        penutup.asal_satker  AS satker_pejabat_penutup
+        penutup.nama        AS nama_pejabat_penutup,
+        penutup.NIP         AS nip_pejabat_penutup,
+        penutup.jabatan     AS jabatan_pejabat_penutup,
+        penutup.asal_satker AS satker_pejabat_penutup,
+
+        wi1.nama AS nama_wi_1,
+        wi2.nama AS nama_wi_2,
+        wi3.nama AS nama_wi_3,
+        wi4.nama AS nama_wi_4,
+        wirapat.nama AS nama_wi_rapat_kelulusan,
+
+        peng1.nama AS nama_pengajar_1,
+        peng2.nama AS nama_pengajar_2,
+        peng3.nama AS nama_pengajar_3,
+
+        kp_user.nama AS nama_ketua_panitia,
+        kp_user.nip  AS nip_ketua_panitia,
+        kp_user.level AS jabatan_ketua_panitia,
+
+        ak_user.nama AS nama_akademis,
+        ak_user.nip  AS nip_akademis,
+        ak_user.level AS jabatan_akademis,
+
+        ke_user.nama AS nama_keuangan,
+        ke_user.nip  AS nip_keuangan,
+        ke_user.level AS jabatan_keuangan,
+
+        ad_user.nama AS nama_administrasi,
+        ad_user.nip  AS nip_administrasi,
+        ad_user.level AS jabatan_administrasi
     ');
+
     $this->db->from('tbl_pelatihan p');
     $this->db->join('tbl_detail_pelatihan d', 'p.id_pelatihan = d.id_pelatihan', 'left');
     $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
     $this->db->join('tbl_pegawai pembuka', 'p.id_pejabat_pembuka = pembuka.id_pegawai', 'left');
     $this->db->join('tbl_pegawai penutup', 'p.id_pejabat_penutup = penutup.id_pegawai', 'left');
-    $this->db->where('p.id_pelatihan', (int)$id_pelatihan);
+
+    $this->db->join('tbl_pegawai wi1', 'wi1.id_pegawai = d.id_wi_1', 'left');
+    $this->db->join('tbl_pegawai wi2', 'wi2.id_pegawai = d.id_wi_2', 'left');
+    $this->db->join('tbl_pegawai wi3', 'wi3.id_pegawai = d.id_wi_3', 'left');
+    $this->db->join('tbl_pegawai wi4', 'wi4.id_pegawai = d.id_wi_4', 'left');
+    $this->db->join('tbl_pegawai wirapat', 'wirapat.id_pegawai = d.id_wi_rapat_kelulusan', 'left');
+
+    $this->db->join('tbl_pegawai peng1', 'peng1.id_pegawai = d.id_pengajar_1', 'left');
+    $this->db->join('tbl_pegawai peng2', 'peng2.id_pegawai = d.id_pengajar_2', 'left');
+    $this->db->join('tbl_pegawai peng3', 'peng3.id_pegawai = d.id_pengajar_3', 'left');
+
+    $this->db->join('tbl_panitia_pelatihan pp_ketua', 'pp_ketua.id = d.id_ketua_panitia', 'left');
+    $this->db->join('tbl_login kp_user', 'kp_user.id_login = pp_ketua.panitia_id', 'left');
+
+    $this->db->join('tbl_panitia_pelatihan pp_akademis', 'pp_akademis.id = d.id_akademis', 'left');
+    $this->db->join('tbl_login ak_user', 'ak_user.id_login = pp_akademis.panitia_id', 'left');
+
+    $this->db->join('tbl_panitia_pelatihan pp_keuangan', 'pp_keuangan.id = d.id_keuangan', 'left');
+    $this->db->join('tbl_login ke_user', 'ke_user.id_login = pp_keuangan.panitia_id', 'left');
+
+    $this->db->join('tbl_panitia_pelatihan pp_administrasi', 'pp_administrasi.id = d.id_administrasi', 'left');
+    $this->db->join('tbl_login ad_user', 'ad_user.id_login = pp_administrasi.panitia_id', 'left');
+
+    $this->db->where('p.id_pelatihan', (int)$id_pelatihan);   
+
+    // $this->db->select('
+    //     p.*,
+    //     d.*,
+    //     j.nama_jenis_pelatihan,
+
+    //     d.id_detail_pelatihan,
+    //     d.id_penanggung_jawab,
+    //     d.id_ketua_panitia,
+    //     d.id_akademis,
+    //     d.id_keuangan,
+    //     d.id_administrasi,
+    //     d.id_wi_1,
+    //     d.id_wi_2,
+    //     d.id_wi_3,
+    //     d.id_wi_rapat_kelulusan,
+    //     d.id_wi_4,
+    //     d.id_pengajar_1,
+    //     d.id_pengajar_2,
+    //     d.id_pengajar_3,
+    //     d.jumlah_wi_pengajar,
+    //     d.jumlah_pendidikan_wi_s1,
+    //     d.jumlah_pendidikan_wi_s2,
+    //     d.jumlah_pendidikan_wi_s3,
+    //     d.jumlah_peserta,
+    //     d.jumlah_lulus,
+    //     d.jumlah_tidak_lulus,
+    //     d.jabatan_peserta,
+    //     d.jumlah_peserta_asn,
+    //     d.jumlah_peserta_non_asn,
+    //     d.jumlah_peserta_laki,
+    //     d.jumlah_peserta_wanita,
+    //     d.jumlah_pendidikan_peserta_sma,
+    //     d.jumlah_pendidikan_wi_d2,
+    //     d.jumlah_pendidikan_peserta_d3,
+    //     d.jumlah_pendidikan_peserta_s1,
+    //     d.jumlah_pendidikan_peserta_s2,
+    //     d.jumlah_pendidikan_peserta_s3,
+    //     d.rab,
+    //     d.realisasi,
+    //     d.pic_smartbangkom,
+    //     d.jml_peserta_nilai_sm,
+    //     d.jml_peserta_nilai_m,
+    //     d.jml_peserta_nilai_cm,
+    //     d.jml_peserta_nilai_dl,
+    //     d.jml_peserta_tm,
+    //     d.peserta_peringkat_1,
+    //     d.peserta_peringkat_2,
+    //     d.peserta_peringkat_3,
+
+    //     j.nama_jenis_pelatihan,
+
+    //     pembuka.nama         AS nama_pejabat_pembuka,
+    //     pembuka.NIP          AS nip_pejabat_pembuka,
+    //     pembuka.jabatan      AS jabatan_pejabat_pembuka,
+    //     pembuka.asal_satker  AS satker_pejabat_pembuka,
+
+    //     penutup.nama         AS nama_pejabat_penutup,
+    //     penutup.NIP          AS nip_pejabat_penutup,
+    //     penutup.jabatan      AS jabatan_pejabat_penutup,
+    //     penutup.asal_satker  AS satker_pejabat_penutup
+    // ');
+    // $this->db->from('tbl_pelatihan p');
+    // $this->db->join('tbl_detail_pelatihan d', 'p.id_pelatihan = d.id_pelatihan', 'left');
+    // $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
+    // $this->db->join('tbl_pegawai pembuka', 'p.id_pejabat_pembuka = pembuka.id_pegawai', 'left');
+    // $this->db->join('tbl_pegawai penutup', 'p.id_pejabat_penutup = penutup.id_pegawai', 'left');
+    // $this->db->where('p.id_pelatihan', (int)$id_pelatihan);
 
     $pelatihan = $this->db->get()->row();
+    $pelatihan->wi_1 = (object)['nama' => $pelatihan->nama_wi_1 ?? null];
+    $pelatihan->wi_2 = (object)['nama' => $pelatihan->nama_wi_2 ?? null];
+    $pelatihan->wi_3 = (object)['nama' => $pelatihan->nama_wi_3 ?? null];
+    $pelatihan->wi_4 = (object)['nama' => $pelatihan->nama_wi_4 ?? null];
+    $pelatihan->wi_rapat_kelulusan = (object)['nama' => $pelatihan->nama_wi_rapat_kelulusan ?? null];
+
+    $pelatihan->pengajar_1 = (object)['nama' => $pelatihan->nama_pengajar_1 ?? null];
+    $pelatihan->pengajar_2 = (object)['nama' => $pelatihan->nama_pengajar_2 ?? null];
+    $pelatihan->pengajar_3 = (object)['nama' => $pelatihan->nama_pengajar_3 ?? null];
+    
+    $pelatihan->pejabat_pembuka = (object)['nama' => $pelatihan->nama_pejabat_pembuka ?? null];
+    $pelatihan->pejabat_penutup = (object)['nama' => $pelatihan->nama_pejabat_penutup ?? null];
+    $pelatihan->penanggung_jawab = (object)['nama' => $pelatihan->nama_penanggung_jawab ?? null];
+
     if (!$pelatihan) return null;
 
     // Pastikan tipe numerik aman untuk percabangan
@@ -214,7 +303,7 @@ class M_Admin extends CI_Model
     // 2) PETAKAN pegawai untuk semua field id_pegawai (termasuk pic_smartbangkom)
     $pegawai_fields = [
         'id_pejabat_pembuka','id_pejabat_penutup',
-        'id_penanggung_jawab','id_ketua_panitia','id_akademis','id_keuangan','id_administrasi',
+        'id_penanggung_jawab',
         'id_wi_1','id_wi_2','id_wi_3','id_wi_4','id_wi_rapat_kelulusan',
         'id_pengajar_1','id_pengajar_2','id_pengajar_3',
         'pic_smartbangkom'
@@ -239,23 +328,23 @@ class M_Admin extends CI_Model
     }
 
     // --- NEW: attach WI/Pengajar for non-Latsar from tbl_pelatihan_pengajar
-if (in_array((int)$pelatihan->id_jenis_pelatihan, [1,2], true)) { // 1=PJJ, 2=PDWK
-    $asgn = $this->_get_pengajar_assignments((int)$pelatihan->id_pelatihan);
+    if (in_array((int)$pelatihan->id_jenis_pelatihan, [1,2], true)) { // 1=PJJ, 2=PDWK
+        $asgn = $this->_get_pengajar_assignments((int)$pelatihan->id_pelatihan);
 
-    // full objects (id, nama, NIP, asal_satker, jabatan)
-    $pelatihan->wi_list       = $asgn['wi_list'];
-    $pelatihan->pengajar_list = $asgn['pengajar_list'];
-    $pelatihan->wi_rapat      = $asgn['wi_rapat'];
+        // full objects (id, nama, NIP, asal_satker, jabatan)
+        $pelatihan->wi_list       = $asgn['wi_list'];
+        $pelatihan->pengajar_list = $asgn['pengajar_list'];
+        $pelatihan->wi_rapat      = $asgn['wi_rapat'];
 
-    // simple name arrays for views
-    $pelatihan->wi_names        = $asgn['wi_names'];
-    $pelatihan->pengajar_names  = $asgn['pengajar_names'];
-    $pelatihan->wi_rapat_name   = $asgn['wi_rapat_name'];
+        // simple name arrays for views
+        $pelatihan->wi_names        = $asgn['wi_names'];
+        $pelatihan->pengajar_names  = $asgn['pengajar_names'];
+        $pelatihan->wi_rapat_name   = $asgn['wi_rapat_name'];
 
-    // computed headcount (read-only)
-    $pelatihan->jumlah_wi_pengajar_auto =
-        count($asgn['wi_list']) + count($asgn['pengajar_list']) + ($asgn['wi_rapat'] ? 1 : 0);
-}
+        // computed headcount (read-only)
+        $pelatihan->jumlah_wi_pengajar_auto =
+            count($asgn['wi_list']) + count($asgn['pengajar_list']) + ($asgn['wi_rapat'] ? 1 : 0);
+    }
 
 
     // 3) MATERI (tetap seperti sebelumnya)
@@ -545,7 +634,7 @@ private function _get_pengajar_assignments($id_pelatihan)
   }
 
   public function get_ketua_loka() {
-    return $this->db->get_where('tbl_pegawai', ['id_pegawai' => 3])->row();
+    return $this->db->get_where('tbl_pegawai', ['id_pegawai' => 71996])->row();
   }
 
   public function parseTujuanKursil($text) {
@@ -608,22 +697,35 @@ private function _get_pengajar_assignments($id_pelatihan)
 
 
   function get_pelatihan_by_jenis($id_jenis = null) {
-    // $id_jenis = ($jenis == 'PJJ') ? 1 : 2;
-    // Ambil semua role yang belum dihapus (deleted_at IS NULL)
-    $this->db->select('p.*, j.nama_jenis_pelatihan as nama_jenis_pelatihan');
-    $this->db->from('tbl_pelatihan p');
-    $this->db->join('tbl_jenis_pelatihan j', 'p.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
-    $this->db->where('p.deleted_at IS NULL', null, false);
+    $this->db->select('pel.*, j.nama_jenis_pelatihan AS nama_jenis_pelatihan');
+    $this->db->from('tbl_pelatihan pel');
+    $this->db->join('tbl_jenis_pelatihan j', 'pel.id_jenis_pelatihan = j.id_jenis_pelatihan', 'left');
+    $this->db->where('pel.deleted_at IS NULL', null, false);
 
     if ($id_jenis !== NULL) {
-      $this->db->where('p.id_jenis_pelatihan', $id_jenis);
+        $this->db->where('pel.id_jenis_pelatihan', $id_jenis);
     }
 
-    $this->db->order_by('p.id_pelatihan', 'DESC');
-
+    $this->db->order_by('pel.id_pelatihan', 'DESC');
     return $this->db->get();
+}
 
-  }
+
+  public function get_pelatihan_by_panitia($id_jenis, $panitia_id) {
+    $this->db->select('pel.*, j.nama_jenis_pelatihan AS nama_jenis_pelatihan, pp.peran');
+    $this->db->from('tbl_pelatihan pel');
+    $this->db->join('tbl_jenis_pelatihan j', 'j.id_jenis_pelatihan = pel.id_jenis_pelatihan', 'left');
+    $this->db->join('tbl_panitia_pelatihan pp', 'pp.pelatihan_id = pel.id_pelatihan');
+    $this->db->where('pp.panitia_id', $panitia_id);
+
+    if ($id_jenis != null) {
+        $this->db->where('pel.id_jenis_pelatihan', $id_jenis);
+    }
+
+    $this->db->order_by('pel.tanggal_mulai_pelatihan', 'DESC');
+    return $this->db->get();
+}
+
 
   function tambahJenisPelatihan($data)
    {

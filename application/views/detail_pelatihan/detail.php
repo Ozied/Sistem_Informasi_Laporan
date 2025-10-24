@@ -105,11 +105,13 @@ $is_latsar = !empty($is_latsar) ? $is_latsar : (!empty($jenis) && $jenis === 'La
               </table>
             <?php else: ?>
               <table class="table table-bordered table-detail">
-                <tr><th style="width:30%">Penanggung Jawab</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_penanggung_jawab); ?></td></tr>
-                <tr><th>Ketua Panitia</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_ketua_panitia); ?></td></tr>
-                <tr><th>Akademis</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_akademis); ?></td></tr>
-                <tr><th>Keuangan</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_keuangan); ?></td></tr>
-                <tr><th>Administrasi</th><td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_administrasi); ?></td></tr>
+                <tr><th style="width:30%">Penanggung Jawab</th>
+                    <td><?= dv_get_nama_pegawai($pegawais, $detail_pelatihan->id_penanggung_jawab); ?></td></tr>
+
+                <tr><th>Ketua Panitia</th><td><?= htmlentities($detail_pelatihan->nama_ketua_panitia ?? '-'); ?></td></tr>
+                <tr><th>Akademis</th><td><?= htmlentities($detail_pelatihan->nama_akademis ?? '-'); ?></td></tr>
+                <tr><th>Keuangan</th><td><?= htmlentities($detail_pelatihan->nama_keuangan ?? '-'); ?></td></tr>
+                <tr><th>Administrasi</th><td><?= htmlentities($detail_pelatihan->nama_administrasi ?? '-'); ?></td></tr>
               </table>
             <?php endif; ?>
 
