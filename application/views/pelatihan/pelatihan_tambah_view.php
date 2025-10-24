@@ -166,7 +166,19 @@
               <div class="pull-right">
                 <input type="hidden" name="tambah" value="tambah">
                 <button type="submit" class="btn btn-primary btn-md">Submit</button>
-                <a href="<?= base_url('data?jenis=PDWK'); ?>" class="btn btn-danger btn-md">Kembali</a>
+                <?php if($default_jenis == 1){ ?>
+                  <a href="<?= base_url('data?jenis=PJJ'); ?>" class="btn btn-danger btn-md">
+                    <i class="fa fa-arrow-left"></i> Kembali
+                  </a>
+                <?php }elseif($default_jenis == 2){ ?>
+                  <a href="<?= base_url('data?jenis=PDWK'); ?>" class="btn btn-danger btn-md">
+                    <i class="fa fa-arrow-left"></i> Kembali
+                  </a>
+                <?php }else{ ?>
+                  <a href="<?= base_url('data?jenis=Latsar'); ?>" class="btn btn-danger btn-md">
+                    <i class="fa fa-arrow-left"></i> Kembali
+                  </a>
+                <?php } ?>
               </div>
 
             </form>

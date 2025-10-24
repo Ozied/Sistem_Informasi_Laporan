@@ -112,7 +112,7 @@
               <li <?= act('Latsar',$jenis) ?>><a href="<?= base_url('data/detailpelatihan?jenis=Latsar'); ?>">Latsar</a></li>
             </ul> -->
 
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
               <a href="<?= base_url('data/detailpelatihantambah'.(!empty($jenis)?'?jenis='.urlencode($jenis):'')); ?>">
                 <button class="btn btn-primary"><i class="fa fa-plus"></i> Tambah Detail</button>
               </a>
@@ -143,7 +143,7 @@
                         <td><?= htmlentities($row->nama_ketua_panitia ?? '-') ?></td>
                         <td><?= nl2br(htmlentities($row->jabatan_peserta ?? '-')) ?></td>
                         <td>
-                          <?php if($this->session->userdata('level') == 'Petugas'){ ?>
+                          <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin'){ ?>
                             <a href="<?= base_url('data/detailpelatihanedit/'.$row->id_detail_pelatihan.(!empty($jenis)?'?jenis='.urlencode($jenis):'')); ?>" class="btn btn-success btn-sm">
                               <i class="fa fa-edit"></i>
                             </a>

@@ -33,28 +33,33 @@ class Login extends CI_Controller {
 
     public function auth()
     {
-        $user = htmlspecialchars($this->input->post('user',TRUE),ENT_QUOTES);
-        $pass = htmlspecialchars($this->input->post('pass',TRUE),ENT_QUOTES);
-        // auth
-        $proses_login = $this->db->query("SELECT * FROM tbl_login WHERE user='$user' AND pass = md5('$pass')");
-        $row = $proses_login->num_rows();
-        if($row > 0)
-        {
+        $user = $this->input->post('user', TRUE);
+        $pass = $this->input->post('pass', TRUE);
+
+        // Gunakan query builder (lebih aman dari SQL injection)
+        $this->db->where('user', $user);
+        $this->db->where('pass', md5($pass)); // pastikan kolom pass disimpan dalam md5
+        $proses_login = $this->db->get('tbl_login');
+
+        if ($proses_login->num_rows() > 0) {
             $hasil_login = $proses_login->row_array();
 
-            // create session
-            $this->session->set_userdata('masuk_perpus',TRUE);
-            $this->session->set_userdata('level',$hasil_login['level']);
-            $this->session->set_userdata('ses_id',$hasil_login['id_login']);
-            $this->session->set_userdata('anggota_id',$hasil_login['anggota_id']);
+            // Simpan data ke session
+            $this->session->set_userdata([
+                'masuk_perpus' => TRUE,
+                'level'        => $hasil_login['level'],
+                'ses_id'       => $hasil_login['id_login'],
+                'nama'         => $hasil_login['nama'],
+                'anggota_id'   => $hasil_login['anggota_id'],
+                'id_login'     => $hasil_login['id_login'] // penting untuk filter pelatihan
+            ]);
 
-            echo '<script>window.location="'.base_url().'dashboard";</script>';
-        }else{
-
-            echo '<script>alert("Login Gagal, Periksa Kembali Username dan Password Anda");
-            window.location="'.base_url().'"</script>';
+            redirect('dashboard');
+        } else {
+            echo '<script>alert("Login gagal, periksa kembali username dan password Anda"); window.location="' . base_url() . '"</script>';
         }
     }
+
 
     public function logout()
     {

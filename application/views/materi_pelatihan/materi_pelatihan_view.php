@@ -19,7 +19,7 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
               <a href="<?= base_url('data/materipelatihantambah'); ?>">
                 <button class="btn btn-primary"><i class="fa fa-plus"></i> Tambah Materi Pelatihan</button>
               </a>
@@ -52,7 +52,7 @@
                         <td><?= (int)$row->jp_kel_inti ?> JP</td>
                         <td><?= (int)$row->jp_kel_penunjang ?> JP</td>
                         <td>
-                          <?php if($this->session->userdata('level') == 'Petugas'){ ?>
+                          <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin'){ ?>
                             <a href="<?= base_url('data/materipelatihanedit/'.$row->id_materi_pelatihan); ?>">
                               <button class="btn btn-success btn-sm"><i class="fa fa-edit"></i></button>
                             </a>

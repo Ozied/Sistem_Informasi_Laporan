@@ -35,11 +35,11 @@ class User extends CI_Controller {
 
     // Filter only users who are NOT soft-deleted (deleted_at IS NULL)
     $filtered_users = array_filter($all_users, function($user) {
-        return $user['deleted_at'] === NULL;
+        // return $user['deleted_at'] === NULL;
     });
 
     // Reset array keys (important for view)
-    $this->data['user'] = $filtered_users;
+    $this->data['user'] = $all_users;
 
     $this->data['title_web'] = 'Data User';
     $this->load->view('header_view', $this->data);
@@ -71,7 +71,7 @@ class User extends CI_Controller {
         $level = htmlentities($this->input->post('level',TRUE));
         $jenkel = htmlentities($this->input->post('jenkel',TRUE));
         $telepon = htmlentities($this->input->post('telepon',TRUE));
-        $status = htmlentities($this->input->post('status',TRUE));
+        // $status = htmlentities($this->input->post('status',TRUE));
         $alamat = htmlentities($this->input->post('alamat',TRUE));
 		$email = $_POST['email'];
 		
@@ -105,6 +105,7 @@ class User extends CI_Controller {
                 'tgl_lahir'=>$_POST['tgl_lahir'],
                 'level'=>$level,
                 'email'=>$_POST['email'],
+                'nip'=>$nip,
                 'telepon'=>$telepon,
                 'foto'=>$data1['upload_data']['file_name'],
                 'jenkel'=>$jenkel,
@@ -123,7 +124,7 @@ class User extends CI_Controller {
 
     public function edit()
     {	
-		if($this->session->userdata('level') == 'Petugas'){
+		if($this->session->userdata('level') == 'Admin'){
 			if($this->uri->segment('3') == ''){ echo '<script>alert("halaman tidak ditemukan");window.location="'.base_url('user').'";</script>';}
 			$this->data['idbo'] = $this->session->userdata('ses_id');
 			$count = $this->M_Admin->CountTableId('tbl_login','id_login',$this->uri->segment('3'));
@@ -134,7 +135,7 @@ class User extends CI_Controller {
 				echo '<script>alert("USER TIDAK DITEMUKAN");window.location="'.base_url('user').'"</script>';
 			}
 			
-		}elseif($this->session->userdata('level') == 'Anggota'){
+		}elseif($this->session->userdata('level') == 'Panitia'){
 			$this->data['idbo'] = $this->session->userdata('ses_id');
 			$count = $this->M_Admin->CountTableId('tbl_login','id_login',$this->uri->segment('3'));
 			if($count > 0)
@@ -184,8 +185,8 @@ class User extends CI_Controller {
         $pass = htmlentities($this->input->post('pass'));
         $level = htmlentities($this->input->post('level',TRUE));
         $jenkel = htmlentities($this->input->post('jenkel',TRUE));
+        $nip = htmlentities($this->input->post('nip',TRUE));
         $telepon = htmlentities($this->input->post('telepon',TRUE));
-        $status = htmlentities($this->input->post('status',TRUE));
         $alamat = htmlentities($this->input->post('alamat',TRUE));
         $id_login = htmlentities($this->input->post('id_login',TRUE));
 
@@ -210,19 +211,20 @@ class User extends CI_Controller {
 					'tgl_lahir'=>$_POST['tgl_lahir'],
 					'level'=>$level,
 					'email'=>$_POST['email'],
+					'nip'=>$nip,
 					'telepon'=>$telepon,
 					'jenkel'=>$jenkel,
 					'alamat'=>$alamat,
 				);
 				$this->M_Admin->update_table('tbl_login','id_login',$id_login,$data);
-				if($this->session->userdata('level') == 'Petugas')
+				if($this->session->userdata('level') == 'Admin')
 				{
 
 					$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-success">
 					<p> Berhasil Update User : '.$nama.' !</p>
 					</div></div>');
 					redirect(base_url('user'));  
-				}elseif($this->session->userdata('level') == 'Anggota'){
+				}elseif($this->session->userdata('level') == 'Panitia'){
 
 					$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-success">
 					<p> Berhasil Update User : '.$nama.' !</p>
@@ -237,20 +239,21 @@ class User extends CI_Controller {
 					'tgl_lahir'=>$_POST['tgl_lahir'],
 					'level'=>$level,
 					'email'=>$_POST['email'],
+					'nip'=>$nip,
 					'telepon'=>$telepon,
 					'jenkel'=>$jenkel,
 					'alamat'=>$alamat,
 				);
 				$this->M_Admin->update_table('tbl_login','id_login',$id_login,$data);
 			
-				if($this->session->userdata('level') == 'Petugas')
+				if($this->session->userdata('level') == 'Admin')
 				{
 
 					$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-success">
 					<p> Berhasil Update User : '.$nama.' !</p>
 					</div></div>');
 					redirect(base_url('user'));  
-				}elseif($this->session->userdata('level') == 'Anggota'){
+				}elseif($this->session->userdata('level') == 'Panitia'){
 
 					$this->session->set_flashdata('pesan','<div id="notifikasi"><div class="alert alert-success">
 					<p> Berhasil Update User : '.$nama.' !</p>
@@ -273,6 +276,7 @@ class User extends CI_Controller {
 					'pass'=>md5($pass),
 					'level'=>$level,
 					'email'=>$_POST['email'],
+					'nip'=>$nip,
 					'telepon'=>$telepon,
 					'foto'=>$data1['upload_data']['file_name'],
 					'jenkel'=>$jenkel,
@@ -303,6 +307,7 @@ class User extends CI_Controller {
 					'tgl_lahir'=>$_POST['tgl_lahir'],
 					'level'=>$level,
 					'email'=>$_POST['email'],
+					'nip'=>$nip,
 					'telepon'=>$telepon,
 					'foto'=>$data1['upload_data']['file_name'],
 					'jenkel'=>$jenkel,
@@ -350,7 +355,7 @@ class User extends CI_Controller {
         return;
     }
 
-    $user = $this->M_Admin->get_tableid_edit('tbl_login', 'id_login', $id_login);
+    $user = $this->M_Admin->delete_table('tbl_login', 'id_login', $id_login);
 
     if ($user) {
         // Optional: Remove photo file

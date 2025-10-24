@@ -19,7 +19,7 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
             <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambahDokumenPelatihan">
                 <i class="fa fa-plus"> </i> Tambah Dokumen Pelatihan
             </button>
@@ -55,7 +55,7 @@
                       </td>
                       <td><?= date('d-m-Y', strtotime($dokumen['tanggal_upload'])); ?></td>
                       <td>
-                        <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                        <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                             <!-- Tombol Edit -->
                             <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalEditDokumenPelatihan<?= $dokumen['id_pelatihan_dokumen']; ?>">
                             <i class="fa fa-edit"></i> Edit

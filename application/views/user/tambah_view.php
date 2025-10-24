@@ -43,8 +43,8 @@
                                 <div class="form-group">
                                     <label>Level</label>
                                     <select name="level" class="form-control" required="required">
-                                    <option>Petugas</option>
-                                    <option>Anggota</option>
+                                    <option>Admin</option>
+                                    <option>Panitia</option>
                                     </select>
                                 </div>
                             </div>

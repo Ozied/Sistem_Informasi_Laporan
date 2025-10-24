@@ -54,7 +54,7 @@ class wordGenerator{
             $fontstyle=['name' => 'Times New Roman', 'size' => 12];
             $paragraphstyle = [
                 'alignment' => 'both',
-                'indentation' => ['firstLine' => 700],
+                'indentation' => ['firstLine' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1)],
                 'spacing' => 240,
                 'lineHeight' => 1.5,
                 'spaceAfter' => 0
@@ -67,22 +67,22 @@ class wordGenerator{
                 'spaceAfter' => 0
             ];
 
-                        // Add TOC style (important for formatting)
+            // Add TOC style (important for formatting)
             $tocFontStyle = ['spaceAfter' => 60]; // Adjust spacing as needed
             $tocStyle = [
                 'tabPos'    => 9000, // Position in twips where page number aligns (9000 ≈ 6.25 inches from left)
                 'indent'    => 200,  // Indent for sub-level headings
                 'tabLeader' => PhpOffice\PhpWord\Style\TOC::TAB_LEADER_DOT // Leader dots between title and page number
             ];
-          
-                       $coverSection = $phpword->addSection([
-            'pageSizeW' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(8.5),
-            'pageSizeH' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(11),
-            'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-            'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-            'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-            'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-        ]);
+
+            $coverSection = $phpword->addSection([
+                'pageSizeW' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(8.5),
+                'pageSizeH' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(11),
+                'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+                'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+                'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+                'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+            ]);
 
             // Add background image with proper centering
             $imageWidth = \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1.05); // ~3.9 inches wide
@@ -281,39 +281,6 @@ class wordGenerator{
                 if (isset($pelatihan->pengajar_3)) { $section1->addListItem("{$pelatihan->pengajar_3->nama} berasal dari {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $styleDec); }
             }
 
-
-            // $section1->addListItem("Tenaga Fasilitator/Widyaiswara", 0, $fontstyle, $alphaStyle);
-            // $section1->addText("Tenaga Fasilitator/Widyaiswara pengajar pelatihan ini berasal dari :", $fontstyle, $paragraphstyle);
-
-            // $style = generate_list_style($phpword, 'decimal');
-            // if (isset($pelatihan->wi_1)) {
-            //     $section1->addListItem("{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}", 0, $fontstyle, $style);
-            // }
-
-            // if (isset($pelatihan->wi_2)) {
-            //     $section1->addListItem("{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}", 0, $fontstyle, $style);
-            // }
-
-            // if (isset($pelatihan->wi_3)) {
-            //     $section1->addListItem("{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}", 0, $fontstyle, $style);
-            // }
-
-            // $section1->addListItem("Pengajar/Fasilitator", 0, $fontstyle, $alphaStyle);
-
-            // $style = generate_list_style($phpword, 'decimal');
-
-            // if (isset($pelatihan->pengajar_1)) {
-            //     $section1->addListItem("{$pelatihan->pengajar_1->nama} berasal dari {$pelatihan->pengajar_1->asal_satker}", 0, $fontstyle, $style);
-            // }
-
-            // if (isset($pelatihan->pengajar_2)) {
-            //     $section1->addListItem("{$pelatihan->pengajar_2->nama} berasal dari {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $style);
-            // }
-
-            // if (isset($pelatihan->pengajar_3)) {
-            //     $section1->addListItem("{$pelatihan->pengajar_3->nama} berasal dari {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $style);
-            // }
-                        
             //PENYELENGGARAAN PELATIHAN
             $section1->addPageBreak();
             $section1->addTitle("PENYELENGGARAAN PELATIHAN");                                                        
@@ -322,37 +289,35 @@ class wordGenerator{
 
             $section1->addListItem("Penyelenggara", 0, $fontstyle, $alphaStyle);
             $section1->addText("Penyelenggara Pelatihan Jarak Jauh (PJJ) {$pelatihan->nama_pelatihan} berasal dari Loka Pendidikan dan Pelatihan Keagamaan Pekanbaru dengan susunan panitia sebagai berikut:", $fontstyle, $paragraphstyle);
-            $phpword->setDefaultParagraphStyle([
-                'tabs' => [
-                    new Tab('left', 3000)
-                    ]
+            $phpword->addParagraphStyle('penyelenggaraStyle', [
+                'tabs' => [ new Tab('left', 3000) ],
             ]);
             
             if (isset($pelatihan->penanggung_jawab)) {
-                $section1->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}", $fontstyle, $paragraphstyle);
+                $section1->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}", $fontstyle, 'penyelenggaraStyle');
             }
 
-            if (isset($pelatihan->ketua_panitia)) {
-                $section1->addText("Ketua\t: {$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_ketua_panitia)) {
+                $section1->addText("Ketua\t: {$pelatihan->nama_ketua_panitia}", $fontstyle, 'penyelenggaraStyle');
             }
 
-            if (isset($pelatihan->akademis)) {
-                $section1->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_akademis)) {
+                $section1->addText("Bidang Akademis\t: {$pelatihan->nama_akademis}", $fontstyle, 'penyelenggaraStyle');
             }
 
-            if (isset($pelatihan->administrasi)) {
-                $section1->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_administrasi)) {
+                $section1->addText("Bidang Administrasi\t: {$pelatihan->nama_administrasi}", $fontstyle, 'penyelenggaraStyle');
             }
 
-            if (isset($pelatihan->keuangan)) {
-                $section1->addText("Bidang Keuangan\t: {$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_keuangan)) {
+                $section1->addText("Bidang Keuangan\t: {$pelatihan->nama_keuangan}", $fontstyle, 'penyelenggaraStyle');
             }
 
 
             $section1->addListItem("Lama (Durasi Waktu) Pelatihan", 0, $fontstyle, $alphaStyle);
-             if (isset($pelatihan->materi)){
-                 $section1->addText("Pelatihan ini dilaksanakan selama $durasi hari, mulai dari tanggal " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ", dengan jumlah jam pelatihan sebanyak $materi->jumlah_jp Jam Pelatihan (JP).", $fontstyle, $paragraphstyle);
-             }
+            if (isset($pelatihan->materi)){
+                $section1->addText("Pelatihan ini dilaksanakan selama $durasi hari, mulai dari tanggal " . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ", dengan jumlah jam pelatihan sebanyak$materi->jumlah_jp Jam Pelatihan (JP).", $fontstyle, $paragraphstyle);
+            }
 
             $section1->addListItem("Tempat Pelatihan", 0, $fontstyle, $alphaStyle);
             $section1->addText("Pelatihan ini dilaksanakan secara virtual melalui whatsapp group, zoom meeting, dan LMS PJJ Kementerian Agama.", $fontstyle, $paragraphstyle);
@@ -409,59 +374,46 @@ class wordGenerator{
             $section1->addTextBreak(3);
             $section1->addText('H. Aprianto, S.Ag., M.A.', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
-           //LAPORAN PENYELENGGARAAN//
-           $coverSection2 = $phpword->addSection([
-            'pageSizeW' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(8.5),
-            'pageSizeH' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(11),
-            'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-            'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-            'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-            'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
-        ]);
+            //LAPORAN PENYELENGGARAAN//
+            $coverSection2 = $phpword->addSection([
+                'pageSizeW' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(8.5),
+                'pageSizeH' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(11),
+                'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+                'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+                'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+                'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),
+            ]);
 
-        // Add background image with proper centering
-        $imageWidth = \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1); // ~3.9 inches wide
-        $coverSection2->addImage(
-            'assets\cover\Cover_PJJ_Penyelenggaraan.png',
-            [
-                'width' => $imageWidth,
-                'positioning' => \PhpOffice\PhpWord\Style\Image::POSITION_ABSOLUTE,
-                'posHorizontal' => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_CENTER,
-                'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
-                'posVertical' => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_CENTER,
-                'posVerticalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
-                'wrap' => \PhpOffice\PhpWord\Style\Image::WRAP_BEHIND,
-            ]
-        );
+            // Add background image with proper centering
+            $imageWidth = \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1); // ~3.9 inches wide
+            $coverSection2->addImage(
+                'assets\cover\Cover_PJJ_Penyelenggaraan.png',
+                [
+                    'width' => $imageWidth,
+                    'positioning' => \PhpOffice\PhpWord\Style\Image::POSITION_ABSOLUTE,
+                    'posHorizontal' => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_CENTER,
+                    'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
+                    'posVertical' => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_CENTER,
+                    'posVerticalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
+                    'wrap' => \PhpOffice\PhpWord\Style\Image::WRAP_BEHIND,
+                ]
+            );
 
-        // Rest of your cover content remains the same...
-        $coverSection2->addTextBreak(9); // Adds 4 line breaks (you can adjust this number)
-        $coverSection2->addText(
-            strtoupper($pelatihan->nama_kegiatan),
-            [
-                'name' => 'Times New Roman',
-                'size' => 13,
-                'bold' => true,
-                'color' => '244061',
-            ],
-            [
-                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::START,
-                'spaceAfter' => 300,
-            ]
-        );
-
-            // // Add location information
-            // $coverSection->addText(
-            //     'Di Wilayah Kerja Kantor Kementerian Agama Kabupaten ' . $pelatihan->kab_kota,
-            //     [
-            //         'name' => 'Times New Roman',
-            //         'size' => 12,
-            //     ],
-            //     [
-            //         'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
-            //         'spaceAfter' => 300,
-            //     ]
-            // );
+            // Rest of your cover content remains the same...
+            $coverSection2->addTextBreak(9); // Adds 4 line breaks (you can adjust this number)
+            $coverSection2->addText(
+                strtoupper($pelatihan->nama_kegiatan),
+                [
+                    'name' => 'Times New Roman',
+                    'size' => 13,
+                    'bold' => true,
+                    'color' => '244061',
+                ],
+                [
+                    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::START,
+                    'spaceAfter' => 300,
+                ]
+            );
 
             // Add date information (using your dynamic data)
             $coverSection2->addText("" . $data['tanggal_mulai'] . " s.d " . $data['tanggal_selesai'] . ".",
@@ -500,10 +452,10 @@ class wordGenerator{
                 'spaceAfter' => 100,
             ];
 
-            $coverSection2->addText($pelatihan->ketua_panitia->nama, $committeeStyle, $paragraphStyle);
-            $coverSection2->addText($pelatihan->akademis->nama, $committeeStyle, $paragraphStyle);
-            $coverSection2->addText($pelatihan->keuangan->nama, $committeeStyle, $paragraphStyle);
-            $coverSection2->addText($pelatihan->administrasi->nama, $committeeStyle, $paragraphStyle);
+            $coverSection2->addText($pelatihan->nama_ketua_panitia, $committeeStyle, $paragraphStyle);
+            $coverSection2->addText($pelatihan->nama_akademis, $committeeStyle, $paragraphStyle);
+            $coverSection2->addText($pelatihan->nama_keuangan, $committeeStyle, $paragraphStyle);
+            $coverSection2->addText($pelatihan->nama_administrasi, $committeeStyle, $paragraphStyle);
 
             // // Add footer text
             // $coverSection->addTextBreak(4); // Add some space
@@ -544,9 +496,8 @@ class wordGenerator{
             $section2->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section2->addText('Ketua', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section2->addTextBreak(3);
-            $section2->addText("{$pelatihan->ketua_panitia->nama}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section2->addText("NIP. {$pelatihan->ketua_panitia->NIP}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            
+            $section2->addText("{$pelatihan->nama_ketua_panitia}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section2->addText("NIP. {$pelatihan->nip_ketua_panitia}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             // Daftar Isi
             $section2->addPageBreak();
             $section2->addTitle("DAFTAR ISI");
@@ -593,20 +544,20 @@ class wordGenerator{
             $section2->addTitle("F. Susunan Panitia", 2);
             $section2->addText("Adapun susunan panitia penyelenggara $pelatihan->nama_kegiatan Wilayah Kerja Kementerian Agama $pelatihan->provinsi Tahun $pelatihan->tahun adalah sebegai berikut:", $fontstyle, $paragraphstyle);
 
-            if (isset($pelatihan->ketua_panitia)) {
-                $section2->addText("Ketua\t: {$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_ketua_panitia)) {
+                $section2->addText("Ketua\t: {$pelatihan->nama_ketua_panitia}", $fontstyle, $paragraphstyle);
             }
 
-            if (isset($pelatihan->akademis)) {
-                $section2->addText("Seketaris/Akademis\t: {$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_akademis)) {
+                $section2->addText("Seketaris/Akademis\t: {$pelatihan->nama_akademis}", $fontstyle, $paragraphstyle);
             }
 
-            if (isset($pelatihan->administrasi)) {
-                $section2->addText("Anggota/Keuangan\t: {$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_administrasi)) {
+                $section2->addText("Anggota/Keuangan\t: {$pelatihan->nama_administrasi}", $fontstyle, $paragraphstyle);
             }
 
-            if (isset($pelatihan->keuangan)) {
-                $section2->addText("Anggota/Keuangan\t: {$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_keuangan)) {
+                $section2->addText("Anggota/Keuangan\t: {$pelatihan->nama_keuangan}", $fontstyle, $paragraphstyle);
             }
 
 
@@ -638,22 +589,7 @@ class wordGenerator{
                         }
                     }
                 }
-            }            
-
-            // $section3->addListItem("Peningkatan Pemahaman Tentang Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addText("Memahami konsep dasar zakat, jenis-jenis zakat (zakat mal dan zakat fitrah), dan dalil-dalil syariah yang mendasarinya.", $fontstyle, $paragraphstyle2);
-            // $section3->addListItem("Pengelolaan Dana Zakat yang Efektif", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addText("Membekali peserta dengan keterampilan teknis untuk mengelola dana zakat, mulai dari pengumpulan, pendistribusian, hingga pelaporan.", $fontstyle, $paragraphstyle2);
-            // $section3->addListItem("Peningkatan Kapasitas Lembaga Pengelola Zakat (LPZ)", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addText("Memperkuat manajemen lembaga zakat agar lebih profesional, transparan, dan akuntabel.", $fontstyle, $paragraphstyle2);
-            // $section3->addListItem("Strategi Pengumpulan Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addText("Mengajarkan teknik penggalangan dana zakat yang inovatif dan berbasis teknologi untuk menjangkau lebih banyak muzakki (pemberi zakat).", $fontstyle, $paragraphstyle2);
-            // $section3->addListItem("Distribusi Zakat yang Tepat Sasaran", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addText("Memberikan wawasan mengenai metode pendistribusian zakat yang adil, tepat sasaran, dan berdampak besar bagi mustahik (penerima zakat).", $fontstyle, $paragraphstyle2);
-            // $section3->addListItem("Peningkatan Kesejahteraan Umat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addText("Menanamkan nilai-nilai bahwa zakat adalah instrumen pemberdayaan ekonomi umat, bukan sekadar kewajiban agama.", $fontstyle, $paragraphstyle2);
-            // $section3->addListItem("Kepatuhan Syariah", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addText("Menjamin bahwa pengelolaan zakat dilakukan sesuai dengan kaidah syariah dan hukum positif yang berlaku, seperti Undang-Undang Pengelolaan Zakat.", $fontstyle, $paragraphstyle2);
+            }
 
             $style = generate_list_style($phpword, 'decimal', 2);
 
@@ -684,10 +620,6 @@ class wordGenerator{
             } else {
                 $section2->addText('Tidak ada materi pelatihan', $fontstyle);
             }
-            
-            // $section3->addListItem("Moderasi Beragama dan Pembangunan Nasional", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Nilai-Nilai Dasar Sumber Daya Manusia (SDM) Kementerian Agama", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Sistem Pelatihan dan Pengembangan SDM Kementerian Agama", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
 
             $section2->addText("Kelompok Inti yaitu kelompok mata pelajaran yang bertujuan untuk membekali peserta dengan pengetahuan dibidang tugas pokok yang bersangkutan meliputi :", $fontstyle, $paragraphstyle);
 
@@ -709,15 +641,6 @@ class wordGenerator{
                 $section2->addText('Tidak ada materi pelatihan', $fontstyle);
             }
 
-            
-            // $section3->addListItem("Peraturan Perundang Undangan Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Fiqh Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Perhitungan Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Fundraising Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Sistem Akuntansi dan Pelaporan Zakat", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Zakat dan Pajak", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Pengelolaan zakat di BAZNAS", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-
             $section2->addText("Kelompok penunjang adalah kelompok mata pelajaran yang bertujuan untuk memperluas pengetahuan dan wawasan, serta mempertajam pemahaman dan penghayatan peserta terhadap berbagai faktor, termasuk lingkungan. Sebagai penunjang pelaksanaan tugas pokok tersebut terdiri dari :", $fontstyle, $paragraphstyle);
 
             $style = generate_list_style($phpword, 'decimal');
@@ -737,12 +660,6 @@ class wordGenerator{
             } else {
                 $section2->addText('Tidak ada materi pelatihan', $fontstyle);
             }
-            
-            // $section3->addListItem("Overview", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Building Learning Commitment", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Evaluasi Program", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Rencana Tindak Lanjut", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
-            // $section3->addListItem("Ujian", 0, $fontstyle, $style, ['indentation' => ['left' => 720, 'hanging' => 360]]);
 
             $section2->addTitle("D. Jadwal Pelatihan", 2);
             $section2->addText("Adapun Jadwal $pelatihan->nama_pelatihan Tahun $pelatihan->tahun dimuat di lampiran.", $fontstyle, $paragraphstyle);
@@ -801,65 +718,6 @@ class wordGenerator{
                 if (isset($pelatihan->pengajar_2)) { $section2->addListItem("{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
                 if (isset($pelatihan->pengajar_3)) { $section2->addListItem("{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}", 0, $fontstyle, $styleDec, ['indentation' => ['left' => 720, 'hanging' => 360]]); }
             }
-
-            
-            // $section2->addText("Jumlah dan Asal Widyaiswara/Tenaga Pengajar", $fontstyle, $paragraphstyle);
-            // $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah $pelatihan->jumlah_wi_pengajar orang, yakni :", $fontstyle, $paragraphstyle);
-            
-            // $style = generate_list_style($phpword, 'decimal');
-            
-            // if (isset($pelatihan->wi_1)) {
-            //     $section2->addListItem(
-            //         "{$pelatihan->wi_1->nama} berasal dari {$pelatihan->wi_1->asal_satker}",
-            //         0, $fontstyle, $style,
-            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
-            //     );
-            // }
-
-            // if (isset($pelatihan->wi_2)) {
-            //     $section2->addListItem(
-            //         "{$pelatihan->wi_2->nama} berasal dari {$pelatihan->wi_2->asal_satker}",
-            //         0, $fontstyle, $style,
-            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
-            //     );
-            // }
-
-            // if (isset($pelatihan->wi_3)) {
-            //     $section2->addListItem(
-            //         "{$pelatihan->wi_3->nama} berasal dari {$pelatihan->wi_3->asal_satker}",
-            //         0, $fontstyle, $style,
-            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
-            //     );
-            // }
-
-            
-            // $section2->addText("Widyaiswara/Tenaga Pengajar berjumlah 2 orang, yakni :", $fontstyle, $paragraphstyle);
-            
-            // $style = generate_list_style($phpword, 'decimal');
-
-            // if (isset($pelatihan->pengajar_1)) {
-            //     $section2->addListItem(
-            //         "{$pelatihan->pengajar_1->nama} {$pelatihan->pengajar_1->asal_satker}",
-            //         0, $fontstyle, $style,
-            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
-            //     );
-            // }
-
-            // if (isset($pelatihan->pengajar_2)) {
-            //     $section2->addListItem(
-            //         "{$pelatihan->pengajar_2->nama} {$pelatihan->pengajar_2->asal_satker}",
-            //         0, $fontstyle, $style,
-            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
-            //     );
-            // }
-
-            // if (isset($pelatihan->pengajar_3)) {
-            //     $section2->addListItem(
-            //         "{$pelatihan->pengajar_3->nama} {$pelatihan->pengajar_3->asal_satker}",
-            //         0, $fontstyle, $style,
-            //         ['indentation' => ['left' => 720, 'hanging' => 360]]
-            //     );
-            // }
 
 
             $section2->addTitle("G. Jenjang Akademik/Kualifikasi Widyaiswara/Tenaga Pengajar", 2);
@@ -939,8 +797,8 @@ class wordGenerator{
             $section2->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section2->addText('Diterima Kepala LDK Pekanbaru', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
             $section2->addTextBreak(3);
-            $section2->addText("$ketua_loka->nama", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section2->addText("NIP. $ketua_loka->NIP", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section2->addText("H. Aprianto, S.Ag., M.A.", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section2->addText("NIP. 197603012003121004", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
                     $coverSection3 = $phpword->addSection([
             'pageSizeW' => \PhpOffice\PhpWord\Shared\Converter::inchToTwip(8.5),
@@ -1054,8 +912,8 @@ class wordGenerator{
             $section3->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section3->addText('Diterima Kepala LDK Pekanbaru', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
             $section3->addTextBreak(3);
-            $section3->addText("$ketua_loka->nama", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section3->addText("NIP. $ketua_loka->NIP", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section3->addText("H. Aprianto, S.Ag., M.A.", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section3->addText("NIP. 197603012003121004", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
             //Term of References
             $section3->addPageBreak();
@@ -1153,17 +1011,17 @@ class wordGenerator{
             if (isset($pelatihan->penanggung_jawab)) {
                 $section3->addText("Penanggung Jawab\t: {$pelatihan->penanggung_jawab->nama}", $fontstyle, $paragraphstyle);
             }
-            if (isset($pelatihan->ketua_panitia)) {
-                $section3->addText("Ketua Panitia\t: {$pelatihan->ketua_panitia->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_ketua_panitia)) {
+                $section3->addText("Ketua Panitia\t: {$pelatihan->nama_ketua_panitia}", $fontstyle, $paragraphstyle);
             }
-            if (isset($pelatihan->akademis)) {
-                $section3->addText("Bidang Akademis\t: {$pelatihan->akademis->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_akademis)) {
+                $section3->addText("Bidang Akademis\t: {$pelatihan->nama_akademis}", $fontstyle, $paragraphstyle);
             }
-            if (isset($pelatihan->administrasi)) {
-                $section3->addText("Bidang Administrasi\t: {$pelatihan->administrasi->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_administrasi)) {
+                $section3->addText("Bidang Administrasi\t: {$pelatihan->nama_administrasi}", $fontstyle, $paragraphstyle);
             }
-            if (isset($pelatihan->keuangan)) {
-                $section3->addText("Bidang Keuangan\t: {$pelatihan->keuangan->nama}", $fontstyle, $paragraphstyle);
+            if (isset($pelatihan->nama_keuangan)) {
+                $section3->addText("Bidang Keuangan\t: {$pelatihan->nama_keuangan}", $fontstyle, $paragraphstyle);
             }
 
             // === Tenaga Pengajar dari tabel baru ===
@@ -1263,8 +1121,8 @@ class wordGenerator{
             $section3->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section3->addText('Diterima Kepala LDK Pekanbaru', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
             $section3->addTextBreak(3);
-            $section3->addText("$ketua_loka->nama", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section3->addText("NIP. $ketua_loka->NIP", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section3->addText("H. Aprianto, S.Ag., M.A.", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section3->addText("NIP. 197603012003121004", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
             //Berita Acara
             $section3->addPageBreak();
@@ -1281,8 +1139,8 @@ class wordGenerator{
             $section3->addText("Pekanbaru, $pelatihan->bulan_ttd_lap $pelatihan->tahun,", $fontstyle, ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
             $section3->addText('Diterima Kepala LDK Pekanbaru', array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]); 
             $section3->addTextBreak(3);
-            $section3->addText("{$pelatihan->ketua_panitia->nama}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
-            $section3->addText("NIP. {$pelatihan->ketua_panitia->NIP}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section3->addText("{$pelatihan->nama_ketua_panitia}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
+            $section3->addText("NIP. {$pelatihan->nip_ketua_panitia}", array_merge($fontstyle, ['bold' => true]), ['alignment' => 'both', 'indentation' => ['left' => Converter::cmToTwip(9.75)]]);
 
             //Daftar Hadir
             // $section3->addPageBreak();
@@ -1325,23 +1183,32 @@ class wordGenerator{
             
             //$this->generateListSection($phpword, $section, $lists);
             
-            $tempFile = tempnam(sys_get_temp_dir(), 'word_');
-            $writer = IOFactory::createWriter($phpword, 'Word2007');
-            $writer->save($tempFile);
-            
-            $filename = 'dokumen_' . time() . '.docx';
-            $target = FCPATH . 'downloads/' . $filename;
-            rename($tempFile, $target);
+            // --- Simpan file ---
+            $filename = 'Laporan_Pelatihan_' . date('Ymd_His') . '.docx';
+            $outputPath = FCPATH . 'downloads/' . $filename;
 
-            
-            // $writer = IOFactory::createWriter($phpword, 'Word2007');
-            // $writer->save($filepath);
+            if (!is_dir(FCPATH . 'downloads/')) {
+                throw new \Exception('Folder downloads/ tidak ditemukan.');
+            }
+            if (!is_writable(FCPATH . 'downloads/')) {
+                throw new \Exception('Folder downloads/ tidak memiliki izin tulis.');
+            }
 
-    
-            return $filename;
-        } catch (Exception $e){
-            log_message('error', $e->getMessage());
-            return false;
+            try {
+                $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpword, 'Word2007');
+                $objWriter->save($outputPath);
+            } catch (\Throwable $e) {
+                throw new \Exception('Gagal menyimpan file Word: ' . $e->getMessage());
+            }
+
+            if (!file_exists($outputPath)) {
+                throw new \Exception('File tidak berhasil dibuat di: ' . $outputPath);
+            }
+
+            return basename($outputPath);
+        } catch (\Throwable $e) {
+            // Lempar error agar bisa ditangkap oleh controller (seperti generateLaporan)
+            throw new \Exception('Gagal generate laporan: ' . $e->getMessage());
         }
     }
 }

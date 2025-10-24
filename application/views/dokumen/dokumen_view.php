@@ -18,7 +18,7 @@
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
-            <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+            <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
             <!-- Trigger Button -->
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalTambahDokumen">
               <i class="fa fa-plus"></i> Tambah Dokumen
@@ -45,7 +45,7 @@
                       <td><?= htmlentities($isi['nama_dokumen']); ?></td>
                       <td><?= htmlentities($isi['deskripsi']); ?></td>
                       <td class="text-right">
-                        <?php if ($this->session->userdata('level') == 'Petugas') { ?>
+                        <?php if($this->session->userdata('level') == 'Panitia' || $this->session->userdata('level') == 'Admin') { ?>
                           <!-- Tombol Edit yang memicu modal dengan ID unik -->
                           <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalEditDokumen<?= $isi['id_dokumen']; ?>" title="Edit Dokumen">
                             <i class="fa fa-edit"></i>
